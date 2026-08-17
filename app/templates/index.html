@@ -954,8 +954,20 @@
             const isNeutral = climate.regime === 'NEUTRAL';
             const sign = climate.change_pct >= 0 ? '+' : '';
 
-            // Header badge update
-            headerText.innerText = `IHSG ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%) • ${climate.title}`;
+            // Header badge update with market status
+            const mStatus = climate.market_status;
+            let statusSuffix = '';
+            if (mStatus) {
+                if (mStatus.is_holiday) {
+                    statusSuffix = ` • 🔴 ${mStatus.title}`;
+                } else if (mStatus.is_open) {
+                    statusSuffix = ` • 🟢 ${mStatus.title}`;
+                } else {
+                    statusSuffix = ` • ⚪ ${mStatus.title}`;
+                }
+            }
+            
+            headerText.innerText = `IHSG ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%)${statusSuffix}`;
             
             if (isBullish) {
                 headerDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
@@ -977,9 +989,14 @@
                 climateExposure.className = "text-rose-600 dark:text-rose-400 font-bold text-sm";
             }
 
+            let adviceText = climate.advice;
+            if (mStatus && mStatus.is_holiday) {
+                adviceText = `🏛️ <b>${mStatus.title}</b>: ${mStatus.message} ${climate.advice}`;
+            }
+
             climateBadge.innerText = `${climate.regime} (${climate.title})`;
             climatePrice.innerText = `Index: ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%) • EMA50: ${climate.ema50.toLocaleString('id-ID')}`;
-            climateAdvice.innerText = climate.advice;
+            climateAdvice.innerHTML = adviceText;
             climateExposure.innerText = `${climate.exposure_pct}% Modal Aktif`;
         }
 

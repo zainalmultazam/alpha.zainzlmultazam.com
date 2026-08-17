@@ -55,6 +55,13 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     msg = f"⚡ <b>ALPHASWING SUPER-DIGEST (TOP 3)</b>\n"
     msg += f"📅 <i>{now_str} • {settings.APP_DOMAIN}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
+    
+    # Status Operasional Bursa (Libur / Buka / Tutup)
+    market_status = climate.get("market_status") if climate else None
+    if market_status:
+        status_title = html.escape(str(market_status.get("title", "")))
+        msg += f"🏛️ <b>STATUS BURSA:</b> {status_title}\n"
+    
     msg += f"{climate_icon} <b>IHSG CLIMATE:</b> {regime_title}\n"
     msg += f"• Indeks: <b>{ihsg_price:,.0f} ({sign}{ihsg_change}%)</b>\n"
     msg += f"• Rekomendasi: <i>{html.escape(exposure_text)}</i>\n"

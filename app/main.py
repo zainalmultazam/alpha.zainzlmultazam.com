@@ -10,7 +10,7 @@ from typing import Optional
 
 from app.config import settings
 from app.engine.universe import get_universe
-from app.services.market_data import fetch_stock_df, clear_cache, get_market_climate
+from app.services.market_data import fetch_stock_df, clear_cache, get_market_climate, get_idx_market_status
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
 from app.engine.journal import log_trade, get_all_trades, close_trade, get_journal_stats, init_db
@@ -86,6 +86,10 @@ async def home(request: Request):
 @app.get("/api/market-climate")
 async def api_market_climate():
     return {"status": "success", "data": get_market_climate()}
+
+@app.get("/api/market-status")
+async def api_market_status():
+    return {"status": "success", "data": get_idx_market_status()}
 
 @app.get("/api/scan")
 async def api_scan(force: bool = False):
