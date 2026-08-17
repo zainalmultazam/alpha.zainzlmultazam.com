@@ -964,9 +964,9 @@
                     </div>
                 </div>
 
-                <!-- Main Chart Card with Indicator Toggles -->
-                <div class="clean-card p-4 sm:p-5 space-y-3">
-                    <!-- Indicator Toggles & Legend -->
+                <!-- Main Chart Card with Indicator Toggles & Fullscreen -->
+                <div id="chart-card-container" class="clean-card p-4 sm:p-5 space-y-3 transition-all duration-300">
+                    <!-- Indicator Toggles & Actions Bar -->
                     <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-200 dark:border-white/[0.06] text-xs font-mono">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-[11px] text-slate-500 dark:text-gray-400 font-sans mr-1">Indikator:</span>
@@ -974,13 +974,25 @@
                             <button onclick="toggleIndicator('plan')" id="toggle-plan" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle Garis Trade Plan (Entry, Stop Loss Merah, Target TP Hijau)">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Trade Plan (SL/TP)
                             </button>
+                            <!-- Volume Profile & POC -->
+                            <button onclick="toggleIndicator('poc')" id="toggle-poc" class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle Volume Profile & Garis POC (Point of Control / Akumulasi Terbesar)">
+                                <span class="w-2 h-2 rounded-full bg-amber-400"></span> POC &amp; Profile
+                            </button>
+                            <!-- Anchored VWAP -->
+                            <button onclick="toggleIndicator('avwap')" id="toggle-avwap" class="px-2.5 py-1 rounded-lg bg-cyan-50 text-cyan-700 dark:bg-cyan-950/70 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle Anchored VWAP (Harga Rata-rata Institusi dari Swing Low)">
+                                <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Anchored VWAP
+                            </button>
+                            <!-- Pocket Pivot Markers -->
+                            <button onclick="toggleIndicator('markers')" id="toggle-markers" class="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 dark:bg-purple-950/70 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle Sinyal Candle (Pocket Pivot & Breakout)">
+                                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Sinyal Candle
+                            </button>
                             <!-- EMA 20 -->
                             <button onclick="toggleIndicator('ema20')" id="toggle-ema20" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 20">
                                 <span class="w-2 h-2 rounded-full bg-blue-500"></span> EMA 20
                             </button>
                             <!-- EMA 50 -->
-                            <button onclick="toggleIndicator('ema50')" id="toggle-ema50" class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 50">
-                                <span class="w-2 h-2 rounded-full bg-amber-500"></span> EMA 50
+                            <button onclick="toggleIndicator('ema50')" id="toggle-ema50" class="px-2.5 py-1 rounded-lg bg-yellow-50 text-yellow-700 dark:bg-yellow-950/70 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 50">
+                                <span class="w-2 h-2 rounded-full bg-yellow-500"></span> EMA 50
                             </button>
                             <!-- EMA 200 -->
                             <button onclick="toggleIndicator('ema200')" id="toggle-ema200" class="px-2.5 py-1 rounded-lg bg-pink-50 text-pink-700 dark:bg-pink-950/70 dark:text-pink-400 border border-pink-200 dark:border-pink-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 200 (Major Trend)">
@@ -992,9 +1004,14 @@
                             </button>
                         </div>
 
-                        <!-- Timeframe Badge -->
-                        <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-gray-400">
-                            <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-surface-800 border border-slate-200 dark:border-white/10 font-bold text-slate-700 dark:text-gray-300">Daily (1D)</span>
+                        <!-- Timeframe Badge & Fullscreen Button -->
+                        <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-gray-400">
+                            <span class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-surface-800 border border-slate-200 dark:border-white/10 font-bold text-slate-700 dark:text-gray-300">Daily (1D)</span>
+                            <!-- Fullscreen Button -->
+                            <button onclick="toggleFullscreenChart()" id="btn-fullscreen-chart" class="p-1 px-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold transition active:scale-95" title="Tampilan Layar Penuh (Fullscreen)">
+                                <i data-lucide="maximize" id="icon-fullscreen" class="w-3.5 h-3.5"></i>
+                                <span id="text-fullscreen" class="hidden sm:inline">Fullscreen</span>
+                            </button>
                         </div>
                     </div>
 
@@ -1539,16 +1556,23 @@
         let candleSeries = null;
         let volumeSeries = null;
         let chartEma20 = null, chartEma50 = null, chartEma200 = null, chartVolMa = null;
+        let chartAvwap = null;
         let chartPriceLines = [];
+        let chartPocLines = [];
         
         let terminalChartInstance = null;
         let terminalCandleSeries = null;
         let terminalVolumeSeries = null;
         let termEma20 = null, termEma50 = null, termEma200 = null, termVolMa = null;
+        let termAvwap = null;
         let termPriceLines = [];
+        let termPocLines = [];
 
         let indicatorVisibility = {
             plan: true,
+            poc: true,
+            avwap: true,
+            markers: true,
             ema20: true,
             ema50: true,
             ema200: true,
@@ -1848,6 +1872,7 @@
             chartEma20 = chartInstance.addLineSeries({ color: '#3B82F6', lineWidth: 1.5, title: 'EMA 20' });
             chartEma50 = chartInstance.addLineSeries({ color: '#F59E0B', lineWidth: 1.5, title: 'EMA 50' });
             chartEma200 = chartInstance.addLineSeries({ color: '#EC4899', lineWidth: 2, title: 'EMA 200' });
+            chartAvwap = chartInstance.addLineSeries({ color: '#06B6D4', lineWidth: 2, title: 'Anchored VWAP' });
 
             volumeSeries = chartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
@@ -1889,6 +1914,7 @@
             termEma20 = terminalChartInstance.addLineSeries({ color: '#3B82F6', lineWidth: 1.5, title: 'EMA 20' });
             termEma50 = terminalChartInstance.addLineSeries({ color: '#F59E0B', lineWidth: 1.5, title: 'EMA 50' });
             termEma200 = terminalChartInstance.addLineSeries({ color: '#EC4899', lineWidth: 2, title: 'EMA 200' });
+            termAvwap = terminalChartInstance.addLineSeries({ color: '#06B6D4', lineWidth: 2, title: 'Anchored VWAP' });
 
             terminalVolumeSeries = terminalChartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
@@ -2367,7 +2393,69 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     termPriceLines.push(terminalCandleSeries.createPriceLine(tp2Opt));
                 }
             } catch(e) {
-                console.error("Error creating price lines", e);
+                console.error("Error creating trade plan price lines", e);
+            }
+        }
+
+        function renderPocLines(volProfile) {
+            // Hapus garis POC horizontal sebelumnya
+            if (candleSeries && chartPocLines.length > 0) {
+                chartPocLines.forEach(l => {
+                    try { candleSeries.removePriceLine(l); } catch(e) {}
+                });
+            }
+            chartPocLines = [];
+
+            if (terminalCandleSeries && termPocLines.length > 0) {
+                termPocLines.forEach(l => {
+                    try { terminalCandleSeries.removePriceLine(l); } catch(e) {}
+                });
+            }
+            termPocLines = [];
+
+            if (!volProfile || !indicatorVisibility.poc || !volProfile.poc_price) return;
+
+            // 1. Garis POC (Point of Control - Kuning Emas Solid)
+            const pocOpt = {
+                price: volProfile.poc_price,
+                color: '#F59E0B',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Solid,
+                axisLabelVisible: true,
+                title: `POC Rp ${volProfile.poc_price.toLocaleString('id-ID')} (Akumulasi Max)`
+            };
+            // 2. Garis VAH (Value Area High - Amber Dashed)
+            const vahOpt = {
+                price: volProfile.vah_price,
+                color: '#D97706',
+                lineWidth: 1.2,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: `VAH Rp ${volProfile.vah_price.toLocaleString('id-ID')} (70% Vol)`
+            };
+            // 3. Garis VAL (Value Area Low - Amber Dashed)
+            const valOpt = {
+                price: volProfile.val_price,
+                color: '#D97706',
+                lineWidth: 1.2,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: `VAL Rp ${volProfile.val_price.toLocaleString('id-ID')} (70% Vol)`
+            };
+
+            try {
+                if (candleSeries) {
+                    chartPocLines.push(candleSeries.createPriceLine(pocOpt));
+                    chartPocLines.push(candleSeries.createPriceLine(vahOpt));
+                    chartPocLines.push(candleSeries.createPriceLine(valOpt));
+                }
+                if (terminalCandleSeries) {
+                    termPocLines.push(terminalCandleSeries.createPriceLine(pocOpt));
+                    termPocLines.push(terminalCandleSeries.createPriceLine(vahOpt));
+                    termPocLines.push(terminalCandleSeries.createPriceLine(valOpt));
+                }
+            } catch(e) {
+                console.error("Error creating POC price lines", e);
             }
         }
 
@@ -2421,9 +2509,25 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         if (termVolMa) termVolMa.setData(json.vol_ma20);
                     }
 
+                    // Anchored VWAP (Cyan)
+                    if (json.avwap) {
+                        if (chartAvwap) chartAvwap.setData(indicatorVisibility.avwap ? json.avwap : []);
+                        if (termAvwap) termAvwap.setData(indicatorVisibility.avwap ? json.avwap : []);
+                    }
+
+                    // Pocket Pivot & Breakout Markers
+                    const markersToSet = (indicatorVisibility.markers && json.markers) ? json.markers : [];
+                    if (candleSeries) candleSeries.setMarkers(markersToSet);
+                    if (terminalCandleSeries) terminalCandleSeries.setMarkers(markersToSet);
+
                     // Render Trade Plan Price Lines Overlay (Entry, SL, TP1, TP2)
                     if (json.trade_plan) {
                         renderTradePlanLines(json.trade_plan);
+                    }
+
+                    // Render Volume Profile & Point of Control (POC) Lines
+                    if (json.volume_profile) {
+                        renderPocLines(json.volume_profile);
                     }
 
                     if (chartInstance) chartInstance.timeScale().fitContent();
@@ -2461,6 +2565,26 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 if (lastLoadedChartData && lastLoadedChartData.trade_plan) {
                     renderTradePlanLines(lastLoadedChartData.trade_plan);
                 }
+            } else if (name === 'poc') {
+                if (btn) btn.className = isVisible
+                    ? 'px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+                if (lastLoadedChartData && lastLoadedChartData.volume_profile) {
+                    renderPocLines(lastLoadedChartData.volume_profile);
+                }
+            } else if (name === 'avwap') {
+                if (chartAvwap) chartAvwap.applyOptions({ visible: isVisible });
+                if (termAvwap) termAvwap.applyOptions({ visible: isVisible });
+                if (btn) btn.className = isVisible
+                    ? 'px-2.5 py-1 rounded-lg bg-cyan-50 text-cyan-700 dark:bg-cyan-950/70 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+            } else if (name === 'markers') {
+                const markersToSet = (isVisible && lastLoadedChartData && lastLoadedChartData.markers) ? lastLoadedChartData.markers : [];
+                if (candleSeries) candleSeries.setMarkers(markersToSet);
+                if (terminalCandleSeries) terminalCandleSeries.setMarkers(markersToSet);
+                if (btn) btn.className = isVisible
+                    ? 'px-2.5 py-1 rounded-lg bg-purple-50 text-purple-700 dark:bg-purple-950/70 dark:text-purple-400 border border-purple-200 dark:border-purple-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
             } else if (name === 'ema20') {
                 if (chartEma20) chartEma20.applyOptions({ visible: isVisible });
                 if (termEma20) termEma20.applyOptions({ visible: isVisible });
@@ -2471,7 +2595,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 if (chartEma50) chartEma50.applyOptions({ visible: isVisible });
                 if (termEma50) termEma50.applyOptions({ visible: isVisible });
                 if (btn) btn.className = isVisible
-                    ? 'px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    ? 'px-2.5 py-1 rounded-lg bg-yellow-50 text-yellow-700 dark:bg-yellow-950/70 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
                     : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
             } else if (name === 'ema200') {
                 if (chartEma200) chartEma200.applyOptions({ visible: isVisible });
@@ -2487,6 +2611,60 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
             }
         }
+
+        // ==========================================
+        // FULLSCREEN CHART TOGGLE
+        // ==========================================
+        function toggleFullscreenChart() {
+            const elem = document.getElementById('chart-card-container');
+            if (!elem) return;
+
+            if (!document.fullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            const isFull = !!document.fullscreenElement;
+            const icon = document.getElementById('icon-fullscreen');
+            const text = document.getElementById('text-fullscreen');
+            const chartEl = document.getElementById('tv-terminal-chart');
+            
+            if (isFull) {
+                if (icon) icon.setAttribute('data-lucide', 'minimize');
+                if (text) text.innerText = 'Exit Fullscreen';
+                if (chartEl) chartEl.style.height = `${window.innerHeight - 80}px`;
+            } else {
+                if (icon) icon.setAttribute('data-lucide', 'maximize');
+                if (text) text.innerText = 'Fullscreen';
+                if (chartEl) chartEl.style.height = '580px';
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            if (terminalChartInstance) {
+                setTimeout(() => {
+                    terminalChartInstance.applyOptions({
+                        width: chartEl ? chartEl.clientWidth : window.innerWidth,
+                        height: isFull ? (window.innerHeight - 80) : 580
+                    });
+                    terminalChartInstance.timeScale().fitContent();
+                }, 100);
+            }
+        });
 
         function updateQuickTickersFromScan(results) {
             const container = document.getElementById('quick-tickers');

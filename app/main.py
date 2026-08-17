@@ -14,7 +14,7 @@ from app.config import settings
 from app.engine.universe import get_universe
 from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status
 from app.engine.scanner import scan_stock
-from app.engine.technical import calculate_indicators
+from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
 from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
 from app.services.telegram import send_telegram_message, notify_super_digest
@@ -393,6 +393,11 @@ async def api_chart(ticker: str):
     curr_atr = float(last_row.get("ATR", curr_price * 0.04))
     trade_plan = generate_trade_plan(curr_price, curr_atr, "Trade Plan")
 
+    # Hitung Volume Profile, Anchored VWAP, & Pocket Pivot Markers
+    vol_profile = calculate_volume_profile(df_calc, lookback=120)
+    avwap_series = calculate_anchored_vwap(df_calc, lookback=120)
+    markers = calculate_pocket_pivots_and_markers(df_calc, lookback=180)
+
     # Format untuk TradingView Lightweight Charts
     candles = []
     volumes = []
@@ -439,6 +444,9 @@ async def api_chart(ticker: str):
         "ema50": ema50_series[-180:],
         "ema200": ema200_series[-180:],
         "vol_ma20": vol_ma20_series[-180:],
+        "avwap": avwap_series[-180:],
+        "markers": markers,
+        "volume_profile": vol_profile,
         "trade_plan": trade_plan
     }
 
