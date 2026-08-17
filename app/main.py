@@ -33,18 +33,26 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "t
 
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="alphaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#60a5fa"/>
-      <stop offset="100%" stop-color="#2563eb"/>
+    <linearGradient id="zapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="50%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#1D4ED8"/>
     </linearGradient>
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="1.5" result="blur"/>
-      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.35"/>
+    </linearGradient>
+    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
-  <rect width="64" height="64" rx="16" fill="#06080F"/>
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-opacity="0.4"/>
-  <path d="M34 10 L16 36 L30 36 L24 54 L48 26 L34 26 Z" fill="url(#alphaGrad)" filter="url(#glow)"/>
+  <rect width="64" height="64" rx="16" fill="#070913"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" fill="none" stroke="url(#borderGrad)" stroke-width="1.5"/>
+  <path d="M35 8 L15 36 L30 36 L25 56 L49 26 L34 26 Z" fill="url(#zapGrad)" filter="url(#neonGlow)"/>
 </svg>"""
 
 @app.get("/favicon.svg")
@@ -52,7 +60,7 @@ FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
 @app.get("/apple-touch-icon.png")
 @app.get("/apple-touch-icon-precomposed.png")
 async def get_favicon():
-    return Response(content=FAVICON_SVG, media_type="image/svg+xml")
+    return Response(content=FAVICON_SVG, media_type="image/svg+xml", headers={"Cache-Control": "no-cache, must-revalidate"})
 
 # Scheduler untuk scan otomatis setiap sore pukul 17:00 WIB
 scheduler = AsyncIOScheduler()
