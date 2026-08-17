@@ -184,8 +184,11 @@ async def api_calculate_size(
     entry_price: float = Form(...),
     stop_loss: float = Form(...)
 ):
-    result = calculate_lot_size(capital, risk_pct, entry_price, stop_loss)
-    return {"status": "success", "data": result}
+    try:
+        result = calculate_lot_size(capital, risk_pct, entry_price, stop_loss)
+        return {"status": "success", "data": result}
+    except ValueError as e:
+        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
 
 @app.get("/api/chart/{ticker}")
 async def api_chart(ticker: str):

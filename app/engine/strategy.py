@@ -51,20 +51,40 @@ def generate_trade_plan(price: float, atr: float, setup_type: str) -> Dict[str, 
 
 def calculate_lot_size(capital: float, risk_pct: float, entry_price: float, stop_loss: float) -> Dict[str, Any]:
     """Menghitung jumlah Lot yang aman berdasarkan batas risiko maksimal modal."""
+    if capital <= 0:
+        raise ValueError("Modal harus lebih besar dari 0.")
+    if entry_price <= 0:
+        raise ValueError("Entry price harus lebih besar dari 0.")
+    if stop_loss >= entry_price:
+        raise ValueError("Stop Loss harus lebih rendah dari Entry Price.")
+    if risk_pct <= 0:
+        raise ValueError("Risk % harus lebih besar dari 0.")
+
     max_risk_amount = capital * (risk_pct / 100.0)
-    risk_per_share = max(1.0, entry_price - stop_loss)
-    
-    total_shares = max_risk_amount / risk_per_share
-    lots = int(total_shares // 100)  # 1 Lot = 100 Lembar Saham di Indonesia
-    final_lots = max(1, lots)
-    
+    risk_per_share = entry_price - stop_loss  # sudah pasti > 0 karena validasi di atas
+
+    lots_by_risk = max(1, int((max_risk_amount / risk_per_share) // 100))
+
+    max_affordable_lots = int(capital // (100 * entry_price))
+    if max_affordable_lots < 1:
+        raise ValueError(
+            f"Modal Rp{int(capital):,} tidak cukup untuk membeli 1 lot (Rp{int(100*entry_price):,}) di harga entry ini."
+        )
+
+    final_lots = min(lots_by_risk, max_affordable_lots)
+    capped_by_capital = final_lots < lots_by_risk
+
     total_cost = final_lots * 100 * entry_price
     max_loss_idr = final_lots * 100 * risk_per_share
-    
+    actual_risk_pct = round((max_loss_idr / capital) * 100, 2)
+
     return {
         "lots": final_lots,
         "shares": final_lots * 100,
         "total_cost": int(total_cost),
         "max_risk_idr": int(max_loss_idr),
-        "capital_allocation_pct": round((total_cost / capital) * 100, 1) if capital > 0 else 0
+        "target_risk_pct": risk_pct,
+        "actual_risk_pct": actual_risk_pct,
+        "capital_allocation_pct": round((total_cost / capital) * 100, 1),
+        "capped_by_capital": capped_by_capital,
     }

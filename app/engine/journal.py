@@ -161,6 +161,9 @@ def delete_trade(trade_id: int) -> bool:
 
 def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
     """Menghitung metrik performa komprehensif (Win rate, Avg R, Max DD, Profit Factor, Equity curve vs IHSG)."""
+    import pandas as pd
+    from app.services.market_data import fetch_stock_df
+
     trades = get_all_trades()
     total_trades = len(trades)
     open_trades = [t for t in trades if t["status"] == "OPEN"]
@@ -177,7 +180,14 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
     
     gross_profits = sum((t.get("pnl_amount") or 0) for t in winning_trades)
     gross_losses = abs(sum((t.get("pnl_amount") or 0) for t in losing_trades))
-    profit_factor = round(gross_profits / gross_losses, 2) if gross_losses > 0 else (round(gross_profits, 2) if gross_profits > 0 else 0.0)
+    
+    # Spek #3: Profit Factor edge case
+    if gross_losses > 0:
+        profit_factor = round(gross_profits / gross_losses, 2)
+    elif gross_profits > 0:
+        profit_factor = None  # representasi "infinity" — belum ada loss untuk dibagi
+    else:
+        profit_factor = None  # belum ada data closed trade / profit
     
     # Perhitungan Average R
     r_multiples = []
@@ -195,12 +205,42 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
             
     avg_r = round(sum(r_multiples) / len(r_multiples), 2) if r_multiples else 0.0
     
+    # Spek #2: Fetch IHSG Real Benchmark (^JKSE)
+    df_ihsg = fetch_stock_df("^JKSE")
+    ihsg_available = df_ihsg is not None and not df_ihsg.empty
+
+    def ihsg_price_asof(date_str: str) -> Optional[float]:
+        if not ihsg_available or not date_str:
+            return None
+        try:
+            date_clean = date_str[:10]
+            target = pd.Timestamp(date_clean)
+            if df_ihsg.index.tz is not None:
+                if target.tz is None:
+                    target = target.tz_localize(df_ihsg.index.tz)
+                else:
+                    target = target.tz_convert(df_ihsg.index.tz)
+            elif target.tz is not None:
+                target = target.tz_localize(None)
+
+            eligible = df_ihsg[df_ihsg.index <= target]
+            if eligible.empty:
+                return float(df_ihsg["Close"].iloc[0])
+            return float(eligible["Close"].iloc[-1])
+        except Exception:
+            return None
+
+    ihsg_start_price = None
+    if closed_trades_chrono:
+        start_date = (closed_trades_chrono[0].get("entry_date") or closed_trades_chrono[0].get("exit_date") or "")[:10]
+        ihsg_start_price = ihsg_price_asof(start_date)
+
     # Equity curve calculation
     current_equity = float(base_capital)
     peak_equity = float(base_capital)
     max_dd_pct = 0.0
     
-    equity_curve = [{"date": "Start", "equity": base_capital, "ihsg_pct": 0.0, "account_pct": 0.0}]
+    equity_curve = [{"date": "Start", "equity": base_capital, "ihsg_pct": 0.0 if ihsg_start_price else None, "account_pct": 0.0}]
     
     for idx, t in enumerate(closed_trades_chrono):
         pnl = float(t.get("pnl_amount") or 0)
@@ -213,14 +253,18 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
             
         acc_return_pct = round(((current_equity - base_capital) / base_capital) * 100, 2)
         t_date = (t.get("exit_date") or t.get("entry_date") or f"Trade {idx+1}")[:10]
-        # Benchmark IHSG progression
-        simulated_ihsg_pct = round((idx + 1) * 0.4, 2)  # Benchmark growth estimate
+        
+        ihsg_price_now = ihsg_price_asof(t_date)
+        if ihsg_start_price and ihsg_price_now and ihsg_start_price > 0:
+            real_ihsg_pct = round(((ihsg_price_now - ihsg_start_price) / ihsg_start_price) * 100, 2)
+        else:
+            real_ihsg_pct = None
         
         equity_curve.append({
             "date": t_date,
             "equity": round(current_equity, 2),
             "account_pct": acc_return_pct,
-            "ihsg_pct": simulated_ihsg_pct
+            "ihsg_pct": real_ihsg_pct
         })
         
     return {

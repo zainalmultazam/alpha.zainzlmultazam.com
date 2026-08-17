@@ -840,6 +840,18 @@
                             </div>
                         </div>
 
+                        <!-- Error Banner for Invalid Inputs -->
+                        <div id="calc-error-banner" class="hidden p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-mono flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-4 h-4 shrink-0"></i>
+                            <span id="calc-error-text">Stop Loss harus lebih rendah dari Entry Price.</span>
+                        </div>
+
+                        <!-- Capped Notice Banner -->
+                        <div id="calc-notice-banner" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-mono flex items-start gap-2">
+                            <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+                            <span id="calc-notice-text">Lot dibatasi kapasitas modal.</span>
+                        </div>
+
                         <!-- Live Result Box -->
                         <div id="calc-result" class="bg-slate-100 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2.5 text-xs font-mono">
                             <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
@@ -1723,7 +1735,27 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             const sl = parseRupiahInput(document.getElementById('calc-sl').value) || 0;
             const ticker = (document.getElementById('calc-ticker').value || 'AUTO').toUpperCase();
 
-            if (!capital || !entry || !sl || entry <= sl) {
+            const errorBanner = document.getElementById('calc-error-banner');
+            const errorText = document.getElementById('calc-error-text');
+            const noticeBanner = document.getElementById('calc-notice-banner');
+            const noticeText = document.getElementById('calc-notice-text');
+
+            if (errorBanner) errorBanner.classList.add('hidden');
+            if (noticeBanner) noticeBanner.classList.add('hidden');
+
+            if (!capital || !entry || !sl) {
+                return;
+            }
+
+            if (sl >= entry) {
+                if (errorBanner && errorText) {
+                    errorText.innerText = "Stop Loss harus lebih rendah dari Entry Price.";
+                    errorBanner.classList.remove('hidden');
+                }
+                document.getElementById('res-lots').innerText = `0 Lot (0 Lembar)`;
+                document.getElementById('res-cost').innerText = `Rp 0`;
+                document.getElementById('res-risk').innerText = `Rp 0`;
+                document.getElementById('res-alloc').innerText = `0%`;
                 return;
             }
 
@@ -1736,12 +1768,31 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             try {
                 const res = await fetch('/api/calculate-size', { method: 'POST', body: formData });
                 const json = await res.json();
-                const d = json.data;
 
+                if (!res.ok || json.status === 'error') {
+                    if (errorBanner && errorText) {
+                        errorText.innerText = json.message || "Input kalkulasi tidak valid.";
+                        errorBanner.classList.remove('hidden');
+                    }
+                    document.getElementById('res-lots').innerText = `0 Lot (0 Lembar)`;
+                    document.getElementById('res-cost').innerText = `Rp 0`;
+                    document.getElementById('res-risk').innerText = `Rp 0`;
+                    document.getElementById('res-alloc').innerText = `0%`;
+                    return;
+                }
+
+                const d = json.data;
                 document.getElementById('res-lots').innerText = `${d.lots} Lot (${d.shares.toLocaleString('id-ID')} Lembar)`;
                 document.getElementById('res-cost').innerText = `Rp ${d.total_cost.toLocaleString('id-ID')}`;
                 document.getElementById('res-risk').innerText = `Rp ${d.max_risk_idr.toLocaleString('id-ID')}`;
                 document.getElementById('res-alloc').innerText = `${d.capital_allocation_pct}% dari modal portofolio`;
+
+                if (d.capped_by_capital) {
+                    if (noticeBanner && noticeText) {
+                        noticeText.innerHTML = `<b>Kapasitas Modal Terbatas</b>: Lot disesuaikan menjadi <b>${d.lots} lot</b> agar tidak melebihi modal. Risiko aktual menjadi <b>${d.actual_risk_pct}%</b> (target ${d.target_risk_pct}%).`;
+                        noticeBanner.classList.remove('hidden');
+                    }
+                }
 
                 currentCalculatedTrade = {
                     ticker: ticker,
@@ -2140,7 +2191,22 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 }
                 if (elAvgR) elAvgR.innerText = `${(d.avg_r || 0) >= 0 ? '+' : ''}${d.avg_r || 0}R`;
                 if (elMaxDd) elMaxDd.innerText = `-${d.max_drawdown || 0}%`;
-                if (elProfitFactor) elProfitFactor.innerText = `${d.profit_factor || 0}`;
+                
+                // Spek #3: Profit Factor display
+                if (elProfitFactor) {
+                    if (d.profit_factor === null || d.profit_factor === undefined) {
+                        if (d.winning_trades > 0) {
+                            elProfitFactor.innerText = "∞";
+                            elProfitFactor.title = "Belum ada trade rugi (Semua Win)";
+                        } else {
+                            elProfitFactor.innerText = "N/A";
+                            elProfitFactor.title = "Belum ada transaksi selesai";
+                        }
+                    } else {
+                        elProfitFactor.innerText = `${d.profit_factor}`;
+                        elProfitFactor.title = "";
+                    }
+                }
 
                 const emptyState = document.getElementById('perf-empty-state');
                 const svgWrapper = document.getElementById('perf-svg-wrapper');
@@ -2169,10 +2235,12 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             const innerW = width - padding.left - padding.right;
             const innerH = height - padding.top - padding.bottom;
 
-            let allPcts = points.map(p => p.account_pct).concat(points.map(p => p.ihsg_pct));
-            allPcts.push(0);
-            let minPct = Math.min(...allPcts);
-            let maxPct = Math.max(...allPcts);
+            let validPcts = points.map(p => p.account_pct).filter(v => v !== null && v !== undefined);
+            const validIhsgPcts = points.map(p => p.ihsg_pct).filter(v => v !== null && v !== undefined);
+            validPcts = validPcts.concat(validIhsgPcts);
+            validPcts.push(0);
+            let minPct = Math.min(...validPcts);
+            let maxPct = Math.max(...validPcts);
 
             const range = (maxPct - minPct) || 10;
             minPct = Math.floor(minPct - range * 0.1);
@@ -2184,20 +2252,28 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             let accPathD = '';
             let accAreaD = '';
             let ihsgPathD = '';
+            let hasIhsgData = false;
 
             points.forEach((p, idx) => {
                 const x = getX(idx);
                 const yAcc = getY(p.account_pct);
-                const yIhsg = getY(p.ihsg_pct);
 
                 if (idx === 0) {
                     accPathD = `M ${x} ${yAcc}`;
                     accAreaD = `M ${x} ${padding.top + innerH} L ${x} ${yAcc}`;
-                    ihsgPathD = `M ${x} ${yIhsg}`;
                 } else {
                     accPathD += ` L ${x} ${yAcc}`;
                     accAreaD += ` L ${x} ${yAcc}`;
-                    ihsgPathD += ` L ${x} ${yIhsg}`;
+                }
+
+                if (p.ihsg_pct !== null && p.ihsg_pct !== undefined) {
+                    hasIhsgData = true;
+                    const yIhsg = getY(p.ihsg_pct);
+                    if (!ihsgPathD) {
+                        ihsgPathD = `M ${x} ${yIhsg}`;
+                    } else {
+                        ihsgPathD += ` L ${x} ${yIhsg}`;
+                    }
                 }
             });
 
@@ -2230,16 +2306,21 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             points.forEach((p, idx) => {
                 const x = getX(idx);
                 const yAcc = getY(p.account_pct);
-                const yIhsg = getY(p.ihsg_pct);
 
                 pointsHtml += `
                     <circle cx="${x}" cy="${yAcc}" r="4" class="fill-blue-500 stroke-white dark:stroke-surface-950" stroke-width="2">
                         <title>${p.date} | Account: ${p.account_pct >= 0 ? '+' : ''}${p.account_pct}% (Rp ${p.equity.toLocaleString('id-ID')})</title>
                     </circle>
-                    <circle cx="${x}" cy="${yIhsg}" r="3" class="fill-cyan-400 stroke-white dark:stroke-surface-950" stroke-width="1.5">
-                        <title>${p.date} | IHSG: ${p.ihsg_pct >= 0 ? '+' : ''}${p.ihsg_pct}%</title>
-                    </circle>
                 `;
+
+                if (p.ihsg_pct !== null && p.ihsg_pct !== undefined) {
+                    const yIhsg = getY(p.ihsg_pct);
+                    pointsHtml += `
+                        <circle cx="${x}" cy="${yIhsg}" r="3" class="fill-cyan-400 stroke-white dark:stroke-surface-950" stroke-width="1.5">
+                            <title>${p.date} | IHSG Riil (^JKSE): ${p.ihsg_pct >= 0 ? '+' : ''}${p.ihsg_pct}%</title>
+                        </circle>
+                    `;
+                }
             });
 
             wrapper.innerHTML = `
@@ -2252,7 +2333,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     </defs>
                     ${gridLinesHtml}
                     <path d="${accAreaD}" fill="url(#accGradient)" />
-                    <path d="${ihsgPathD}" fill="none" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4,4" />
+                    ${hasIhsgData ? `<path d="${ihsgPathD}" fill="none" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4,4" />` : ''}
                     <path d="${accPathD}" fill="none" stroke="#3B82F6" stroke-width="2.5" />
                     ${pointsHtml}
                     ${xLabelsHtml}
