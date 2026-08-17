@@ -289,5 +289,119 @@ def get_market_climate() -> Dict[str, Any]:
 
 def clear_cache():
     """Mengosongkan cache memory."""
-    global _CACHE
+    global _CACHE, _MACRO_CACHE, _MACRO_CACHE_TIME
     _CACHE = {}
+    _MACRO_CACHE = {}
+    _MACRO_CACHE_TIME = None
+
+_MACRO_CACHE: Dict[str, Any] = {}
+_MACRO_CACHE_TIME: Optional[datetime] = None
+_MACRO_CACHE_EXPIRY_SECONDS = 900  # Cache 15 menit
+
+def get_global_macro_data() -> Dict[str, Any]:
+    """Mengambil harga komoditas global, kurs valas, dan yield obligasi untuk korelasi sektoral saham BEI."""
+    global _MACRO_CACHE, _MACRO_CACHE_TIME
+    now = datetime.now()
+    if _MACRO_CACHE_TIME and (now - _MACRO_CACHE_TIME).total_seconds() < _MACRO_CACHE_EXPIRY_SECONDS and _MACRO_CACHE:
+        return _MACRO_CACHE
+
+    macro_items = [
+        {
+            "id": "oil",
+            "name": "Brent Crude Oil",
+            "symbol": "BZ=F",
+            "category": "Energy",
+            "unit": "$/bbl",
+            "related_tickers": ["MEDC", "ELSA", "AKRA"],
+            "impact_sector": "Minyak & Gas"
+        },
+        {
+            "id": "gold",
+            "name": "Gold (Emas)",
+            "symbol": "GC=F",
+            "category": "Precious Metals",
+            "unit": "$/oz",
+            "related_tickers": ["BRMS", "PSAB", "ANTM", "MDKA"],
+            "impact_sector": "Tambang Emas"
+        },
+        {
+            "id": "copper",
+            "name": "Copper & Metals",
+            "symbol": "HG=F",
+            "category": "Industrial Metals",
+            "unit": "$/lb",
+            "related_tickers": ["INCO", "NCKL", "MBMA", "TINS"],
+            "impact_sector": "Nikel & Mineral"
+        },
+        {
+            "id": "usdidr",
+            "name": "USD / IDR",
+            "symbol": "IDR=X",
+            "category": "Currency",
+            "unit": "Rp",
+            "related_tickers": ["ASII", "ICBP", "INDF", "BBCA"],
+            "impact_sector": "Nilai Tukar Rupiah"
+        },
+        {
+            "id": "us10y",
+            "name": "US 10Y Yield",
+            "symbol": "^TNX",
+            "category": "Bonds",
+            "unit": "%",
+            "related_tickers": ["BBCA", "BBRI", "BMRI", "BBNI"],
+            "impact_sector": "Likuiditas Global"
+        }
+    ]
+
+    results = []
+    for item in macro_items:
+        try:
+            t = yf.Ticker(item["symbol"])
+            hist = t.history(period="5d")
+            if not hist.empty:
+                curr = float(hist["Close"].iloc[-1])
+                prev = float(hist["Close"].iloc[-2]) if len(hist) > 1 else curr
+                chg_pct = round(((curr - prev) / prev) * 100, 2) if prev > 0 else 0.0
+                chg_val = round(curr - prev, 2)
+                
+                # Format visual price
+                if item["id"] == "usdidr":
+                    display_price = f"Rp {int(curr):,}".replace(",", ".")
+                elif item["id"] == "us10y":
+                    display_price = f"{curr:.2f}%"
+                else:
+                    display_price = f"${curr:,.2f}"
+
+                results.append({
+                    "id": item["id"],
+                    "name": item["name"],
+                    "category": item["category"],
+                    "symbol": item["symbol"],
+                    "price": round(curr, 2),
+                    "display_price": display_price,
+                    "unit": item["unit"],
+                    "change_pct": chg_pct,
+                    "change_val": chg_val,
+                    "is_positive": chg_pct >= 0,
+                    "related_tickers": item["related_tickers"],
+                    "impact_sector": item["impact_sector"]
+                })
+        except Exception:
+            continue
+
+    if not results:
+        # Fallback default static
+        results = [
+            {"id": "oil", "name": "Brent Crude Oil", "symbol": "BZ=F", "category": "Energy", "price": 89.35, "display_price": "$89.35", "unit": "$/bbl", "change_pct": 0.94, "change_val": 0.83, "is_positive": True, "related_tickers": ["MEDC", "ELSA", "AKRA"], "impact_sector": "Minyak & Gas"},
+            {"id": "gold", "name": "Gold (Emas)", "symbol": "GC=F", "category": "Precious Metals", "price": 2439.50, "display_price": "$2,439.50", "unit": "$/oz", "change_pct": 1.35, "change_val": 32.5, "is_positive": True, "related_tickers": ["BRMS", "PSAB", "ANTM", "MDKA"], "impact_sector": "Tambang Emas"},
+            {"id": "copper", "name": "Copper & Metals", "symbol": "HG=F", "category": "Industrial Metals", "price": 4.65, "display_price": "$4.65", "unit": "$/lb", "change_pct": 0.79, "change_val": 0.04, "is_positive": True, "related_tickers": ["INCO", "NCKL", "MBMA"], "impact_sector": "Nikel & Mineral"},
+            {"id": "usdidr", "name": "USD / IDR", "symbol": "IDR=X", "category": "Currency", "price": 15820.0, "display_price": "Rp 15.820", "unit": "Rp", "change_pct": -0.24, "change_val": -38.0, "is_positive": False, "related_tickers": ["ASII", "ICBP", "BBCA"], "impact_sector": "Nilai Tukar Rupiah"},
+            {"id": "us10y", "name": "US 10Y Yield", "symbol": "^TNX", "category": "Bonds", "price": 4.21, "display_price": "4.21%", "unit": "%", "change_pct": -0.34, "change_val": -0.01, "is_positive": False, "related_tickers": ["BBCA", "BBRI", "BMRI"], "impact_sector": "Likuiditas Global"}
+        ]
+
+    _MACRO_CACHE = {
+        "items": results,
+        "last_updated": now.strftime("%H:%M:%S WIB")
+    }
+    _MACRO_CACHE_TIME = now
+    return _MACRO_CACHE

@@ -680,6 +680,28 @@
             </div>
         </header>
 
+        <!-- Bloomberg-Style Live Global Macro & Commodity Ribbon -->
+        <div id="macro-ribbon-bar" class="w-full bg-slate-900 text-slate-300 border-b border-white/[0.08] px-4 sm:px-6 py-2 flex items-center justify-between text-xs font-mono overflow-x-auto gap-4 shrink-0 select-none">
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800/80">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> Macro Radar
+                </span>
+            </div>
+
+            <!-- Scrollable Commodity / Forex / Yield Tickers -->
+            <div class="flex items-center gap-2.5 sm:gap-3.5 overflow-x-auto no-scrollbar" id="macro-tickers-container">
+                <div class="text-[11px] text-slate-500 py-0.5 flex items-center gap-1.5">
+                    <i data-lucide="loader-2" class="w-3 h-3 animate-spin text-blue-400"></i> Memuat data komoditas global...
+                </div>
+            </div>
+
+            <!-- Last Updated Timestamp -->
+            <div class="hidden lg:flex items-center gap-1.5 text-[10px] text-slate-500 shrink-0">
+                <i data-lucide="clock" class="w-3 h-3"></i>
+                <span id="macro-updated-time">--:-- WIB</span>
+            </div>
+        </div>
+
         <!-- Dynamic Content Body -->
         <div class="p-4 sm:p-6 lg:p-8 flex-1 space-y-6">
             
@@ -1638,6 +1660,7 @@
             initChart();
             initTerminalChart();
             applyChartTheme(isCurrentDark());
+            loadGlobalMacro();
             runScan(false);
             loadJournalData();
             loadPerformanceData();
@@ -2701,6 +2724,50 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 }, 100);
             }
         });
+
+        async function loadGlobalMacro() {
+            try {
+                const res = await fetch('/api/macro');
+                const data = await res.json();
+                if (!data || !data.items) return;
+                
+                const container = document.getElementById('macro-tickers-container');
+                const timeEl = document.getElementById('macro-updated-time');
+                if (timeEl && data.last_updated) timeEl.innerText = data.last_updated;
+
+                if (container) {
+                    container.innerHTML = data.items.map(item => {
+                        const isPos = item.is_positive;
+                        const chgColor = isPos ? 'text-emerald-400' : 'text-rose-400';
+                        const chgSign = isPos ? '+' : '';
+                        const relTickersStr = item.related_tickers ? item.related_tickers.join(', ') : '';
+                        const tickersArrStr = item.related_tickers ? JSON.stringify(item.related_tickers) : '[]';
+                        
+                        return `
+                            <div onclick='filterByMacroCommodity("${item.id}", "${item.name}", ${tickersArrStr})' class="flex items-center gap-2 shrink-0 px-2.5 py-1 rounded-lg bg-surface-900/90 hover:bg-surface-800 border border-white/[0.06] hover:border-blue-500/40 cursor-pointer transition active:scale-95 group" title="Saring saham terkait: ${relTickersStr} (${item.impact_sector})">
+                                <span class="text-[11px] text-slate-400 group-hover:text-white font-sans font-semibold transition">${item.name}</span>
+                                <span class="font-bold text-white font-mono">${item.display_price}</span>
+                                <span class="${chgColor} text-[11px] font-bold font-mono">${chgSign}${item.change_pct}%</span>
+                                <span class="text-[9px] px-1 rounded bg-white/[0.06] text-slate-400 group-hover:text-blue-300 font-sans hidden sm:inline">➔ ${item.related_tickers.slice(0, 2).join('/')}</span>
+                            </div>
+                        `;
+                    }).join('');
+                    if (typeof lucide !== 'undefined') lucide.createIcons();
+                }
+            } catch(e) {
+                console.error("Error loading macro data", e);
+            }
+        }
+
+        function filterByMacroCommodity(id, name, tickers) {
+            switchView('screener');
+            const searchInput = document.getElementById('search-ticker');
+            if (searchInput && tickers && tickers.length > 0) {
+                searchInput.value = tickers[0];
+                renderPicks();
+                showToast(`Saring sektor ${name} (${tickers.join(', ')})`);
+            }
+        }
 
         function updateQuickTickersFromScan(results) {
             const container = document.getElementById('quick-tickers');

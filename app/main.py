@@ -12,7 +12,7 @@ from typing import Optional
 
 from app.config import settings
 from app.engine.universe import get_universe
-from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status
+from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status, get_global_macro_data
 from app.engine.scanner import scan_stock
 from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
@@ -370,6 +370,13 @@ async def api_calculate_size(
         return {"status": "success", "data": result}
     except ValueError as e:
         return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
+
+@app.get("/api/macro")
+async def api_macro():
+    """Mengembalikan data harga komoditas global, kurs USD/IDR, dan yield US 10Y dengan korelasi emiten BEI."""
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(None, get_global_macro_data)
+    return JSONResponse(content=data)
 
 @app.get("/api/chart/{ticker}")
 async def api_chart(ticker: str):
