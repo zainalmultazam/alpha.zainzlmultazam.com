@@ -239,6 +239,67 @@
         </div>
     </div>
 
+    <!-- MODAL CATAT TRANSAKSI MANUAL -->
+    <div id="manual-journal-modal" class="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 hidden opacity-0 pointer-events-none">
+        <div class="w-full max-w-md bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-4 relative">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
+                        <i data-lucide="book-plus" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white tracking-tight">Catat Transaksi Manual</h3>
+                        <p class="text-xs text-slate-500 dark:text-gray-400 font-mono">Input posisi & aktifkan pengawas bursa</p>
+                    </div>
+                </div>
+                <button onclick="closeManualJournalModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="submitManualJournal(event)" class="space-y-3.5 font-sans">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Ticker Saham</label>
+                        <input type="text" id="manual-ticker" required placeholder="AUTO" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Jumlah Lot</label>
+                        <input type="text" inputmode="numeric" id="manual-lots" required placeholder="35" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Harga Beli / Entry (Rp)</label>
+                        <input type="text" inputmode="numeric" id="manual-entry" required placeholder="2.900" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Stop Loss (Rp)</label>
+                        <input type="text" inputmode="numeric" id="manual-sl" required placeholder="2.800" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Target TP (Rp)</label>
+                        <input type="text" inputmode="numeric" id="manual-tp" placeholder="3.100" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Setup / Catatan</label>
+                        <input type="text" id="manual-setup" placeholder="Swing Breakout" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-sans focus:outline-none focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" id="btn-submit-manual-journal" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 active:scale-[0.98]">
+                        <i data-lucide="check" class="w-4 h-4"></i> Simpan ke Jurnal & Awasi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
@@ -598,11 +659,16 @@
 
                 <!-- Journal Table -->
                 <div class="clean-card p-5 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.06]">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.06]">
                         <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Riwayat Transaksi Jurnal</h3>
-                        <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <button onclick="openManualJournalModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-600/20 transition active:scale-[0.98]">
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Catat Transaksi Manual
+                            </button>
+                            <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
+                            </button>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-oled">
@@ -646,28 +712,28 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
-                            <input type="number" id="calc-capital" value="{{ default_capital }}" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                            <input type="text" inputmode="numeric" id="calc-capital" value="50.000.000" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Maksimal Risiko (%)</label>
-                                <input type="number" id="calc-risk-pct" value="{{ default_risk_pct }}" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <input type="number" id="calc-risk-pct" value="1.0" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Ticker Saham</label>
-                                <input type="text" id="calc-ticker" placeholder="BBCA" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+                                <input type="text" id="calc-ticker" placeholder="AUTO" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Entry Price (Rp)</label>
-                                <input type="number" id="calc-entry" placeholder="8500" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <input type="text" inputmode="numeric" id="calc-entry" placeholder="2.900" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Stop Loss (Rp)</label>
-                                <input type="number" id="calc-sl" placeholder="8200" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <input type="text" inputmode="numeric" id="calc-sl" placeholder="2.800" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                             </div>
                         </div>
 
@@ -1284,20 +1350,39 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
+        // ==========================================
+        // NUMBER FORMATTER (Thousand Separator Dot '.')
+        // ==========================================
+        function formatRupiahInput(input) {
+            let val = input.value.replace(/\D/g, '');
+            if (val === '') {
+                input.value = '';
+                return;
+            }
+            let formatted = Number(val).toLocaleString('id-ID');
+            input.value = formatted;
+        }
+
+        function parseRupiahInput(val) {
+            if (!val) return 0;
+            const clean = String(val).replace(/\./g, '').replace(/,/g, '.').replace(/\D/g, '');
+            return parseFloat(clean) || 0;
+        }
+
         function quickCalculate(ticker, entry, sl, tp, setup) {
             document.getElementById('calc-ticker').value = ticker;
-            document.getElementById('calc-entry').value = entry;
-            document.getElementById('calc-sl').value = sl;
+            document.getElementById('calc-entry').value = Number(entry).toLocaleString('id-ID');
+            document.getElementById('calc-sl').value = Number(sl).toLocaleString('id-ID');
             switchView('calculator');
             calculateLotFromForm();
         }
 
         async function calculateLotFromForm() {
-            const capital = parseFloat(document.getElementById('calc-capital').value) || 0;
+            const capital = parseRupiahInput(document.getElementById('calc-capital').value) || 0;
             const riskPct = parseFloat(document.getElementById('calc-risk-pct').value) || 1.0;
-            const entry = parseFloat(document.getElementById('calc-entry').value) || 0;
-            const sl = parseFloat(document.getElementById('calc-sl').value) || 0;
-            const ticker = (document.getElementById('calc-ticker').value || 'IDX').toUpperCase();
+            const entry = parseRupiahInput(document.getElementById('calc-entry').value) || 0;
+            const sl = parseRupiahInput(document.getElementById('calc-sl').value) || 0;
+            const ticker = (document.getElementById('calc-ticker').value || 'AUTO').toUpperCase();
 
             if (!capital || !entry || !sl || entry <= sl) {
                 return;
@@ -1332,6 +1417,83 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
+        // ==========================================
+        // MANUAL JOURNAL ENTRY MODAL
+        // ==========================================
+        function openManualJournalModal() {
+            const modal = document.getElementById('manual-journal-modal');
+            modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            lucide.createIcons();
+            setTimeout(() => {
+                document.getElementById('manual-ticker')?.focus();
+            }, 100);
+        }
+
+        function closeManualJournalModal() {
+            const modal = document.getElementById('manual-journal-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 250);
+        }
+
+        async function submitManualJournal(e) {
+            e.preventDefault();
+            const ticker = (document.getElementById('manual-ticker').value || '').toUpperCase().trim();
+            const lots = parseRupiahInput(document.getElementById('manual-lots').value);
+            const entry = parseRupiahInput(document.getElementById('manual-entry').value);
+            const sl = parseRupiahInput(document.getElementById('manual-sl').value);
+            let tp = parseRupiahInput(document.getElementById('manual-tp').value);
+            const setup = (document.getElementById('manual-setup').value || 'Manual Entry').trim();
+
+            if (!ticker || !lots || !entry || !sl) {
+                showToast("Mohon lengkapi Ticker, Lot, Entry, dan Stop Loss.", "error");
+                return;
+            }
+
+            if (!tp || tp <= entry) {
+                tp = entry + (entry - sl) * 2;
+            }
+
+            const btn = document.getElementById('btn-submit-manual-journal');
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...`;
+            lucide.createIcons();
+
+            try {
+                const formData = new FormData();
+                formData.append('ticker', ticker);
+                formData.append('entry_price', entry);
+                formData.append('stop_loss', sl);
+                formData.append('target_price', tp);
+                formData.append('lots', lots);
+                formData.append('setup_name', setup);
+
+                const res = await fetch('/api/journal/log', { method: 'POST', body: formData });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`Posisi ${ticker} (${lots} Lot) berhasil dicatat ke Jurnal!`, "success");
+                    closeManualJournalModal();
+                    // Reset fields
+                    document.getElementById('manual-ticker').value = '';
+                    document.getElementById('manual-lots').value = '';
+                    document.getElementById('manual-entry').value = '';
+                    document.getElementById('manual-sl').value = '';
+                    document.getElementById('manual-tp').value = '';
+                    document.getElementById('manual-setup').value = '';
+                    loadJournalData();
+                } else {
+                    showToast("Gagal menyimpan ke jurnal", "error");
+                }
+            } catch (err) {
+                showToast("Terjadi kesalahan saat menyimpan", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Simpan ke Jurnal & Awasi`;
+                lucide.createIcons();
+            }
+        }
+
         async function logCalculatedTrade() {
             if (!currentCalculatedTrade) return;
             
@@ -1357,7 +1519,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             } catch (e) {
                 showToast("Gagal mencatat transaksi", "error");
             } finally {
-                btn.innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal Trading';
+                btn.innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal';
                 lucide.createIcons();
             }
         }
