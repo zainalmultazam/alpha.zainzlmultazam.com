@@ -432,61 +432,46 @@
         </nav>
 
         <!-- Sidebar Footer Actions & Status -->
-        <div class="py-2.5 px-1 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col gap-1 shrink-0 overflow-hidden">
+        <div class="py-2.5 px-1 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col gap-2 shrink-0">
             
-            <!-- Settings Button -->
-            <div class="relative group w-full">
-                <button onclick="openSettingsModal()" class="w-full flex items-center p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-surface-800 transition" title="Settings">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="settings" class="w-4.5 h-4.5"></i>
+            <!-- 3 Footer Mini Action Icons -->
+            <div class="flex items-center justify-around w-full px-1">
+                <!-- Settings Icon -->
+                <div class="relative group">
+                    <button onclick="openSettingsModal()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Settings">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                    </button>
+                    <div class="sidebar-tooltip font-mono">
+                        Settings
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-xs font-semibold text-left whitespace-nowrap">Settings</span>
-                </button>
-                <div class="sidebar-tooltip font-mono">
-                    Settings
                 </div>
-            </div>
 
-            <!-- Theme Toggle Button -->
-            <div class="relative group w-full">
-                <button onclick="toggleTheme()" class="w-full flex items-center p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-surface-800 transition" title="Theme">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="sun" class="w-4.5 h-4.5 text-amber-500 hidden dark:block"></i>
-                        <i data-lucide="moon" class="w-4.5 h-4.5 text-slate-700 block dark:hidden"></i>
+                <!-- Theme Toggle Icon -->
+                <div class="relative group">
+                    <button onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Theme">
+                        <i data-lucide="sun" class="w-4 h-4 text-amber-500 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-4 h-4 text-slate-700 block dark:hidden"></i>
+                    </button>
+                    <div class="sidebar-tooltip font-mono">
+                        Theme
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-xs font-semibold text-left whitespace-nowrap">Theme</span>
-                </button>
-                <div class="sidebar-tooltip font-mono">
-                    Theme
                 </div>
-            </div>
 
-            <!-- Lock Button -->
-            <div class="relative group w-full">
-                <button onclick="lockTerminal()" class="w-full flex items-center p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-surface-800 transition" title="Lock">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="lock" class="w-4.5 h-4.5"></i>
+                <!-- Lock Icon -->
+                <div class="relative group">
+                    <button onclick="lockTerminal()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Lock">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                    </button>
+                    <div class="sidebar-tooltip font-mono">
+                        Lock
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-xs font-semibold text-left whitespace-nowrap">Lock</span>
-                </button>
-                <div class="sidebar-tooltip font-mono">
-                    Lock
                 </div>
             </div>
 
             <!-- Engine Online Status Line -->
-            <div class="relative group w-full pt-1">
-                <div class="p-2 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center cursor-pointer">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                    </div>
-                    <div class="sidebar-text hidden ml-2.5 truncate text-left">
-                        <div class="text-[10px] font-mono font-semibold text-slate-800 dark:text-white whitespace-nowrap">Engine online · 17:00 WIB</div>
-                    </div>
-                </div>
-                <div class="sidebar-tooltip font-mono">
-                    Engine online · 17:00 WIB
-                </div>
+            <div class="flex items-center justify-center gap-1.5 py-1 px-1.5 rounded-lg bg-slate-100/80 dark:bg-surface-900/80 border border-slate-200/80 dark:border-white/[0.04]">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span class="text-[10px] font-mono text-slate-600 dark:text-gray-400 truncate">Engine online · 17:00 WIB</span>
             </div>
 
         </div>
