@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     MIN_RR_RATIO: float = 2.0  # Minimal Risk to Reward 1:2
     
     # Security PIN
-    ACCESS_PIN: str = os.getenv("ACCESS_PIN", "1234")
+    ACCESS_PIN: str = os.getenv("ACCESS_PIN", "311294")
     
     # Telegram Bot Settings
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
