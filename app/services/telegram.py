@@ -51,7 +51,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
 
     msg = f"<b>[ALPHASWING SUPER-DIGEST] TOP 3 PICKS</b>\n"
     msg += f"<i>{now_str} • {settings.APP_DOMAIN}</i>\n"
-    msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
+    msg += "────────────\n"
     
     # Status Operasional Bursa (Libur / Buka / Tutup)
     market_status = climate.get("market_status") if climate else None
@@ -62,7 +62,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     msg += f"<b>IHSG CLIMATE:</b> {regime_title}\n"
     msg += f"• Indeks: <b>{ihsg_price:,.0f} ({sign}{ihsg_change}%)</b>\n"
     msg += f"• Rekomendasi: <i>{html.escape(exposure_text)}</i>\n"
-    msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n"
+    msg += "────────────\n\n"
 
     # 2. Top 3 Picks Details
     top_3 = picks[:3]
@@ -95,7 +95,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         msg += f"   <i>Modal Beli: Rp {cost_idr:,} | Max Risiko: Rp {risk_idr:,} (1%)</i>\n\n"
 
     # 3. Action Call to Trader
-    msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
+    msg += "────────────\n"
     msg += "<b>PANDUAN EKSEKUSI AUTO-ORDER GTC:</b>\n"
     msg += "1. Buka aplikasi sekuritas (Stockbit, IPOT, Mirae, MOST, Ajaib).\n"
     msg += "2. Pasang Auto-Order GTC Buy Stop pada harga Entry di atas.\n"
