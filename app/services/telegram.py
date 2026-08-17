@@ -43,26 +43,23 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     sign = "+" if ihsg_change >= 0 else ""
     
     if regime_status == "BULLISH":
-        climate_icon = "🟢"
         exposure_text = "100% Modal Aktif (Pasar Sehat)"
     elif regime_status == "NEUTRAL":
-        climate_icon = "🟡"
         exposure_text = "50% Alokasi Lot (Konsolidasi/Pullback)"
     else:
-        climate_icon = "🔴"
         exposure_text = "DEFENSIVE / CASH IS KING (IHSG < EMA200)"
 
-    msg = f"⚡ <b>ALPHASWING SUPER-DIGEST (TOP 3)</b>\n"
-    msg += f"📅 <i>{now_str} • {settings.APP_DOMAIN}</i>\n"
+    msg = f"<b>[ALPHASWING SUPER-DIGEST] TOP 3 PICKS</b>\n"
+    msg += f"<i>{now_str} • {settings.APP_DOMAIN}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
     
     # Status Operasional Bursa (Libur / Buka / Tutup)
     market_status = climate.get("market_status") if climate else None
     if market_status:
         status_title = html.escape(str(market_status.get("title", "")))
-        msg += f"🏛️ <b>STATUS BURSA:</b> {status_title}\n"
+        msg += f"<b>STATUS BURSA:</b> {status_title}\n"
     
-    msg += f"{climate_icon} <b>IHSG CLIMATE:</b> {regime_title}\n"
+    msg += f"<b>IHSG CLIMATE:</b> {regime_title}\n"
     msg += f"• Indeks: <b>{ihsg_price:,.0f} ({sign}{ihsg_change}%)</b>\n"
     msg += f"• Rekomendasi: <i>{html.escape(exposure_text)}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n"
@@ -83,28 +80,28 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         cost_idr = sizing["total_cost"]
         risk_idr = sizing["max_risk_idr"]
 
-        weekly_tag = "🟢 Weekly Confirmed" if p.get("weekly_confirmed") else "🟡 Daily Setup"
+        weekly_tag = "[Weekly Confirmed]" if p.get("weekly_confirmed") else "[Daily Setup]"
         safe_name = html.escape(str(p.get("name", "")))
         safe_setup = html.escape(str(p.get("primary_setup", "")))
 
-        msg += f"<b>#{i} 🎯 {p['symbol']} ({safe_name})</b>\n"
+        msg += f"<b>#{i} {p['symbol']} - {safe_name}</b>\n"
         msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p['score']} PTS</b>)\n"
-        msg += f"• Status: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n"
-        msg += f"• 🟢 <b>BUY STOP / ENTRY:</b> Rp {entry:,}\n"
-        msg += f"• 🔴 <b>STOP LOSS:</b> Rp {sl:,} (-{plan['risk_pct']}%)\n"
-        msg += f"• 🎯 <b>TP 1 (2R):</b> Rp {tp1:,} (+{plan['tp1_gain_pct']}%)\n"
-        msg += f"• 🚀 <b>TP 2 (Runner):</b> Rp {tp2:,} (+{plan['tp2_gain_pct']}%)\n"
-        msg += f"• 🧮 <b>ALOKASI AMAN:</b> <b>{lots} Lot</b> ({shares:,} lbr)\n"
+        msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n"
+        msg += f"• [BUY STOP / ENTRY]: Rp {entry:,}\n"
+        msg += f"• [STOP LOSS]: Rp {sl:,} (-{plan['risk_pct']}%)\n"
+        msg += f"• [TARGET TP 1]: Rp {tp1:,} (+{plan['tp1_gain_pct']}%)\n"
+        msg += f"• [TARGET TP 2]: Rp {tp2:,} (+{plan['tp2_gain_pct']}%)\n"
+        msg += f"• [ALOKASI AMAN]: <b>{lots} Lot</b> ({shares:,} lembar)\n"
         msg += f"   <i>Modal Beli: Rp {cost_idr:,} | Max Risiko: Rp {risk_idr:,} (1%)</i>\n\n"
 
     # 3. Action Call to Trader
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
-    msg += "📌 <b>INSTRUKSI EKSEKUSI:</b>\n"
-    msg += "1. Buka aplikasi sekuritas Anda (Stockbit/IPOT/Mirae/MOST/Ajaib).\n"
-    msg += "2. Pasang <b>Auto-Order GTC Buy Stop</b> pada harga Entry di atas.\n"
-    msg += "3. Pasang <b>Auto Stop Loss (OCO)</b> untuk proteksi modal otomatis.\n"
-    msg += "4. Selesai! Tidak perlu menatap layar saat jam bursa.\n"
-    msg += f"🔗 <i>Web Terminal: https://{settings.APP_DOMAIN}</i>"
+    msg += "<b>PANDUAN EKSEKUSI AUTO-ORDER GTC:</b>\n"
+    msg += "1. Buka aplikasi sekuritas (Stockbit, IPOT, Mirae, MOST, Ajaib).\n"
+    msg += "2. Pasang Auto-Order GTC Buy Stop pada harga Entry di atas.\n"
+    msg += "3. Pasang Auto Stop Loss (OCO) untuk proteksi modal otomatis.\n"
+    msg += "4. Disiplin posisi sesuai alokasi lot yang tertera.\n"
+    msg += f"Terminal: https://{settings.APP_DOMAIN}"
 
     return await send_telegram_message(msg)
 
