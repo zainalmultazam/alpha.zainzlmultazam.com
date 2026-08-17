@@ -142,10 +142,10 @@
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- SIDEBAR NAVIGATION (Default Mini with Tooltips) -->
-    <aside id="sidebar" class="w-16 px-2 bg-surface-950/95 border-r border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex flex-col justify-between z-40 transition-all duration-300 select-none overflow-visible">
+    <aside id="sidebar" class="w-16 px-2 bg-surface-950/95 border-r border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex flex-col justify-between z-40 transition-all duration-300 select-none overflow-visible shrink-0">
         
-        <!-- Sidebar Header -->
-        <div class="py-4 border-b border-white/[0.06] flex items-center justify-center relative">
+        <!-- Sidebar Header (Aligned h-16) -->
+        <div class="h-16 border-b border-white/[0.07] flex items-center justify-center relative shrink-0">
             <button onclick="toggleSidebar()" class="group relative text-gray-400 hover:text-white p-2 rounded-xl hover:bg-surface-800 transition flex items-center justify-center" title="Toggle Sidebar">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base shadow-inner shadow-emerald-500/30">
                     ⚡
@@ -177,7 +177,7 @@
                     <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Alpha Playbook</span>
                 </button>
-                <div class="sidebar-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-surface-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
+                <div class="sidebar-tooltip">
                     Alpha Playbook
                 </div>
             </div>
@@ -188,7 +188,7 @@
                     <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Chart Terminal</span>
                 </button>
-                <div class="sidebar-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-surface-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
+                <div class="sidebar-tooltip">
                     Chart Terminal
                 </div>
             </div>
@@ -199,7 +199,7 @@
                     <i data-lucide="book-open" class="w-5 h-5 text-cyan-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Jurnal & Tracker</span>
                 </button>
-                <div class="sidebar-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-surface-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
+                <div class="sidebar-tooltip">
                     Jurnal & Tracker
                 </div>
             </div>
@@ -210,7 +210,7 @@
                     <i data-lucide="calculator" class="w-5 h-5 text-amber-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Kalkulator Lot</span>
                 </button>
-                <div class="sidebar-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-surface-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
+                <div class="sidebar-tooltip">
                     Kalkulator Lot
                 </div>
             </div>
@@ -221,7 +221,7 @@
                     <i data-lucide="settings-2" class="w-5 h-5 text-purple-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Settings & Alerts</span>
                 </button>
-                <div class="sidebar-tooltip absolute left-full ml-3 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-surface-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none">
+                <div class="sidebar-tooltip">
                     Settings & Alerts
                 </div>
             </div>
@@ -229,7 +229,7 @@
         </nav>
 
         <!-- Sidebar Footer Status -->
-        <div class="py-3 border-t border-white/[0.06] bg-oled/50 flex justify-center">
+        <div class="py-3 border-t border-white/[0.07] bg-oled/50 flex justify-center shrink-0">
             <div class="relative group flex justify-center">
                 <div class="p-2 rounded-xl bg-surface-900/90 border border-white/[0.05] flex items-center justify-center cursor-pointer">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
@@ -237,7 +237,7 @@
                         <div class="text-[11px] font-mono font-semibold text-white">Online</div>
                     </div>
                 </div>
-                <div class="sidebar-tooltip absolute left-full ml-3 bottom-0 px-2.5 py-1.5 bg-surface-900 text-white text-xs font-semibold rounded-lg shadow-2xl border border-white/10 whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 pointer-events-none font-mono">
+                <div class="sidebar-tooltip font-mono">
                     Engine Online (17:00 WIB Daily Cron)
                 </div>
             </div>
@@ -248,25 +248,26 @@
     <!-- MAIN CONTENT AREA -->
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         
-        <!-- Top Topbar -->
-        <header class="sticky top-0 z-30 backdrop-blur-xl bg-oled/85 border-b border-white/[0.06] px-4 sm:px-6 h-16 flex items-center justify-between">
+        <!-- Topbar Header (Aligned h-16) -->
+        <header class="h-16 sticky top-0 z-30 backdrop-blur-xl bg-oled/90 border-b border-white/[0.07] px-6 flex items-center justify-between shrink-0">
             <div class="flex items-center gap-3">
-                <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-2" id="page-title">
+                <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-2.5 leading-none" id="page-title">
                     Alpha Playbook
                 </h1>
-                <span id="scan-status" class="text-[11px] font-mono text-gray-400 bg-surface-900 px-2.5 py-1 rounded-lg border border-white/[0.06] hidden sm:inline-block">
-                    Menyiapkan data...
+                <span id="scan-status" class="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-800/60 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Menyiapkan data...</span>
                 </span>
             </div>
 
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-3">
                 <!-- Search Ticker Input -->
                 <div class="relative">
-                    <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (BBCA)..." class="bg-surface-900 border border-white/10 rounded-xl px-3 py-1.5 pl-8 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-36 sm:w-48 font-mono transition">
+                    <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (BBCA)..." class="bg-surface-900/90 border border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-36 sm:w-52 font-mono transition">
                     <i data-lucide="search" class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5"></i>
                 </div>
 
-                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition shadow-lg shadow-emerald-950/60 active:scale-[0.98]">
+                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-950/60 active:scale-[0.98]">
                     <i data-lucide="refresh-cw" id="icon-scan" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">Scan Market</span>
                 </button>
