@@ -2656,7 +2656,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
-        async function loadChart(symbol, name, setup, autoSwitch = true) {
+        async function loadChart(symbol, name, setup, autoSwitch = false) {
             const cleanSymbol = symbol.toUpperCase().replace('.JK', '').trim();
             const displayName = name || cleanSymbol;
             const displaySetup = setup || 'Liquid';
@@ -2771,7 +2771,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 showToast("Masukkan kode saham (Ticker).", "error");
                 return;
             }
-            loadChart(ticker, ticker, 'Custom Search');
+            loadChart(ticker, ticker, 'Custom Search', true);
         }
 
         function toggleIndicator(name) {
