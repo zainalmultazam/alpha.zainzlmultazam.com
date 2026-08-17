@@ -106,13 +106,10 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         
         msg += f"• Modal: <b>{cost_str}</b> | Max Risiko: <b>{risk_str}</b> (1%)\n"
         msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
-        msg += "────────────\n\n"
+        if i < len(top_3):
+            msg += "────────────\n\n"
 
-    # 3. Quick Action Tip
-    msg += "<i>Tip: Tap angka di atas untuk copy instan ke Stockbit.</i>\n"
-    msg += f"<i>Web Terminal: https://{settings.APP_DOMAIN}</i>"
-
-    return await send_telegram_message(msg)
+    return await send_telegram_message(msg.strip())
 
 # Alias for backward compatibility
 notify_top_picks = notify_super_digest
