@@ -79,3 +79,25 @@ def close_trade(trade_id: int, exit_price: float, notes: str = "") -> bool:
     conn.commit()
     conn.close()
     return True
+
+def get_journal_stats() -> Dict[str, Any]:
+    trades = get_all_trades()
+    total_trades = len(trades)
+    open_trades = [t for t in trades if t["status"] == "OPEN"]
+    closed_trades = [t for t in trades if t["status"] == "CLOSED"]
+    
+    winning_trades = [t for t in closed_trades if (t.get("pnl_amount") or 0) > 0]
+    losing_trades = [t for t in closed_trades if (t.get("pnl_amount") or 0) < 0]
+    
+    total_pnl = sum((t.get("pnl_amount") or 0) for t in closed_trades)
+    win_rate = round((len(winning_trades) / len(closed_trades)) * 100, 1) if closed_trades else 0.0
+
+    return {
+        "total_trades": total_trades,
+        "open_count": len(open_trades),
+        "closed_count": len(closed_trades),
+        "win_count": len(winning_trades),
+        "loss_count": len(losing_trades),
+        "win_rate_pct": win_rate,
+        "total_pnl_idr": round(total_pnl, 2)
+    }

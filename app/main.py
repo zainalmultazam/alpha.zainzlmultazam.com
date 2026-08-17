@@ -13,7 +13,7 @@ from app.engine.universe import get_universe
 from app.services.market_data import fetch_stock_df, clear_cache
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
-from app.engine.journal import log_trade, get_all_trades, close_trade, init_db
+from app.engine.journal import log_trade, get_all_trades, close_trade, get_journal_stats, init_db
 from app.services.telegram import send_telegram_message, notify_top_picks
 
 app = FastAPI(title=settings.APP_NAME)
@@ -136,7 +136,11 @@ async def api_chart(ticker: str):
 
 @app.get("/api/journal")
 async def api_get_journal():
-    return {"status": "success", "trades": get_all_trades()}
+    return {"status": "success", "trades": get_all_trades(), "stats": get_journal_stats()}
+
+@app.get("/api/journal/stats")
+async def api_journal_stats():
+    return {"status": "success", "data": get_journal_stats()}
 
 @app.post("/api/journal/log")
 async def api_log_trade(
