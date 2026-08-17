@@ -1911,11 +1911,28 @@
                     borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' 
                 },
                 rightPriceScale: { 
-                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' 
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+                    scaleMargins: { top: 0.08, bottom: 0.04 },
+                    autoScale: true
                 },
                 crosshair: {
-                    vertLine: { color: isDark ? 'rgba(16, 185, 129, 0.4)' : 'rgba(16, 185, 129, 0.6)', width: 1, style: 2 },
-                    horzLine: { color: isDark ? 'rgba(16, 185, 129, 0.4)' : 'rgba(16, 185, 129, 0.6)', width: 1, style: 2 }
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { 
+                        color: isDark ? 'rgba(148, 163, 184, 0.35)' : 'rgba(100, 116, 139, 0.35)', 
+                        width: 1, 
+                        style: LightweightCharts.LineStyle.Dashed,
+                        visible: true,
+                        labelVisible: true,
+                        labelBackgroundColor: isDark ? '#334155' : '#475569'
+                    },
+                    horzLine: { 
+                        color: isDark ? 'rgba(59, 130, 246, 0.6)' : 'rgba(37, 99, 235, 0.6)', 
+                        width: 1, 
+                        style: LightweightCharts.LineStyle.Dashed,
+                        visible: true,
+                        labelVisible: true,
+                        labelBackgroundColor: isDark ? '#2563EB' : '#1E293B'
+                    }
                 }
             };
 
@@ -2096,6 +2113,25 @@
                     borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
                     scaleMargins: { top: 0.08, bottom: 0.04 },
                     autoScale: true
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { 
+                        color: isDark ? 'rgba(148, 163, 184, 0.35)' : 'rgba(100, 116, 139, 0.35)', 
+                        width: 1, 
+                        style: LightweightCharts.LineStyle.Dashed,
+                        visible: true,
+                        labelVisible: true,
+                        labelBackgroundColor: isDark ? '#334155' : '#475569'
+                    },
+                    horzLine: { 
+                        color: isDark ? 'rgba(59, 130, 246, 0.6)' : 'rgba(37, 99, 235, 0.6)', 
+                        width: 1, 
+                        style: LightweightCharts.LineStyle.Dashed,
+                        visible: true,
+                        labelVisible: true,
+                        labelBackgroundColor: isDark ? '#2563EB' : '#1E293B'
+                    }
                 }
             });
 
@@ -2143,6 +2179,25 @@
                     borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
                     scaleMargins: { top: 0.08, bottom: 0.04 },
                     autoScale: true
+                },
+                crosshair: {
+                    mode: LightweightCharts.CrosshairMode.Normal,
+                    vertLine: { 
+                        color: isDark ? 'rgba(148, 163, 184, 0.35)' : 'rgba(100, 116, 139, 0.35)', 
+                        width: 1, 
+                        style: LightweightCharts.LineStyle.Dashed,
+                        visible: true,
+                        labelVisible: true,
+                        labelBackgroundColor: isDark ? '#334155' : '#475569'
+                    },
+                    horzLine: { 
+                        color: isDark ? 'rgba(59, 130, 246, 0.6)' : 'rgba(37, 99, 235, 0.6)', 
+                        width: 1, 
+                        style: LightweightCharts.LineStyle.Dashed,
+                        visible: true,
+                        labelVisible: true,
+                        labelBackgroundColor: isDark ? '#2563EB' : '#1E293B'
+                    }
                 }
             });
 
