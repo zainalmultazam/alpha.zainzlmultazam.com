@@ -14,7 +14,7 @@ from app.services.market_data import fetch_stock_df, clear_cache, get_market_cli
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
 from app.engine.journal import log_trade, get_all_trades, close_trade, get_journal_stats, init_db
-from app.services.telegram import send_telegram_message, notify_top_picks
+from app.services.telegram import send_telegram_message, notify_super_digest
 
 app = FastAPI(title=settings.APP_NAME)
 
@@ -61,7 +61,8 @@ async def run_daily_scheduled_scan():
     results = await execute_market_scan()
     cached_scan_results = results
     if settings.ENABLE_TELEGRAM_ALERTS:
-        await notify_top_picks(results[:5])
+        climate = get_market_climate()
+        await notify_super_digest(results[:3], climate)
 
 @app.get("/health")
 async def health_check():
@@ -179,3 +180,12 @@ async def api_close_trade(
 async def api_telegram_test():
     ok = await send_telegram_message(f"🔔 <b>AlphaSwing IDX Test Alert</b>\nKoneksi Telegram berhasil terhubung ke sistem {settings.APP_DOMAIN}!")
     return {"status": "success" if ok else "failed", "connected": ok}
+
+@app.post("/api/telegram/send-digest")
+async def api_telegram_send_digest():
+    global cached_scan_results
+    if not cached_scan_results:
+        cached_scan_results = await execute_market_scan()
+    climate = get_market_climate()
+    ok = await notify_super_digest(cached_scan_results[:3], climate)
+    return {"status": "success" if ok else "failed", "sent": ok, "top_count": min(3, len(cached_scan_results))}
