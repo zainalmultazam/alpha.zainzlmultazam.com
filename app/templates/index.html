@@ -312,6 +312,84 @@
                 </div>
             </form>
         </div>
+    <!-- MODAL TUTUP TRANSAKSI INTERAKTIF (Live PnL Calculator) -->
+    <div id="close-trade-modal" class="fixed inset-0 z-[99999] bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 hidden opacity-0 pointer-events-none">
+        <div class="w-full max-w-md bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-4 relative">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500">
+                        <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white tracking-tight" id="close-modal-title">Tutup Transaksi</h3>
+                        <p class="text-xs text-slate-500 dark:text-gray-400 font-mono" id="close-modal-subtitle">Realisasi hasil PnL dan evaluasi trade</p>
+                    </div>
+                </div>
+                <button onclick="closeCloseTradeModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form onsubmit="submitCloseTrade(event)" class="space-y-3.5 font-sans">
+                <input type="hidden" id="close-trade-id">
+                <input type="hidden" id="close-entry-price">
+                <input type="hidden" id="close-lots">
+                <input type="hidden" id="close-stop-loss">
+
+                <!-- Trade Info Summary -->
+                <div class="grid grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-oled border border-slate-200/80 dark:border-white/[0.06] text-xs font-mono">
+                    <div>
+                        <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Harga Beli (Entry)</span>
+                        <span class="font-bold text-slate-900 dark:text-white" id="close-info-entry">Rp 0</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Jumlah Posisi</span>
+                        <span class="font-bold text-slate-900 dark:text-white" id="close-info-lots">0 Lot (0 Lembar)</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Stop Loss</span>
+                        <span class="font-bold text-rose-500" id="close-info-sl">Rp 0</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Total Modal Beli</span>
+                        <span class="font-bold text-slate-900 dark:text-white" id="close-info-cost">Rp 0</span>
+                    </div>
+                </div>
+
+                <!-- Exit Price Input -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Harga Jual / Exit Price (Rp)</label>
+                    <input type="text" inputmode="numeric" id="close-exit-price" required placeholder="Contoh: 3.100" oninput="formatRupiahInput(this); calculateClosePnL();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
+                </div>
+
+                <!-- Live PnL Preview Card -->
+                <div class="p-3.5 rounded-xl bg-slate-100 dark:bg-oled border border-slate-200 dark:border-white/10 space-y-2 font-mono text-xs" id="close-pnl-card">
+                    <div class="flex items-center justify-between">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans">Estimasi Realized PnL:</span>
+                        <span class="font-black text-sm" id="close-pnl-amount">Rp 0</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-200/60 dark:border-white/[0.04]">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans">Return & Multiple R:</span>
+                        <span class="font-bold" id="close-pnl-metrics">0.0% (0.0R)</span>
+                    </div>
+                </div>
+
+                <!-- Evaluation Notes -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Catatan Evaluasi / Reason for Exit (Opsional)</label>
+                    <input type="text" id="close-notes" placeholder="Contoh: Kena TP1 2R / Trailing Stop triggered" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-sans focus:outline-none focus:border-blue-500 transition">
+                </div>
+
+                <div class="pt-2 flex items-center gap-2">
+                    <button type="button" onclick="closeCloseTradeModal()" class="w-1/3 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 transition">
+                        Batal
+                    </button>
+                    <button type="submit" id="btn-submit-close-trade" class="w-2/3 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 active:scale-[0.98]">
+                        <i data-lucide="check" class="w-4 h-4"></i> Simpan & Tutup Posisi
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Toast Notification Container -->
@@ -778,21 +856,37 @@
                     </div>
                 </div>
 
-                <!-- Journal Table -->
-                <div class="clean-card p-5 space-y-4">
+                <!-- Journal Content Card -->
+                <div class="clean-card p-4 sm:p-5 space-y-4">
+                    
+                    <!-- Header Actions & Filter Tabs -->
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.06]">
-                        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Riwayat Transaksi Jurnal</h3>
-                        <div class="flex items-center gap-2">
+                        <!-- Filter Tabs -->
+                        <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="journal-filter-tabs">
+                            <button onclick="filterJournal('ALL')" class="journal-filter-btn active text-xs font-medium px-3 py-1.5 rounded-xl bg-blue-600 text-white transition shadow-sm" data-jfilter="ALL">
+                                Semua (<span id="jcount-all">0</span>)
+                            </button>
+                            <button onclick="filterJournal('OPEN')" class="journal-filter-btn text-xs font-medium px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 transition" data-jfilter="OPEN">
+                                Posisi Open (<span id="jcount-open">0</span>)
+                            </button>
+                            <button onclick="filterJournal('CLOSED')" class="journal-filter-btn text-xs font-medium px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 transition" data-jfilter="CLOSED">
+                                Selesai Closed (<span id="jcount-closed">0</span>)
+                            </button>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2 shrink-0">
                             <button onclick="openManualJournalModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-600/20 transition active:scale-[0.98]">
                                 <i data-lucide="plus" class="w-3.5 h-3.5"></i> Catat Transaksi Manual
                             </button>
-                            <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
-                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
+                            <button onclick="loadJournalData()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 transition active:scale-95" title="Refresh Jurnal">
+                                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-oled">
+                    <!-- DESKTOP TABLE VIEW (md:block) -->
+                    <div class="hidden md:block overflow-x-auto rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-oled">
                         <table class="w-full text-left text-xs border-collapse font-mono">
                             <thead class="bg-slate-100 dark:bg-surface-900 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-400 uppercase text-[10px] font-sans font-semibold">
                                 <tr>
@@ -814,6 +908,12 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- MOBILE CARD VIEW (md:hidden) -->
+                    <div id="journal-cards-container" class="md:hidden space-y-3 font-mono">
+                        <div class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans text-xs">Memuat catatan transaksi...</div>
+                    </div>
+
                 </div>
 
             </div>
@@ -2373,21 +2473,40 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
+        let currentJournalFilter = 'ALL';
+        let allJournalTrades = [];
+
+        function filterJournal(filter) {
+            currentJournalFilter = filter;
+            document.querySelectorAll('.journal-filter-btn').forEach(btn => {
+                if (btn.dataset.jfilter === filter) {
+                    btn.className = 'journal-filter-btn active text-xs font-medium px-3 py-1.5 rounded-xl bg-blue-600 text-white transition shadow-sm';
+                } else {
+                    btn.className = 'journal-filter-btn text-xs font-medium px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 transition';
+                }
+            });
+            renderJournal();
+        }
+
         async function loadJournalData() {
             const tbody = document.getElementById('journal-table-body');
+            const cardsContainer = document.getElementById('journal-cards-container');
             if (tbody) {
                 tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-slate-500 dark:text-gray-500 font-sans">Mengambil data jurnal...</td></tr>';
+            }
+            if (cardsContainer) {
+                cardsContainer.innerHTML = '<div class="py-6 text-center text-slate-500 dark:text-gray-500 font-sans text-xs">Mengambil data jurnal...</div>';
             }
 
             try {
                 const res = await fetch('/api/journal');
                 const json = await res.json();
-                const trades = json.trades || [];
+                allJournalTrades = json.trades || [];
                 const stats = json.stats || {};
 
-                const totalT = stats.total_trades || trades.length || 0;
-                const openT = trades.filter(t => t.status === 'OPEN').length;
-                const closedT = trades.filter(t => t.status === 'CLOSED').length;
+                const totalT = stats.total_trades || allJournalTrades.length || 0;
+                const openT = allJournalTrades.filter(t => t.status === 'OPEN').length;
+                const closedT = allJournalTrades.filter(t => t.status === 'CLOSED').length;
 
                 const elTotal = document.getElementById('stat-total-trades');
                 const elOpen = document.getElementById('stat-open-trades');
@@ -2397,56 +2516,240 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 if (elOpen) elOpen.innerText = openT;
                 if (elClosed) elClosed.innerText = closedT;
 
-                if (!tbody) return;
+                const jCountAll = document.getElementById('jcount-all');
+                const jCountOpen = document.getElementById('jcount-open');
+                const jCountClosed = document.getElementById('jcount-closed');
 
-                if (trades.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans">Belum ada transaksi di jurnal. Anda dapat menambahkan trade dari kalkulator.</td></tr>';
-                    return;
-                }
+                if (jCountAll) jCountAll.innerText = totalT;
+                if (jCountOpen) jCountOpen.innerText = openT;
+                if (jCountClosed) jCountClosed.innerText = closedT;
 
-                tbody.innerHTML = trades.map(t => {
-                    const statusBadge = t.status === 'OPEN' 
-                        ? '<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold">OPEN</span>'
-                        : '<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold">CLOSED</span>';
+                renderJournal();
+            } catch (err) {
+                if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-rose-500 font-sans">Gagal memuat data jurnal.</td></tr>';
+                if (cardsContainer) cardsContainer.innerHTML = '<div class="py-6 text-center text-rose-500 font-sans text-xs">Gagal memuat data jurnal.</div>';
+            }
+        }
 
-                    const actionCol = t.status === 'OPEN'
-                        ? `<button onclick="promptCloseTrade(${t.id}, ${t.entry_price})" class="text-blue-600 dark:text-blue-400 hover:underline font-medium text-xs">Tutup Trade</button>`
-                        : `<span class="${(t.pnl_amount || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-danger-500 dark:text-danger-400 font-bold'}">Rp ${(t.pnl_amount || 0).toLocaleString('id-ID')} (${(t.pnl_pct || 0)}%)</span>`;
+        function renderJournal() {
+            const tbody = document.getElementById('journal-table-body');
+            const cardsContainer = document.getElementById('journal-cards-container');
 
-                    return `
-                    <tr class="hover:bg-slate-100 dark:hover:bg-surface-800/40 transition">
-                        <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.entry_date}</td>
-                        <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${t.ticker}</td>
-                        <td class="py-3 px-3.5 text-emerald-600 dark:text-emerald-400">Rp ${Number(t.entry_price).toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-danger-500 dark:text-danger-400">Rp ${Number(t.stop_loss).toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-target-500 dark:text-target-400">Rp ${Number(t.target_price).toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${Number(t.lots).toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.setup_name || '-'}</td>
-                        <td class="py-3 px-3.5">${statusBadge}</td>
-                        <td class="py-3 px-3.5 text-right whitespace-nowrap">
-                            <div class="inline-flex items-center justify-end gap-2.5">
-                                ${actionCol}
-                                
-                                <div class="relative inline-block text-left">
-                                    <button onclick="toggleRowMenu(event, ${t.id})" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-surface-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition flex items-center justify-center" title="Menu Opsi">
-                                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
-                                    </button>
+            let filtered = allJournalTrades;
+            if (currentJournalFilter !== 'ALL') {
+                filtered = filtered.filter(t => t.status === currentJournalFilter);
+            }
+
+            // ── Render Desktop Table ─────────────────────────────────────────
+            if (tbody) {
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans">Tidak ada transaksi yang cocok dengan filter ini.</td></tr>';
+                } else {
+                    tbody.innerHTML = filtered.map(t => {
+                        const statusBadge = t.status === 'OPEN' 
+                            ? '<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold">OPEN</span>'
+                            : '<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold">CLOSED</span>';
+
+                        const actionCol = t.status === 'OPEN'
+                            ? `<button onclick="openCloseTradeModal(${t.id}, '${t.ticker}', ${t.entry_price}, ${t.lots}, ${t.stop_loss}, ${t.target_price})" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-400 dark:hover:bg-blue-950 border border-blue-200/60 dark:border-blue-800/60 font-semibold text-xs transition">Tutup Trade</button>`
+                            : `<span class="${(t.pnl_amount || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-rose-600 dark:text-rose-400 font-bold'}">${(t.pnl_amount || 0) >= 0 ? '+' : ''}Rp ${(t.pnl_amount || 0).toLocaleString('id-ID')} (${(t.pnl_pct || 0)}%)</span>`;
+
+                        return `
+                        <tr class="hover:bg-slate-100 dark:hover:bg-surface-800/40 transition">
+                            <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.entry_date}</td>
+                            <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white font-mono">${t.ticker}</td>
+                            <td class="py-3 px-3.5 text-emerald-600 dark:text-emerald-400">Rp ${Number(t.entry_price).toLocaleString('id-ID')}</td>
+                            <td class="py-3 px-3.5 text-rose-600 dark:text-rose-400">Rp ${Number(t.stop_loss).toLocaleString('id-ID')}</td>
+                            <td class="py-3 px-3.5 text-cyan-600 dark:text-cyan-400">Rp ${Number(t.target_price).toLocaleString('id-ID')}</td>
+                            <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${Number(t.lots).toLocaleString('id-ID')}</td>
+                            <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.setup_name || '-'}</td>
+                            <td class="py-3 px-3.5">${statusBadge}</td>
+                            <td class="py-3 px-3.5 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center justify-end gap-2">
+                                    ${actionCol}
                                     
-                                    <div id="row-menu-${t.id}" class="row-dropdown-menu hidden fixed z-[9999] w-36 bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl py-1 text-xs font-sans text-left">
-                                        <button onclick="deleteJournalTrade(${t.id}, '${t.ticker}')" class="w-full px-3 py-2 text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/10 flex items-center gap-2 font-medium transition">
-                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                                            <span>Hapus Data</span>
-                                        </button>
-                                    </div>
+                                    <button onclick="deleteJournalTrade(${t.id}, '${t.ticker}')" class="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-500/10 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition" title="Hapus Trade">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // ── Render Mobile Cards ──────────────────────────────────────────
+            if (cardsContainer) {
+                if (filtered.length === 0) {
+                    cardsContainer.innerHTML = '<div class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans text-xs">Tidak ada transaksi yang cocok dengan filter ini.</div>';
+                } else {
+                    cardsContainer.innerHTML = filtered.map(t => {
+                        const isOpen = t.status === 'OPEN';
+                        const statusBadge = isOpen
+                            ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold">OPEN</span>'
+                            : '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold">CLOSED</span>';
+
+                        const pnlVal = t.pnl_amount || 0;
+                        const isProfit = pnlVal >= 0;
+                        const pnlDisplay = !isOpen 
+                            ? `<div class="text-right">
+                                 <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Realized PnL</span>
+                                 <span class="font-bold text-xs ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${isProfit ? '+' : ''}Rp ${pnlVal.toLocaleString('id-ID')} (${t.pnl_pct || 0}%)</span>
+                               </div>`
+                            : '';
+
+                        return `
+                        <div class="clean-card p-4 space-y-3">
+                            <!-- Card Header -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-base font-extrabold text-slate-900 dark:text-white font-mono">${t.ticker}</span>
+                                    <span class="text-xs text-slate-500 dark:text-gray-400 font-bold">${t.lots} Lot</span>
+                                    ${statusBadge}
+                                </div>
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-mono">${t.entry_date ? t.entry_date.split(' ')[0] : ''}</span>
+                            </div>
+
+                            <!-- Setup Tag -->
+                            <div class="text-[10px] text-slate-500 dark:text-gray-400 font-sans">
+                                Setup: <span class="font-semibold text-slate-700 dark:text-gray-300 font-mono">${t.setup_name || 'Manual'}</span>
+                            </div>
+
+                            <!-- Levels Grid -->
+                            <div class="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-oled p-2.5 rounded-xl border border-slate-200/80 dark:border-white/[0.06] text-center text-xs font-mono">
+                                <div>
+                                    <span class="text-[9px] text-slate-500 dark:text-gray-400 font-sans block">Entry</span>
+                                    <span class="font-bold text-emerald-600 dark:text-emerald-400">Rp ${Number(t.entry_price).toLocaleString('id-ID')}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-slate-500 dark:text-gray-400 font-sans block">Stop Loss</span>
+                                    <span class="font-bold text-rose-600 dark:text-rose-400">Rp ${Number(t.stop_loss).toLocaleString('id-ID')}</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-slate-500 dark:text-gray-400 font-sans block">${isOpen ? 'Target TP' : 'Exit Price'}</span>
+                                    <span class="font-bold ${isOpen ? 'text-cyan-600 dark:text-cyan-400' : 'text-slate-900 dark:text-white'}">Rp ${Number(isOpen ? t.target_price : (t.exit_price || t.target_price)).toLocaleString('id-ID')}</span>
                                 </div>
                             </div>
-                        </td>
-                    </tr>
-                    `;
-                }).join('');
-                lucide.createIcons();
+
+                            <!-- Card Footer -->
+                            <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/[0.04]">
+                                ${pnlDisplay}
+                                <div class="flex items-center gap-2 ${isOpen ? 'w-full justify-between' : 'ml-auto'}">
+                                    ${isOpen ? `<button onclick="openCloseTradeModal(${t.id}, '${t.ticker}', ${t.entry_price}, ${t.lots}, ${t.stop_loss}, ${t.target_price})" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1">
+                                                    <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Tutup Trade
+                                                </button>` : ''}
+                                    <button onclick="deleteJournalTrade(${t.id}, '${t.ticker}')" class="p-1.5 rounded-lg bg-slate-100 dark:bg-surface-800 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition" title="Hapus Trade">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+            }
+
+            lucide.createIcons();
+        }
+
+        // ── Close Trade Interactive Modal Controls ──────────────────────────
+        function openCloseTradeModal(tradeId, ticker, entryPrice, lots, stopLoss, targetPrice) {
+            document.getElementById('close-trade-id').value = tradeId;
+            document.getElementById('close-entry-price').value = entryPrice;
+            document.getElementById('close-lots').value = lots;
+            document.getElementById('close-stop-loss').value = stopLoss;
+
+            document.getElementById('close-modal-title').innerText = `Tutup Transaksi: ${ticker}`;
+            document.getElementById('close-modal-subtitle').innerText = `Posisi ${lots} Lot · Beli @ Rp ${Number(entryPrice).toLocaleString('id-ID')}`;
+
+            document.getElementById('close-info-entry').innerText = `Rp ${Number(entryPrice).toLocaleString('id-ID')}`;
+            document.getElementById('close-info-lots').innerText = `${lots} Lot (${(lots * 100).toLocaleString('id-ID')} Lembar)`;
+            document.getElementById('close-info-sl').innerText = `Rp ${Number(stopLoss).toLocaleString('id-ID')}`;
+            document.getElementById('close-info-cost').innerText = `Rp ${(lots * 100 * entryPrice).toLocaleString('id-ID')}`;
+
+            const exitInput = document.getElementById('close-exit-price');
+            exitInput.value = targetPrice ? Number(targetPrice).toLocaleString('id-ID') : Number(entryPrice).toLocaleString('id-ID');
+            document.getElementById('close-notes').value = '';
+
+            const modal = document.getElementById('close-trade-modal');
+            modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            calculateClosePnL();
+            lucide.createIcons();
+            setTimeout(() => { exitInput.focus(); }, 100);
+        }
+
+        function closeCloseTradeModal() {
+            const modal = document.getElementById('close-trade-modal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => { modal.classList.add('hidden'); }, 250);
+        }
+
+        function calculateClosePnL() {
+            const entry = parseFloat(document.getElementById('close-entry-price').value) || 0;
+            const lots = parseFloat(document.getElementById('close-lots').value) || 0;
+            const sl = parseFloat(document.getElementById('close-stop-loss').value) || 0;
+            const exit = parseRupiahInput(document.getElementById('close-exit-price').value) || 0;
+
+            const shares = lots * 100;
+            const pnlAmount = (exit - entry) * shares;
+            const pnlPct = entry > 0 ? ((exit - entry) / entry) * 100 : 0;
+
+            const riskPerShare = entry - sl;
+            const rMultiple = riskPerShare > 0 ? (exit - entry) / riskPerShare : (pnlPct / 4.0);
+
+            const isProfit = pnlAmount >= 0;
+            const sign = isProfit ? '+' : '';
+
+            const elAmount = document.getElementById('close-pnl-amount');
+            const elMetrics = document.getElementById('close-pnl-metrics');
+
+            if (elAmount) {
+                elAmount.innerText = `${sign}Rp ${Math.abs(pnlAmount).toLocaleString('id-ID')}`;
+                elAmount.className = `font-black text-sm ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+            }
+            if (elMetrics) {
+                elMetrics.innerText = `${sign}${pnlPct.toFixed(2)}% (${sign}${rMultiple.toFixed(2)}R)`;
+                elMetrics.className = `font-bold ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+            }
+        }
+
+        async function submitCloseTrade(e) {
+            e.preventDefault();
+            const tradeId = document.getElementById('close-trade-id').value;
+            const exitPrice = parseRupiahInput(document.getElementById('close-exit-price').value);
+            const notes = (document.getElementById('close-notes').value || '').trim();
+
+            if (!tradeId || !exitPrice) {
+                showToast("Mohon masukkan harga keluar (Exit Price).", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-close-trade');
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Menyimpan...`;
+            lucide.createIcons();
+
+            const formData = new FormData();
+            formData.append('trade_id', tradeId);
+            formData.append('exit_price', exitPrice);
+            formData.append('notes', notes);
+
+            try {
+                const res = await fetch('/api/journal/close', { method: 'POST', body: formData });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast("Transaksi berhasil ditutup & PnL tercatat!", "success");
+                    closeCloseTradeModal();
+                    loadJournalData();
+                } else {
+                    showToast(json.message || "Gagal menutup transaksi", "error");
+                }
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-red-500 font-sans">Gagal memuat data jurnal.</td></tr>';
+                showToast("Terjadi kesalahan saat menutup transaksi", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Simpan & Tutup Posisi`;
+                lucide.createIcons();
             }
         }
 
