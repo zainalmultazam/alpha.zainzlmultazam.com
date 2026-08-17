@@ -469,9 +469,14 @@
             </div>
 
             <!-- Engine Online Status Line -->
-            <div class="flex items-center justify-center gap-1.5 py-1 px-1.5 rounded-lg bg-slate-100/80 dark:bg-surface-900/80 border border-slate-200/80 dark:border-white/[0.04]">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                <span class="text-[10px] font-mono text-slate-600 dark:text-gray-400 truncate">Engine online · 17:00 WIB</span>
+            <div class="relative group w-full">
+                <div class="flex items-center justify-center gap-1.5 py-1 px-1.5 rounded-lg bg-slate-100/80 dark:bg-surface-900/80 border border-slate-200/80 dark:border-white/[0.04] cursor-pointer">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                    <span class="sidebar-text hidden text-[10px] font-mono text-slate-600 dark:text-gray-400 whitespace-nowrap">Engine online · 17:00 WIB</span>
+                </div>
+                <div class="sidebar-tooltip font-mono">
+                    Engine online · 17:00 WIB
+                </div>
             </div>
 
         </div>
