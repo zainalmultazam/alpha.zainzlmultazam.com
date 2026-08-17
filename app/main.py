@@ -13,7 +13,7 @@ from app.engine.universe import get_universe
 from app.services.market_data import fetch_stock_df, clear_cache, get_market_climate, get_idx_market_status
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
-from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, init_db
+from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
 from app.services.telegram import send_telegram_message, notify_super_digest
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
 
@@ -101,8 +101,21 @@ async def health_check():
     return {"status": "ok", "app": settings.APP_NAME, "domain": settings.APP_DOMAIN}
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/screener", response_class=HTMLResponse)
+@app.get("/rules", response_class=HTMLResponse)
+@app.get("/journal", response_class=HTMLResponse)
+@app.get("/charts", response_class=HTMLResponse)
+@app.get("/performance", response_class=HTMLResponse)
+@app.get("/calculator", response_class=HTMLResponse)
+@app.get("/alerts", response_class=HTMLResponse)
 async def home(request: Request):
     climate = get_market_climate()
+    # Detect initial view from path
+    path = request.url.path.strip("/").lower()
+    initial_view = path if path in ["screener", "rules", "journal", "charts", "performance", "calculator", "alerts"] else "screener"
+    if initial_view == "rules":
+        initial_view = "playbook"
+
     return templates.TemplateResponse(
         request=request,
         name="index.html",
@@ -111,9 +124,16 @@ async def home(request: Request):
             "default_capital": settings.DEFAULT_CAPITAL,
             "default_risk_pct": settings.DEFAULT_MAX_RISK_PCT,
             "app_name": settings.APP_NAME,
-            "climate": climate
+            "climate": climate,
+            "initial_view": initial_view
         }
     )
+
+@app.get("/api/performance")
+async def api_performance(capital: Optional[float] = None):
+    base_cap = capital or settings.DEFAULT_CAPITAL or 50000000.0
+    metrics = get_performance_metrics(base_cap)
+    return {"status": "success", "data": metrics}
 
 @app.post("/api/auth/verify-pin")
 async def api_verify_pin(pin: str = Form(...)):

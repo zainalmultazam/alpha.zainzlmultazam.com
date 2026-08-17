@@ -336,106 +336,144 @@
         </div>
 
         <!-- Sidebar Menu Items (Icon-Centric with Tooltips) -->
-        <nav class="py-3 space-y-1.5 flex-1 overflow-visible">
+        <nav class="py-2.5 space-y-1 flex-1 overflow-visible">
             
-            <div class="px-3 pt-1 pb-1 text-[9px] font-mono font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider sidebar-label hidden text-left">
-                Menu
-            </div>
-
             <!-- Item 1: Screener -->
             <div class="relative group w-full">
-                <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                        <i data-lucide="layout-grid" class="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Alpha Playbook</span>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Screener</span>
                 </button>
                 <div class="sidebar-tooltip">
-                    Alpha Playbook
+                    Screener
                 </div>
             </div>
 
             <!-- Item 2: Journal -->
             <div class="relative group w-full">
-                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
+                        <i data-lucide="book-open" class="w-4.5 h-4.5 text-cyan-600 dark:text-cyan-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Jurnal & Tracker</span>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Journal</span>
                 </button>
                 <div class="sidebar-tooltip">
-                    Jurnal & Tracker
+                    Journal
                 </div>
             </div>
 
-            <!-- Item 3: Terminal -->
+            <!-- Item 3: Charts -->
             <div class="relative group w-full">
-                <button onclick="switchView('terminal')" id="nav-terminal" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('charts')" id="nav-charts" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                        <i data-lucide="candlestick-chart" class="w-4.5 h-4.5 text-blue-600 dark:text-blue-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Chart Terminal</span>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Charts</span>
                 </button>
                 <div class="sidebar-tooltip">
-                    Chart Terminal
+                    Charts
                 </div>
             </div>
 
-            <!-- Item 4: Calculator -->
+            <!-- Item 4: Performance -->
             <div class="relative group w-full">
-                <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('performance')" id="nav-performance" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="calculator" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                        <i data-lucide="line-chart" class="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Kalkulator Lot</span>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Performance</span>
                 </button>
                 <div class="sidebar-tooltip">
-                    Kalkulator Lot
+                    Performance
                 </div>
             </div>
 
-            <!-- Item 5: Settings -->
+            <!-- Item 5: Calculator -->
             <div class="relative group w-full">
-                <button onclick="switchView('settings')" id="nav-settings" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="settings-2" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                        <i data-lucide="calculator" class="w-4.5 h-4.5 text-amber-600 dark:text-amber-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Settings & Alerts</span>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Calculator</span>
                 </button>
                 <div class="sidebar-tooltip">
-                    Settings & Alerts
+                    Calculator
+                </div>
+            </div>
+
+            <!-- Item 6: Alerts -->
+            <div class="relative group w-full">
+                <button onclick="switchView('alerts')" id="nav-alerts" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <i data-lucide="bell" class="w-4.5 h-4.5 text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Alerts</span>
+                </button>
+                <div class="sidebar-tooltip">
+                    Alerts
+                </div>
+            </div>
+
+            <!-- Item 7: Playbook -->
+            <div class="relative group w-full">
+                <button onclick="switchView('playbook')" id="nav-playbook" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <i data-lucide="shield-check" class="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400"></i>
+                    </div>
+                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Playbook</span>
+                </button>
+                <div class="sidebar-tooltip">
+                    Playbook
                 </div>
             </div>
 
         </nav>
 
-        <!-- Sidebar Footer Status & Lock -->
-        <div class="py-2.5 px-1 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col gap-1.5 shrink-0">
-            <div class="relative group w-full">
-                <button onclick="lockTerminal()" class="w-full p-2.5 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-800 transition flex items-center" title="Kunci Terminal (Lock PIN)">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="lock" class="w-4 h-4"></i>
-                    </div>
-                    <span class="sidebar-text hidden ml-3 text-xs font-semibold text-left whitespace-nowrap">Kunci Layar</span>
-                </button>
-                <div class="sidebar-tooltip font-mono">
-                    Kunci Terminal (Lock PIN)
-                </div>
-            </div>
+        <!-- Sidebar Footer Actions & Status -->
+        <div class="py-2.5 px-1 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col gap-2 shrink-0">
             
-            <div class="relative group w-full">
-                <div class="p-2 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center cursor-pointer">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                    </div>
-                    <div class="sidebar-text hidden ml-3 truncate text-left">
-                        <div class="text-[10px] font-mono font-semibold text-slate-800 dark:text-white">Engine Online</div>
+            <!-- 3 Footer Mini Action Icons -->
+            <div class="flex items-center justify-around w-full px-1">
+                <!-- Settings Icon -->
+                <div class="relative group">
+                    <button onclick="openSettingsModal()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Settings">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                    </button>
+                    <div class="sidebar-tooltip font-mono">
+                        Settings
                     </div>
                 </div>
-                <div class="sidebar-tooltip font-mono">
-                    Engine Online (17:00 WIB Daily Cron)
+
+                <!-- Theme Toggle Icon -->
+                <div class="relative group">
+                    <button onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Theme">
+                        <i data-lucide="sun" class="w-4 h-4 text-amber-500 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-4 h-4 text-slate-700 block dark:hidden"></i>
+                    </button>
+                    <div class="sidebar-tooltip font-mono">
+                        Theme
+                    </div>
+                </div>
+
+                <!-- Lock Icon -->
+                <div class="relative group">
+                    <button onclick="lockTerminal()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Lock">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                    </button>
+                    <div class="sidebar-tooltip font-mono">
+                        Lock
+                    </div>
                 </div>
             </div>
+
+            <!-- Engine Online Status Line -->
+            <div class="flex items-center justify-center gap-1.5 py-1 px-1.5 rounded-lg bg-slate-100/80 dark:bg-surface-900/80 border border-slate-200/80 dark:border-white/[0.04]">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                <span class="text-[10px] font-mono text-slate-600 dark:text-gray-400 truncate">Engine online · 17:00 WIB</span>
+            </div>
+
         </div>
 
     </aside>
@@ -447,7 +485,7 @@
         <header class="h-16 sticky top-0 z-30 backdrop-blur-xl bg-white/85 dark:bg-oled/90 border-b border-slate-200 dark:border-white/[0.07] px-6 flex items-center justify-between shrink-0 transition-colors">
             <div class="flex items-center gap-3">
                 <h1 class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight flex items-center gap-2.5 leading-none" id="page-title">
-                    Alpha Playbook
+                    Screener
                 </h1>
                 
                 <!-- IHSG Climate Header Pill -->
@@ -612,42 +650,11 @@
 
             </div>
 
-            <!-- VIEW 2: CHART TERMINAL WORKSPACE -->
-            <div id="view-terminal" class="view-panel hidden space-y-4">
-                
-                <div class="clean-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                            <i data-lucide="line-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
-                            <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume Histogram Engine (Yahoo Finance EOD)</p>
-                        </div>
-                    </div>
-
-                    <!-- Quick Switcher Pills -->
-                    <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs" id="quick-tickers">
-                        <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBCA</button>
-                        <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBRI</button>
-                        <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BMRI</button>
-                        <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ASII</button>
-                        <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">AUTO</button>
-                        <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ADRO</button>
-                    </div>
-                </div>
-
-                <div class="clean-card p-4 sm:p-5">
-                    <div id="tv-terminal-chart" class="w-full h-[580px] rounded-xl overflow-hidden bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06]"></div>
-                </div>
-
-            </div>
-
-            <!-- VIEW 3: TRADING JOURNAL & TRACKER -->
+            <!-- VIEW 2: JOURNAL -->
             <div id="view-journal" class="view-panel hidden space-y-6">
                 
-                <!-- Journal Stats Row -->
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
+                <!-- Journal Stats Row (3 Cards: Total, Open, Closed) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 font-mono">
                     <div class="clean-card p-4">
                         <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Transaksi</span>
                         <div class="text-slate-900 dark:text-white font-bold text-2xl mt-1" id="stat-total-trades">0</div>
@@ -657,12 +664,8 @@
                         <div class="text-emerald-600 dark:text-emerald-400 font-bold text-2xl mt-1" id="stat-open-trades">0</div>
                     </div>
                     <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Win Rate</span>
-                        <div class="text-cyan-600 dark:text-cyan-400 font-bold text-2xl mt-1" id="stat-win-rate">0%</div>
-                    </div>
-                    <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Realized PnL</span>
-                        <div class="text-slate-900 dark:text-white font-bold text-2xl mt-1" id="stat-total-pnl">Rp 0</div>
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Selesai (Closed)</span>
+                        <div class="text-slate-600 dark:text-gray-300 font-bold text-2xl mt-1" id="stat-closed-trades">0</div>
                     </div>
                 </div>
 
@@ -706,7 +709,100 @@
 
             </div>
 
-            <!-- VIEW 4: POSITION SIZING CALCULATOR -->
+            <!-- VIEW 3: CHARTS (Formerly Terminal) -->
+            <div id="view-charts" class="view-panel hidden space-y-4">
+                
+                <div class="clean-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                            <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
+                            <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume Histogram Engine (Yahoo Finance EOD)</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Switcher Pills -->
+                    <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs" id="quick-tickers">
+                        <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBCA</button>
+                        <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBRI</button>
+                        <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BMRI</button>
+                        <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ASII</button>
+                        <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">AUTO</button>
+                        <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ADRO</button>
+                    </div>
+                </div>
+
+                <div class="clean-card p-4 sm:p-5">
+                    <div id="tv-terminal-chart" class="w-full h-[580px] rounded-xl overflow-hidden bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06]"></div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 4: PERFORMANCE -->
+            <div id="view-performance" class="view-panel hidden space-y-6">
+                
+                <!-- 5 KPI Summary Cards Row -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono">
+                    <div class="clean-card p-4">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Win Rate</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold text-2xl mt-1" id="perf-win-rate">0%</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Realized PnL</span>
+                        <div class="text-slate-900 dark:text-white font-bold text-2xl mt-1" id="perf-total-pnl">Rp 0</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Average R</span>
+                        <div class="text-cyan-600 dark:text-cyan-400 font-bold text-2xl mt-1" id="perf-avg-r">0.0R</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Max Drawdown</span>
+                        <div class="text-danger-500 dark:text-danger-400 font-bold text-2xl mt-1" id="perf-max-dd">0.0%</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Profit Factor</span>
+                        <div class="text-indigo-600 dark:text-indigo-400 font-bold text-2xl mt-1" id="perf-profit-factor">0.0</div>
+                    </div>
+                </div>
+
+                <!-- Equity Curve vs IHSG Chart Card -->
+                <div class="clean-card p-5 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-white/[0.06]">
+                        <div>
+                            <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Equity Curve vs IHSG</h3>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-0.5">Pertumbuhan ekuitas portofolio Alpha dibandingkan benchmark IHSG pada periode transaksi yang sama.</p>
+                        </div>
+                        <!-- Legend Indicator -->
+                        <div class="flex items-center gap-4 text-xs font-mono">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-1 bg-emerald-500 rounded-full"></span>
+                                <span class="text-slate-700 dark:text-gray-300 font-semibold">Account Equity (%)</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-3 h-1 bg-cyan-400 rounded-full border border-cyan-400 border-dashed"></span>
+                                <span class="text-slate-500 dark:text-gray-400 font-medium">IHSG Benchmark (%)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div id="perf-chart-container" class="w-full h-[360px] relative rounded-xl bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06] flex items-center justify-center p-4">
+                        <div id="perf-empty-state" class="text-center py-10 space-y-2.5 hidden">
+                            <div class="w-12 h-12 mx-auto rounded-2xl bg-slate-200/60 dark:bg-surface-800 flex items-center justify-center text-slate-400 dark:text-gray-500">
+                                <i data-lucide="line-chart" class="w-6 h-6"></i>
+                            </div>
+                            <h4 class="font-bold text-slate-800 dark:text-white text-sm">Belum Ada Riwayat Transaksi Closed</h4>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 max-w-sm mx-auto">Selesaikan dan tutup transaksi di Jurnal untuk memplot grafik pertumbuhan modal portofolio terhadap IHSG.</p>
+                        </div>
+                        <div id="perf-svg-wrapper" class="w-full h-full"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 5: CALCULATOR -->
             <div id="view-calculator" class="view-panel hidden space-y-6">
                 
                 <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
@@ -779,19 +875,20 @@
 
             </div>
 
-            <!-- VIEW 5: SETTINGS & ALERTS -->
-            <div id="view-settings" class="view-panel hidden space-y-6">
+            <!-- VIEW 6: ALERTS -->
+            <div id="view-alerts" class="view-panel hidden space-y-6 max-w-3xl mx-auto">
                 
-                <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
+                <div class="clean-card p-6 space-y-6">
                     <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4">
                         <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-                            <i data-lucide="settings-2" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
-                            Pengaturan Sistem & Bot Notifikasi
+                            <i data-lucide="bell" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                            Telegram Bot &amp; Dispatcher Alerts
                         </h3>
-                        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Konfigurasi notifikasi Telegram harian & monitoring server.</p>
+                        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Status asisten bot Telegram, pengujian koneksi, dan jadwal pengiriman radar.</p>
                     </div>
 
                     <div class="space-y-4">
+                        <!-- Super Digest Card -->
                         <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
@@ -799,7 +896,7 @@
                                         <i data-lucide="zap" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
                                         <span>Super-Bot Digest (Top 3 Picks)</span>
                                     </div>
-                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5">Kirim 3 sinyal terbaik dengan alokasi lot & status IHSG harian (17:00 WIB)</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5">Kirim 3 sinyal terbaik dengan alokasi lot &amp; status IHSG harian (17:00 WIB)</div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <button onclick="testTelegramAlert()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition active:scale-95">
@@ -807,22 +904,195 @@
                                     </button>
                                     <button onclick="sendTelegramSuperDigest()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition active:scale-95 flex items-center gap-1">
                                         <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                                        <span>Kirim Digest (Top 3)</span>
+                                        <span>Kirim Digest</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2 font-mono text-xs text-slate-600 dark:text-gray-400">
-                            <div class="text-slate-900 dark:text-white font-sans font-semibold text-xs mb-1">Informasi Environment:</div>
-                            <div>• Domain: <b class="text-emerald-600 dark:text-emerald-400">{{ domain }}</b></div>
-                            <div>• Database: <b class="text-blue-600 dark:text-blue-400">data/alpha.db</b> (SQLite)</div>
-                            <div>• Default Capital: <b class="text-amber-600 dark:text-amber-400">Rp {{ default_capital }}</b></div>
-                            <div>• Scheduler: <b class="text-purple-600 dark:text-purple-400">Setiap Hari 17:00 WIB (Asia/Jakarta)</b></div>
+                        <!-- Schedules Info -->
+                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
+                            <h4 class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                                <span>Jadwal Pengiriman Otomatis:</span>
+                            </h4>
+                            <div class="space-y-2 font-mono text-xs text-slate-600 dark:text-gray-400">
+                                <div class="flex items-start gap-2">
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
+                                    <div><b>17:00 WIB Daily Scan:</b> Memindai seluruh universe saham BEI setiap sore hari kerja dan mendistribusikan Top 3 rekomendasi.</div>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <span class="text-amber-500 font-bold">•</span>
+                                    <div><b>15-Min Safety Sentinel:</b> Memantau pergerakan harga terhadap level Stop Loss &amp; Target TP1 setiap 15 menit selama jam perdagangan aktif.</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+            </div>
+
+            <!-- VIEW 7: PLAYBOOK (Rules) -->
+            <div id="view-playbook" class="view-panel hidden space-y-6 max-w-4xl mx-auto">
+                
+                <!-- Hero Banner -->
+                <div class="clean-card p-6 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-transparent border-emerald-500/20">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Breakout Raider Protocol</h2>
+                            <p class="text-xs text-slate-600 dark:text-gray-300 font-mono">Sistem Swing Trading Berbasis Price Action, VCP Contraction &amp; Risk Management 1%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4 Rule Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Card 1: Entry Criteria -->
+                    <div class="clean-card p-5 space-y-3">
+                        <div class="flex items-center gap-2.5 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-xs">1</div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Kriteria Entry (Validasi Breakout)</h3>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-600 dark:text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                                <span><b>Weekly Uptrend Filter</b>: Harga berada di atas EMA 20 &amp; EMA 50 Weekly. Trend utama wajib bullish.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                                <span><b>Volatility Contraction (VCP)</b>: Terjadi penyempitan rentang harga konsolidasi dengan volume yang mengering.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                                <span><b>Volume Surge (RVOL &gt; 1.5x)</b>: Candle penembusan resistance wajib didukung lonjakan volume minimal 1.5x rata-rata 20 hari.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"></i>
+                                <span><b>Market Climate Favorable</b>: Status iklim IHSG berstatus Green (Bullish / Aman).</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 2: Risk Management -->
+                    <div class="clean-card p-5 space-y-3">
+                        <div class="flex items-center gap-2.5 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+                            <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold text-xs">2</div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Aturan Risk 1% &amp; Sizing</h3>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-600 dark:text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="shield" class="w-4 h-4 text-blue-500 shrink-0 mt-0.5"></i>
+                                <span><b>Maksimal Risiko 1%</b>: Kerugian maksimal jika terkena Stop Loss tidak boleh melebihi 1.0% dari total ekuitas portofolio.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="shield" class="w-4 h-4 text-blue-500 shrink-0 mt-0.5"></i>
+                                <span><b>Formula Alokasi Lot</b>: <code class="font-mono text-[11px] bg-slate-100 dark:bg-surface-800 px-1 py-0.5 rounded">Lot = (Modal × 1%) / ((Entry - SL) × 100)</code>.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="shield" class="w-4 h-4 text-blue-500 shrink-0 mt-0.5"></i>
+                                <span><b>Kapasitas Portofolio</b>: Maksimal memegang 3 – 5 saham secara bersamaan (tidak boleh over-diversifikasi).</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 3: Exit Criteria & RR 1:2 -->
+                    <div class="clean-card p-5 space-y-3">
+                        <div class="flex items-center gap-2.5 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+                            <div class="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs">3</div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Kriteria Exit &amp; Minimum RR 1:2</h3>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-600 dark:text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="target" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                                <span><b>Initial Stop Loss Ketat</b>: Ditempatkan 3% - 5% di bawah swing support level. Eksekusi disiplin tanpa ragu.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="target" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                                <span><b>Take Profit TP1 (1:2 RR)</b>: Saat menyentuh 1:2 RR, jual 50% lot dan geser Stop Loss sisa posisi ke harga modal (Breakeven).</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="target" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                                <span><b>Runner Trailing Stop</b>: Sisa 50% posisi dibiarkan berlari mengikuti Daily EMA 20 Trailing Stop hingga terjadi close di bawah EMA 20.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Card 4: Blacklist Prohibited Conditions -->
+                    <div class="clean-card p-5 space-y-3">
+                        <div class="flex items-center gap-2.5 pb-2.5 border-b border-slate-200 dark:border-white/[0.06]">
+                            <div class="w-7 h-7 rounded-lg bg-danger-50 dark:bg-danger-950 text-danger-500 dark:text-danger-400 flex items-center justify-center font-bold text-xs">4</div>
+                            <h3 class="font-bold text-slate-900 dark:text-white text-sm">Kondisi DILARANG Entry</h3>
+                        </div>
+                        <ul class="space-y-2 text-xs text-slate-600 dark:text-gray-300">
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="x-circle" class="w-4 h-4 text-danger-500 shrink-0 mt-0.5"></i>
+                                <span><b>IHSG Climate Red</b>: Dilarang entry posisi baru saat bursa sedang dalam tekanan distribusi / bear market.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="x-circle" class="w-4 h-4 text-danger-500 shrink-0 mt-0.5"></i>
+                                <span><b>Earnings &amp; RUPS Dekat</b>: Hindari saham yang akan merilis laporan keuangan dalam rentang 3 hari bursa.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="x-circle" class="w-4 h-4 text-danger-500 shrink-0 mt-0.5"></i>
+                                <span><b>Likuiditas Rendah</b>: Transaksi harian emiten di bawah Rp 5 Miliar / hari (berisiko likuiditas).</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i data-lucide="x-circle" class="w-4 h-4 text-danger-500 shrink-0 mt-0.5"></i>
+                                <span><b>Gap-Up Ekstrem (&gt; 5%)</b>: Dilarang mengejar saham yang buka melonjak lebih dari 5% di atas pivot resistance.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- SETTINGS MODAL (Triggered by [gear] footer button) -->
+            <div id="settings-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm hidden p-4">
+                <div class="clean-card w-full max-w-md p-6 space-y-5 bg-white dark:bg-surface-950 border border-slate-200 dark:border-white/10 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 duration-200">
+                    
+                    <div class="flex items-center justify-between border-b border-slate-200 dark:border-white/[0.06] pb-3">
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i data-lucide="settings" class="w-4.5 h-4.5 text-purple-600 dark:text-purple-400"></i>
+                            <span>Settings</span>
+                        </h3>
+                        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-surface-800 transition">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-4 text-xs font-mono">
+                        <div>
+                            <label class="block font-sans font-semibold text-slate-700 dark:text-gray-300 mb-1">Modal Portofolio Default (Rp)</label>
+                            <input type="text" id="settings-capital" value="50.000.000" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-sans font-semibold text-slate-700 dark:text-gray-300 mb-1">Maksimal Risiko per Trade (%)</label>
+                            <input type="number" id="settings-risk" value="1.0" step="0.1" class="w-full bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500">
+                        </div>
+
+                        <div class="p-3 bg-slate-50 dark:bg-oled rounded-xl border border-slate-200 dark:border-white/10 space-y-1.5 text-[11px] text-slate-600 dark:text-gray-400">
+                            <div>• Domain: <b class="text-emerald-600 dark:text-emerald-400">{{ domain }}</b></div>
+                            <div>• Engine: <b class="text-blue-600 dark:text-blue-400">Python 3.11 + Uvicorn + LiteSpeed</b></div>
+                            <div>• Database: <b class="text-purple-600 dark:text-purple-400">alpha.db</b></div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/[0.06]">
+                        <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 transition">
+                            Tutup
+                        </button>
+                        <button onclick="saveSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition active:scale-95">
+                            Simpan
+                        </button>
+                    </div>
+
+                </div>
             </div>
 
         </div>
@@ -852,6 +1122,17 @@
             applyChartTheme(isCurrentDark());
             runScan(false);
             loadJournalData();
+            loadPerformanceData();
+
+            // Handle initial view routing
+            const initial = '{{ initial_view }}' || 'screener';
+            switchView(initial, false);
+        });
+
+        window.addEventListener('popstate', (e) => {
+            const path = window.location.pathname.replace('/', '') || 'screener';
+            const viewName = path === 'rules' ? 'playbook' : path;
+            switchView(viewName, false);
         });
 
         function isCurrentDark() {
@@ -870,6 +1151,33 @@
             lucide.createIcons();
             applyChartTheme(!isDark);
             showToast(`Beralih ke ${!isDark ? 'Dark Mode' : 'Light Mode'}`);
+        }
+
+        function openSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            }
+        }
+
+        function closeSettingsModal() {
+            const modal = document.getElementById('settings-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function saveSettingsModal() {
+            const cap = document.getElementById('settings-capital').value;
+            const risk = document.getElementById('settings-risk').value;
+            const calcCap = document.getElementById('calc-capital');
+            const calcRisk = document.getElementById('calc-risk-pct');
+            if (calcCap) calcCap.value = cap;
+            if (calcRisk) calcRisk.value = risk;
+            if (typeof calculateLotFromForm === 'function') {
+                calculateLotFromForm();
+            }
+            closeSettingsModal();
+            showToast("Pengaturan berhasil disimpan!", "success");
         }
 
         function applyChartTheme(isDark) {
@@ -921,34 +1229,58 @@
             }
         }
 
-        function switchView(viewName) {
+        function switchView(viewName, updateUrl = true) {
+            // Map alias 'terminal' to 'charts'
+            let activeView = viewName === 'terminal' ? 'charts' : viewName;
+            if (activeView === 'rules') activeView = 'playbook';
+
             document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
 
-            const panel = document.getElementById(`view-${viewName}`);
-            const nav = document.getElementById(`nav-${viewName}`);
+            const panel = document.getElementById(`view-${activeView}`);
+            const nav = document.getElementById(`nav-${activeView}`);
             const pageTitle = document.getElementById('page-title');
 
             if (panel) panel.classList.remove('hidden');
             if (nav) nav.classList.add('active');
 
             const titleMap = {
-                'screener': 'Alpha Playbook Screener',
-                'terminal': 'Chart Terminal Workspace',
-                'journal': 'Jurnal Trading & Performance Tracker',
-                'calculator': 'Kalkulator Position Sizing',
-                'settings': 'Pengaturan & Bot Notifikasi'
+                'screener': 'Screener',
+                'journal': 'Journal',
+                'charts': 'Charts',
+                'terminal': 'Charts',
+                'performance': 'Performance',
+                'calculator': 'Calculator',
+                'alerts': 'Alerts',
+                'playbook': 'Playbook'
             };
-            if (pageTitle && titleMap[viewName]) {
-                pageTitle.innerText = titleMap[viewName];
+            if (pageTitle && titleMap[activeView]) {
+                pageTitle.innerText = titleMap[activeView];
             }
 
-            if (viewName === 'terminal' && terminalChartInstance) {
+            if (updateUrl) {
+                const routePath = activeView === 'playbook' ? '/rules' : `/${activeView}`;
+                if (window.location.pathname !== routePath) {
+                    history.pushState({ view: activeView }, '', routePath);
+                }
+            }
+
+            if ((activeView === 'charts' || activeView === 'terminal') && terminalChartInstance) {
                 setTimeout(() => {
                     const cont = document.getElementById('tv-terminal-chart');
-                    terminalChartInstance.applyOptions({ width: cont.clientWidth, height: 580 });
-                    terminalChartInstance.timeScale().fitContent();
+                    if (cont) {
+                        terminalChartInstance.applyOptions({ width: cont.clientWidth, height: 580 });
+                        terminalChartInstance.timeScale().fitContent();
+                    }
                 }, 100);
+            }
+
+            if (activeView === 'performance') {
+                loadPerformanceData();
+            }
+
+            if (activeView === 'journal') {
+                loadJournalData();
             }
         }
 
@@ -1535,7 +1867,9 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
 
         async function loadJournalData() {
             const tbody = document.getElementById('journal-table-body');
-            tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-slate-500 dark:text-gray-500 font-sans">Mengambil data jurnal...</td></tr>';
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-slate-500 dark:text-gray-500 font-sans">Mengambil data jurnal...</td></tr>';
+            }
 
             try {
                 const res = await fetch('/api/journal');
@@ -1543,10 +1877,19 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 const trades = json.trades || [];
                 const stats = json.stats || {};
 
-                document.getElementById('stat-total-trades').innerText = stats.total_trades || 0;
-                document.getElementById('stat-open-trades').innerText = stats.open_count || 0;
-                document.getElementById('stat-win-rate').innerText = `${stats.win_rate_pct || 0}%`;
-                document.getElementById('stat-total-pnl').innerText = `Rp ${(stats.total_pnl_idr || 0).toLocaleString('id-ID')}`;
+                const totalT = stats.total_trades || trades.length || 0;
+                const openT = trades.filter(t => t.status === 'OPEN').length;
+                const closedT = trades.filter(t => t.status === 'CLOSED').length;
+
+                const elTotal = document.getElementById('stat-total-trades');
+                const elOpen = document.getElementById('stat-open-trades');
+                const elClosed = document.getElementById('stat-closed-trades');
+
+                if (elTotal) elTotal.innerText = totalT;
+                if (elOpen) elOpen.innerText = openT;
+                if (elClosed) elClosed.innerText = closedT;
+
+                if (!tbody) return;
 
                 if (trades.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans">Belum ada transaksi di jurnal. Anda dapat menambahkan trade dari kalkulator.</td></tr>';
@@ -1775,6 +2118,148 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             document.getElementById('pin-error').classList.add('hidden');
             document.getElementById('pin-input').focus();
             showToast("Terminal berhasil dikunci.", "info");
+        }
+
+        async function loadPerformanceData() {
+            try {
+                const res = await fetch('/api/performance');
+                const json = await res.json();
+                if (json.status !== 'success') return;
+                const d = json.data;
+
+                // 5 KPI Cards
+                const elWinRate = document.getElementById('perf-win-rate');
+                const elTotalPnl = document.getElementById('perf-total-pnl');
+                const elAvgR = document.getElementById('perf-avg-r');
+                const elMaxDd = document.getElementById('perf-max-dd');
+                const elProfitFactor = document.getElementById('perf-profit-factor');
+
+                if (elWinRate) elWinRate.innerText = `${d.win_rate || 0}%`;
+                if (elTotalPnl) {
+                    const pnlVal = d.total_pnl || 0;
+                    elTotalPnl.innerText = `${pnlVal >= 0 ? '+' : '-'}Rp ${Math.abs(pnlVal).toLocaleString('id-ID')}`;
+                    elTotalPnl.className = `${pnlVal >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-danger-500 dark:text-danger-400'} font-bold text-2xl mt-1`;
+                }
+                if (elAvgR) elAvgR.innerText = `${(d.avg_r || 0) >= 0 ? '+' : ''}${d.avg_r || 0}R`;
+                if (elMaxDd) elMaxDd.innerText = `-${d.max_drawdown || 0}%`;
+                if (elProfitFactor) elProfitFactor.innerText = `${d.profit_factor || 0}`;
+
+                const emptyState = document.getElementById('perf-empty-state');
+                const svgWrapper = document.getElementById('perf-svg-wrapper');
+
+                if (!d.closed_trades || d.closed_trades === 0) {
+                    if (emptyState) emptyState.classList.remove('hidden');
+                    if (svgWrapper) svgWrapper.innerHTML = '';
+                    return;
+                }
+
+                if (emptyState) emptyState.classList.add('hidden');
+                renderEquityCurveSvg(d.equity_curve || []);
+            } catch (e) {
+                console.error("Failed to load performance metrics", e);
+            }
+        }
+
+        function renderEquityCurveSvg(points) {
+            const wrapper = document.getElementById('perf-svg-wrapper');
+            if (!wrapper || !points || points.length === 0) return;
+
+            const width = wrapper.clientWidth || 700;
+            const height = 320;
+            const padding = { top: 30, right: 30, bottom: 40, left: 55 };
+
+            const innerW = width - padding.left - padding.right;
+            const innerH = height - padding.top - padding.bottom;
+
+            let allPcts = points.map(p => p.account_pct).concat(points.map(p => p.ihsg_pct));
+            allPcts.push(0);
+            let minPct = Math.min(...allPcts);
+            let maxPct = Math.max(...allPcts);
+
+            const range = (maxPct - minPct) || 10;
+            minPct = Math.floor(minPct - range * 0.1);
+            maxPct = Math.ceil(maxPct + range * 0.1);
+
+            const getX = (idx) => padding.left + (idx / Math.max(points.length - 1, 1)) * innerW;
+            const getY = (val) => padding.top + innerH - ((val - minPct) / (maxPct - minPct)) * innerH;
+
+            let accPathD = '';
+            let accAreaD = '';
+            let ihsgPathD = '';
+
+            points.forEach((p, idx) => {
+                const x = getX(idx);
+                const yAcc = getY(p.account_pct);
+                const yIhsg = getY(p.ihsg_pct);
+
+                if (idx === 0) {
+                    accPathD = `M ${x} ${yAcc}`;
+                    accAreaD = `M ${x} ${padding.top + innerH} L ${x} ${yAcc}`;
+                    ihsgPathD = `M ${x} ${yIhsg}`;
+                } else {
+                    accPathD += ` L ${x} ${yAcc}`;
+                    accAreaD += ` L ${x} ${yAcc}`;
+                    ihsgPathD += ` L ${x} ${yIhsg}`;
+                }
+            });
+
+            const lastX = getX(points.length - 1);
+            accAreaD += ` L ${lastX} ${padding.top + innerH} Z`;
+
+            let gridLinesHtml = '';
+            const gridSteps = 4;
+            for (let i = 0; i <= gridSteps; i++) {
+                const val = minPct + (i / gridSteps) * (maxPct - minPct);
+                const y = getY(val);
+                gridLinesHtml += `
+                    <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="currentColor" class="text-slate-200 dark:text-white/5" stroke-dasharray="3,3" />
+                    <text x="${padding.left - 8}" y="${y + 4}" fill="currentColor" class="text-slate-400 dark:text-gray-500 font-mono text-[10px]" text-anchor="end">${val >= 0 ? '+' : ''}${val.toFixed(1)}%</text>
+                `;
+            }
+
+            let xLabelsHtml = '';
+            const step = Math.max(1, Math.floor(points.length / 5));
+            points.forEach((p, idx) => {
+                if (idx === 0 || idx === points.length - 1 || idx % step === 0) {
+                    const x = getX(idx);
+                    xLabelsHtml += `
+                        <text x="${x}" y="${height - 10}" fill="currentColor" class="text-slate-400 dark:text-gray-500 font-mono text-[10px]" text-anchor="middle">${p.date}</text>
+                    `;
+                }
+            });
+
+            let pointsHtml = '';
+            points.forEach((p, idx) => {
+                const x = getX(idx);
+                const yAcc = getY(p.account_pct);
+                const yIhsg = getY(p.ihsg_pct);
+
+                pointsHtml += `
+                    <circle cx="${x}" cy="${yAcc}" r="4" class="fill-emerald-500 stroke-white dark:stroke-surface-950" stroke-width="2">
+                        <title>${p.date} | Account: ${p.account_pct >= 0 ? '+' : ''}${p.account_pct}% (Rp ${p.equity.toLocaleString('id-ID')})</title>
+                    </circle>
+                    <circle cx="${x}" cy="${yIhsg}" r="3" class="fill-cyan-400 stroke-white dark:stroke-surface-950" stroke-width="1.5">
+                        <title>${p.date} | IHSG: ${p.ihsg_pct >= 0 ? '+' : ''}${p.ihsg_pct}%</title>
+                    </circle>
+                `;
+            });
+
+            wrapper.innerHTML = `
+                <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">
+                    <defs>
+                        <linearGradient id="accGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#10B981" stop-opacity="0.3" />
+                            <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
+                        </linearGradient>
+                    </defs>
+                    ${gridLinesHtml}
+                    <path d="${accAreaD}" fill="url(#accGradient)" />
+                    <path d="${ihsgPathD}" fill="none" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4,4" />
+                    <path d="${accPathD}" fill="none" stroke="#10B981" stroke-width="2.5" />
+                    ${pointsHtml}
+                    ${xLabelsHtml}
+                </svg>
+            `;
         }
 
         // Jalankan pengecekan PIN saat aplikasi dibuka
