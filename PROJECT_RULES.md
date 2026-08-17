@@ -1,4 +1,4 @@
-# AlphaSwing IDX - Project & UI Design Rules
+# Alpha - Project, UI & Deployment Rules
 
 ## 1. Zero Emoji Policy (Strict)
 - **DILARANG MENGGUNAKAN EMOJI**: Hindari penggunaan unicode emoji (seperti ⚡, 🌦️, 📈, 🏛️, 📋, 🟢, 🔴, 🟡, ⚪, 🎯, 🚀, 🧮, 📌) di seluruh antarmuka web, modal, toast, skrip GTC, maupun pesan bot Telegram.
@@ -16,3 +16,10 @@
 ## 4. Institutional Light & Dark Mode
 - Mode default Dark Mode OLED (`#06080F`).
 - Mode Light menggunakan Clean Institutional Slate (`#F8FAFC`, kartu `#FFFFFF`, teks `#0F172A`).
+
+## 5. Development & Deployment Lifecycle (Strict Flow)
+Setiap kali ada instruksi perubahan:
+1. **Local Changes**: Selalu lakukan perubahan kode pada file project di local repository terlebih dahulu.
+2. **Local Build & Test**: Lakukan build container local (`docker compose up -d --build`) dan verifikasi logika/tampilan.
+3. **Production Deploy**: Sinkronkan perubahan ke server production (`/home/pedulyco/public_html/alpha.zainalmultazam.com`) menggunakan rsync SSH dan reload daemon `start_server.sh`.
+4. **Git Commit**: Commit perubahan ke git repository dengan pesan commit yang deskriptif.
