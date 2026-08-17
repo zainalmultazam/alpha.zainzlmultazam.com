@@ -36,8 +36,11 @@ scheduler = AsyncIOScheduler()
 async def startup_event():
     init_db()
     # 1. Jadwalkan scan otomatis sore hari
-    scheduler.add_job(run_daily_scheduled_scan, "cron", hour=17, minute=0, timezone="Asia/Jakarta")
-    scheduler.start()
+    try:
+        scheduler.add_job(run_daily_scheduled_scan, "cron", hour=17, minute=0, timezone="Asia/Jakarta")
+        scheduler.start()
+    except Exception:
+        pass
     
     # 2. Jalankan background worker Telegram Polling & Safety Sentinel
     asyncio.create_task(telegram_polling_worker())

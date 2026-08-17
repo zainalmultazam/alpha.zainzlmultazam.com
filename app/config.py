@@ -2,7 +2,7 @@ import os
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    APP_NAME: str = "AlphaSwing IDX"
+    APP_NAME: str = "Alpha"
     APP_DOMAIN: str = os.getenv("APP_DOMAIN", "alpha.zainalmultazam.com")
     APP_ENV: str = os.getenv("APP_ENV", "development")
     
