@@ -90,27 +90,27 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         cost_str = format_rupiah_short(sizing["total_cost"])
         risk_str = format_rupiah_short(sizing["max_risk_idr"])
 
-        weekly_tag = "🟢 Weekly Confirmed" if p.get("weekly_confirmed") else "🟡 Daily Setup"
+        weekly_tag = "Weekly Confirmed" if p.get("weekly_confirmed") else "Daily Setup"
         safe_name = html.escape(str(p.get("name", "")))
         safe_setup = html.escape(str(p.get("primary_setup", "")))
 
-        msg += f"<b>#{i} 🎯 {p['symbol']} - {safe_name}</b>\n"
-        msg += f"📊 Setup: <code>{safe_setup}</code> (Skor: <b>{p['score']} PTS</b>)\n"
-        msg += f"⏱️ Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n\n"
+        msg += f"<b>#{i} {p['symbol']} - {safe_name}</b>\n"
+        msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p['score']} PTS</b>)\n"
+        msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n\n"
         
         # Angka kunci dengan format <code> agar bisa di-tap to copy di HP
-        msg += f"  🟢 <b>BUY (GTC) :</b> <code>{entry}</code> → <b>{lots} Lot</b>\n"
-        msg += f"  🔴 <b>CUT LOSS  :</b> <code>{sl}</code> (-{plan['risk_pct']}%)\n"
-        msg += f"  🎯 <b>TARGET 1  :</b> <code>{tp1}</code> (+{plan['tp1_gain_pct']}% | Jual {half_lots} Lot)\n"
-        msg += f"  🚀 <b>TARGET 2  :</b> <code>{tp2}</code> (+{plan['tp2_gain_pct']}% | Jual {runner_lots} Lot)\n\n"
+        msg += f"🟢 <b>BUY (GTC) :</b> <code>{entry}</code> → <b>{lots} Lot</b>\n"
+        msg += f"🔴 <b>CUT LOSS  :</b> <code>{sl}</code> (-{plan['risk_pct']}%)\n"
+        msg += f"🎯 <b>TARGET 1  :</b> <code>{tp1}</code> (+{plan['tp1_gain_pct']}% | Jual {half_lots} Lot)\n"
+        msg += f"🚀 <b>TARGET 2  :</b> <code>{tp2}</code> (+{plan['tp2_gain_pct']}% | Jual {runner_lots} Lot)\n\n"
         
-        msg += f"  💰 Modal: <b>{cost_str}</b> | Max Risiko: <b>{risk_str}</b> (1%)\n"
-        msg += f"  📱 <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
+        msg += f"• Modal: <b>{cost_str}</b> | Max Risiko: <b>{risk_str}</b> (1%)\n"
+        msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
         msg += "────────────\n\n"
 
     # 3. Quick Action Tip
-    msg += "💡 <i>Tip: Tap angka di atas untuk copy instan ke Stockbit.</i>\n"
-    msg += f"🔗 <i>Web Terminal: https://{settings.APP_DOMAIN}</i>"
+    msg += "<i>Tip: Tap angka di atas untuk copy instan ke Stockbit.</i>\n"
+    msg += f"<i>Web Terminal: https://{settings.APP_DOMAIN}</i>"
 
     return await send_telegram_message(msg)
 
