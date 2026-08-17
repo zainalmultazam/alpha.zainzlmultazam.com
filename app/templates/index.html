@@ -491,6 +491,12 @@
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="header-ihsg-dot"></span>
                     <span id="header-ihsg-text">IHSG: Memuat Iklim Pasar...</span>
                 </div>
+
+                <!-- Live Date Pill -->
+                <div id="header-date-badge" class="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-mono font-medium px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-surface-900/80 text-slate-600 dark:text-gray-300" title="Tanggal Hari Ini">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400 dark:text-gray-400"></i>
+                    <span id="header-date-text">Memuat tanggal...</span>
+                </div>
             </div>
 
             <div class="flex items-center gap-3">
@@ -1149,7 +1155,21 @@
         let currentCalculatedTrade = null;
         let isSidebarCollapsed = true;
 
+        function updateHeaderDate() {
+            const el = document.getElementById('header-date-text');
+            if (!el) return;
+            const now = new Date();
+            const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const dayName = days[now.getDay()];
+            const dateNum = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            el.innerText = `${dayName}, ${dateNum} ${monthName} ${year}`;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            updateHeaderDate();
             lucide.createIcons();
             initChart();
             initTerminalChart();
