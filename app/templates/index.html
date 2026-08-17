@@ -9,10 +9,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3">
     <link rel="alternate icon" href="/favicon.ico?v=3">
     <link rel="apple-touch-icon" href="/favicon.svg?v=3">
-    <meta name="theme-color" content="#090d16">
+    
+    <!-- PWA Manifest & App Configuration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#06080F">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Alpha">
+    <meta name="application-name" content="Alpha">
     
     <!-- Prevent Theme FOUC (Flash of Unstyled Content) -->
     <script>
@@ -2744,6 +2749,15 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
 
         // Jalankan pengecekan PIN saat aplikasi dibuka
         checkPinAuth();
+
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Alpha PWA Service Worker Registered', reg.scope))
+                    .catch(err => console.log('Alpha PWA SW registration failed:', err));
+            });
+        }
     </script>
 </body>
 </html>
