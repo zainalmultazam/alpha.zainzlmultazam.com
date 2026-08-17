@@ -15,10 +15,60 @@ from app.engine.scanner import scan_stock, run_full_scan
 
 _last_update_id = 0
 _alerted_trades = set()  # prevent spamming same alert repeatedly
+_waiting_custom_lot: Dict[str, Dict[str, Any]] = {}
 
 async def process_telegram_command(text: str, chat_id: str) -> None:
-    """Memproses command teks yang dikirimkan user di grup/chat Telegram."""
+    """Memproses command teks atau angka lot yang dikirimkan user di grup/chat Telegram."""
     raw_text = text.strip()
+
+    # 1. Cek jika chat sedang menunggu input angka lot custom (misal user langsung ketik: 3)
+    if chat_id in _waiting_custom_lot:
+        clean_num = raw_text.lower().replace("lot", "").strip()
+        if clean_num.isdigit():
+            lots = int(clean_num)
+            if lots > 0:
+                state = _waiting_custom_lot.pop(chat_id)
+                ticker = state["ticker"]
+                entry = float(state["entry"])
+                sl = float(state["sl"])
+                tp1 = float(state["tp1"])
+
+                trade_id = log_trade(
+                    ticker=ticker,
+                    entry_price=entry,
+                    stop_loss=sl,
+                    target_price=tp1,
+                    lots=lots,
+                    setup_name="Custom Lot Direct"
+                )
+
+                total_cost = lots * 100 * entry
+                max_risk = lots * 100 * (entry - sl)
+                cost_str = format_rupiah_short(total_cost)
+                risk_str = format_rupiah_short(max_risk)
+
+                msg = f"<b>POSISI TERCATAT & DALAM PENGAWASAN</b>\n"
+                msg += f"<i>ID Trade: #{trade_id} • {datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
+                msg += "────────────\n"
+                msg += f"Saham      : <b>{ticker}</b> ({lots} Lot)\n"
+                msg += f"Harga Beli : Rp {entry:,.0f}\n"
+                msg += f"Stop Loss  : Rp {sl:,.0f} (-{((entry - sl)/entry)*100:.1f}%)\n"
+                msg += f"Target TP1 : Rp {tp1:,.0f} (+{((tp1 - entry)/entry)*100:.1f}%)\n"
+                msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
+                msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
+                msg += "────────────\n"
+                msg += "🛡️ <i>Robot Sentinel aktif memantau posisi ini. Peringatan darurat akan otomatis dikirim jika harga mendekati Stop Loss!</i>"
+
+                reply_markup = {
+                    "inline_keyboard": [
+                        [
+                            {"text": f"🔴 Tutup Posisi {ticker}", "callback_data": f"close:{ticker}"}
+                        ]
+                    ]
+                }
+                await send_telegram_message(msg, reply_markup=reply_markup)
+                return
+
     if not raw_text.startswith("/"):
         return
 
@@ -279,12 +329,23 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
     elif data.startswith("customlot:"):
         parts = data.split(":")
         ticker = parts[1]
-        await answer_callback_query(callback_id, text=f"Ketik /beli {ticker} [LOT]", show_alert=False)
-        msg = f"<b>INPUT JUMLAH LOT CUSTOM: {ticker}</b>\n"
+        entry = float(parts[2])
+        sl = float(parts[3])
+        tp1 = float(parts[4])
+        chat_id = str(callback.get("message", {}).get("chat", {}).get("id", settings.TELEGRAM_CHAT_ID))
+
+        _waiting_custom_lot[chat_id] = {
+            "ticker": ticker,
+            "entry": entry,
+            "sl": sl,
+            "tp1": tp1
+        }
+
+        await answer_callback_query(callback_id, text=f"Ketik angka lot untuk {ticker}...", show_alert=False)
+        msg = f"<b>INPUT JUMLAH LOT: {ticker}</b>\n"
         msg += "────────────\n"
-        msg += "Ketik perintah berikut di chat dengan jumlah lot yang Anda beli:\n"
-        msg += f"<code>/beli {ticker} [JUMLAH_LOT]</code>\n\n"
-        msg += f"Contoh: <code>/beli {ticker} 15</code>"
+        msg += f"Berapa lot <b>{ticker}</b> yang Anda beli di Stockbit?\n\n"
+        msg += "👉 <b>Langsung balas angkanya saja</b> di chat ini (contoh: <code>3</code> atau <code>15</code>)"
         await send_telegram_message(msg)
         return
 
