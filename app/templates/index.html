@@ -312,8 +312,8 @@
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- SIDEBAR NAVIGATION (Default Mini with Tooltips) -->
-    <aside id="sidebar" class="w-16 px-2 bg-white/90 dark:bg-surface-950/95 border-r border-slate-200 dark:border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex flex-col justify-between z-40 transition-all duration-300 select-none overflow-visible shrink-0">
+    <!-- SIDEBAR NAVIGATION (Desktop only — hidden on mobile) -->
+    <aside id="sidebar" class="hidden md:flex w-16 px-2 bg-white/90 dark:bg-surface-950/95 border-r border-slate-200 dark:border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex-col justify-between z-40 transition-all duration-300 select-none overflow-visible shrink-0">
         
         <!-- Sidebar Header (Aligned h-16) -->
         <div class="h-16 border-b border-slate-200 dark:border-white/[0.07] flex items-center justify-center shrink-0">
@@ -476,46 +476,120 @@
 
     </aside>
 
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- MOBILE BOTTOM SHEET NAV (hidden on desktop)                 -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+
+    <!-- Backdrop -->
+    <div id="mobile-nav-backdrop" class="fixed inset-0 bg-black/50 z-50 hidden md:hidden" onclick="closeMobileNav()"></div>
+
+    <!-- Sheet -->
+    <div id="mobile-nav-sheet" class="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-surface-950 rounded-t-2xl border-t border-slate-200 dark:border-white/[0.07] pb-safe transform translate-y-full transition-transform duration-300 ease-out shadow-2xl">
+        <!-- Drag Handle -->
+        <div class="flex justify-center pt-3 pb-2">
+            <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-white/20"></div>
+        </div>
+        <!-- Brand Row -->
+        <div class="flex items-center gap-2 px-5 pb-3 border-b border-slate-100 dark:border-white/[0.06]">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/5 border border-blue-500/30 flex items-center justify-center">
+                <i data-lucide="zap" class="w-4 h-4 text-blue-500"></i>
+            </div>
+            <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">Alpha</span>
+            <span class="text-[9px] font-mono font-semibold px-1.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400 border border-blue-300 dark:border-blue-800">IDX</span>
+        </div>
+        <!-- Nav Items Grid -->
+        <nav class="grid grid-cols-4 gap-1 p-3">
+            <button onclick="switchView('screener'); closeMobileNav()" id="mobile-nav-screener" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="layout-grid" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                <span class="text-[10px] font-semibold">Screener</span>
+            </button>
+            <button onclick="switchView('journal'); closeMobileNav()" id="mobile-nav-journal" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
+                <span class="text-[10px] font-semibold">Journal</span>
+            </button>
+            <button onclick="switchView('charts'); closeMobileNav()" id="mobile-nav-charts" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                <span class="text-[10px] font-semibold">Charts</span>
+            </button>
+            <button onclick="switchView('performance'); closeMobileNav()" id="mobile-nav-performance" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                <span class="text-[10px] font-semibold">Performance</span>
+            </button>
+            <button onclick="switchView('calculator'); closeMobileNav()" id="mobile-nav-calculator" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="calculator" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+                <span class="text-[10px] font-semibold">Calculator</span>
+            </button>
+            <button onclick="switchView('alerts'); closeMobileNav()" id="mobile-nav-alerts" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="bell" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
+                <span class="text-[10px] font-semibold">Alerts</span>
+            </button>
+            <button onclick="switchView('playbook'); closeMobileNav()" id="mobile-nav-playbook" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                <span class="text-[10px] font-semibold">Playbook</span>
+            </button>
+            <button onclick="openSettingsModal(); closeMobileNav()" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="settings" class="w-5 h-5 text-slate-500 dark:text-gray-400"></i>
+                <span class="text-[10px] font-semibold">Settings</span>
+            </button>
+        </nav>
+        <!-- Bottom safe-area spacer -->
+        <div class="h-4"></div>
+    </div>
+
     <!-- MAIN CONTENT AREA -->
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         
         <!-- Topbar Header (Aligned h-16) -->
-        <header class="h-16 sticky top-0 z-30 backdrop-blur-xl bg-white/85 dark:bg-oled/90 border-b border-slate-200 dark:border-white/[0.07] px-6 flex items-center justify-between shrink-0 transition-colors">
-            <div class="flex items-center gap-3">
+        <header class="h-16 sticky top-0 z-30 backdrop-blur-xl bg-white/85 dark:bg-oled/90 border-b border-slate-200 dark:border-white/[0.07] px-4 md:px-6 flex items-center justify-between shrink-0 transition-colors">
+            <div class="flex items-center gap-2 md:gap-3">
+                <!-- Mobile Hamburger -->
+                <button onclick="openMobileNav()" class="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-200 transition active:scale-95" title="Menu">
+                    <i data-lucide="menu" class="w-4 h-4"></i>
+                </button>
+
                 <h1 class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight flex items-center gap-2.5 leading-none" id="page-title">
                     Screener
                 </h1>
                 
-                <!-- IHSG Climate Header Pill -->
+                <!-- IHSG Climate Header Pill (hidden on mobile) -->
                 <div id="header-ihsg-badge" class="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800/60">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="header-ihsg-dot"></span>
                     <span id="header-ihsg-text">IHSG: Memuat Iklim Pasar...</span>
                 </div>
 
-                <!-- Live Date Pill -->
+                <!-- Live Date Pill (large screens only) -->
                 <div id="header-date-badge" class="hidden lg:inline-flex items-center gap-1.5 text-[11px] font-mono font-medium px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100/70 dark:bg-surface-900/80 text-slate-600 dark:text-gray-300" title="Tanggal Hari Ini">
                     <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400 dark:text-gray-400"></i>
                     <span id="header-date-text">Memuat tanggal...</span>
                 </div>
             </div>
 
-            <div class="flex items-center gap-3">
-                <!-- Universal Search Ticker Input -->
-                <div class="relative">
-                    <input type="text" id="search-ticker" oninput="handleSearch()" onkeydown="handleSearchKeyDown(event)" placeholder="Cari emiten apa saja (Enter)..." class="bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-44 sm:w-56 font-mono transition" title="Ketik kode saham apa saja dan tekan Enter untuk membuka chart">
-                    <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 dark:text-gray-400 absolute left-2.5 top-2.5"></i>
+            <div class="flex items-center gap-2">
+                <!-- Mobile: Search icon toggle — expands inline -->
+                <div class="relative flex items-center" id="search-wrapper">
+                    <!-- Icon-only button (mobile) -->
+                    <button id="btn-search-toggle" onclick="toggleSearchBar()" class="md:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-500 dark:text-gray-400 transition active:scale-95">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                    </button>
+                    <!-- Expanded search input (desktop always visible; mobile: toggled) -->
+                    <div id="search-bar-expanded" class="hidden md:block">
+                        <div class="relative">
+                            <input type="text" id="search-ticker" oninput="handleSearch()" onkeydown="handleSearchKeyDown(event)" onblur="collapseMobileSearch()" placeholder="Cari emiten (Enter)..." class="bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-blue-500/60 w-36 sm:w-44 md:w-56 font-mono transition" title="Ketik kode saham apa saja dan tekan Enter untuk membuka chart">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 dark:text-gray-400 absolute left-2.5 top-2.5"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Theme Toggle Button in Topbar -->
+                <!-- Theme Toggle -->
                 <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-200 transition active:scale-95" title="Ganti Tema">
                     <i data-lucide="sun" class="w-4 h-4 text-amber-500 hidden dark:block"></i>
                     <i data-lucide="moon" class="w-4 h-4 text-slate-700 block dark:hidden"></i>
                 </button>
 
-                <!-- Scan Button -->
-                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-md shadow-blue-600/20 active:scale-[0.98]">
+                <!-- Scan Button — icon only on mobile, full on desktop -->
+                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold px-3 md:px-4 py-2 rounded-xl transition shadow-md shadow-blue-600/20 active:scale-[0.98]">
                     <i data-lucide="refresh-cw" id="icon-scan" class="w-3.5 h-3.5"></i>
-                    <span class="hidden sm:inline">Scan Market</span>
+                    <span class="hidden md:inline">Scan Market</span>
                 </button>
             </div>
         </header>
@@ -1350,6 +1424,53 @@
             }
         }
 
+        // ── Mobile Bottom Sheet Nav Controls ────────────────────────────────
+        function openMobileNav() {
+            const backdrop = document.getElementById('mobile-nav-backdrop');
+            const sheet = document.getElementById('mobile-nav-sheet');
+            if (backdrop && sheet) {
+                backdrop.classList.remove('hidden');
+                sheet.classList.remove('translate-y-full');
+                sheet.classList.add('translate-y-0');
+            }
+        }
+
+        function closeMobileNav() {
+            const backdrop = document.getElementById('mobile-nav-backdrop');
+            const sheet = document.getElementById('mobile-nav-sheet');
+            if (backdrop && sheet) {
+                sheet.classList.remove('translate-y-0');
+                sheet.classList.add('translate-y-full');
+                setTimeout(() => {
+                    backdrop.classList.add('hidden');
+                }, 250);
+            }
+        }
+
+        function toggleSearchBar() {
+            const expanded = document.getElementById('search-bar-expanded');
+            const input = document.getElementById('search-ticker');
+            if (expanded) {
+                if (expanded.classList.contains('hidden')) {
+                    expanded.classList.remove('hidden');
+                    if (input) input.focus();
+                } else {
+                    expanded.classList.add('hidden');
+                }
+            }
+        }
+
+        function collapseMobileSearch() {
+            // Only collapse automatically on mobile viewports
+            if (window.innerWidth < 768) {
+                const expanded = document.getElementById('search-bar-expanded');
+                const input = document.getElementById('search-ticker');
+                if (expanded && (!input || !input.value.trim())) {
+                    expanded.classList.add('hidden');
+                }
+            }
+        }
+
         function switchView(viewName, updateUrl = true) {
             // Map alias 'terminal' to 'charts'
             let activeView = viewName === 'terminal' ? 'charts' : viewName;
@@ -1357,13 +1478,20 @@
 
             document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.mobile-nav-item').forEach(el => {
+                el.classList.remove('bg-blue-50', 'dark:bg-surface-900', 'text-blue-600', 'dark:text-blue-400');
+            });
 
             const panel = document.getElementById(`view-${activeView}`);
             const nav = document.getElementById(`nav-${activeView}`);
+            const mobileNav = document.getElementById(`mobile-nav-${activeView}`);
             const pageTitle = document.getElementById('page-title');
 
             if (panel) panel.classList.remove('hidden');
             if (nav) nav.classList.add('active');
+            if (mobileNav) {
+                mobileNav.classList.add('bg-blue-50', 'dark:bg-surface-900', 'text-blue-600', 'dark:text-blue-400');
+            }
 
             const titleMap = {
                 'screener': 'Screener',
