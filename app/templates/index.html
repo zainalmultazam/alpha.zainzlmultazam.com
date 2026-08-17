@@ -1270,16 +1270,25 @@
             <!-- VIEW 6: ALERTS -->
             <div id="view-alerts" class="view-panel hidden space-y-6 max-w-3xl mx-auto">
                 
-                <div class="clean-card p-6 space-y-6">
-                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4">
-                        <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-                            <i data-lucide="bell" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
-                            Telegram Bot &amp; Dispatcher Alerts
-                        </h3>
-                        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Status asisten bot Telegram, pengujian koneksi, dan jadwal pengiriman radar.</p>
+                <div class="clean-card p-5 sm:p-6 space-y-6">
+                    <!-- Header -->
+                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4 flex items-center justify-between">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                    <i data-lucide="bell" class="w-4 h-4"></i>
+                                </div>
+                                Telegram Bot &amp; Safety Sentinel
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Pengawas otomatis pergerakan harga saham, peringatan Stop Loss, dan digest harian.</p>
+                        </div>
+                        <!-- Status Badge -->
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Bot Online
+                        </span>
                     </div>
 
-                    <div class="space-y-4">
+                    <div class="space-y-4 font-sans">
                         <!-- Super Digest Card -->
                         <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1302,16 +1311,42 @@
                             </div>
                         </div>
 
-                        <!-- Schedules Info -->
+                        <!-- Telegram Interactive Bot Commands Cheat Sheet -->
                         <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
                             <h4 class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
-                                <span>Jadwal Pengiriman Otomatis:</span>
+                                <i data-lucide="terminal" class="w-4 h-4 text-purple-600 dark:text-purple-400"></i>
+                                <span>Perintah Interaktif Bot Telegram:</span>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
+                                <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-blue-600 dark:text-blue-400">/scan</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Jalankan live scanner pasar saham &amp; kirimkan rekomendasi sinyal teratas.</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-blue-600 dark:text-blue-400">/posisi</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Pantau semua posisi OPEN di jurnal beserta live price &amp; unrealized PnL.</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-emerald-600 dark:text-emerald-400">/beli [TICKER] [LOT]</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Contoh: <code>/beli AUTO 35</code> untuk catat beli &amp; aktifkan robot sentinel.</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-rose-600 dark:text-rose-400">/tutup [TICKER]</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Tutup posisi terbuka dan realisasikan profit/loss ke jurnal.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedules & Sentinel Info -->
+                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
+                            <h4 class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="shield-alert" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                                <span>Jadwal Automasi &amp; Safety Sentinel:</span>
                             </h4>
                             <div class="space-y-2 font-mono text-xs text-slate-600 dark:text-gray-400">
                                 <div class="flex items-start gap-2">
                                     <span class="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
-                                    <div><b>17:00 WIB Daily Scan:</b> Memindai seluruh universe saham BEI setiap sore hari kerja dan mendistribusikan Top 3 rekomendasi.</div>
+                                    <div><b>17:00 WIB Daily EOD Scan:</b> Memindai seluruh universe saham BEI setiap sore hari kerja dan mendistribusikan Top 3 rekomendasi.</div>
                                 </div>
                                 <div class="flex items-start gap-2">
                                     <span class="text-amber-500 font-bold">•</span>
