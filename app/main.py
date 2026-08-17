@@ -14,7 +14,8 @@ from app.config import settings
 from app.engine.universe import get_universe
 from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status
 from app.engine.scanner import scan_stock
-from app.engine.strategy import calculate_lot_size
+from app.engine.technical import calculate_indicators
+from app.engine.strategy import calculate_lot_size, generate_trade_plan
 from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
 from app.services.telegram import send_telegram_message, notify_super_digest
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
@@ -381,10 +382,16 @@ async def api_chart(ticker: str):
         return JSONResponse(status_code=404, content={"error": "Data not found"})
     
     # Hitung Indikator Teknikal: EMA 20, EMA 50, EMA 200 & Volume MA 20
-    df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
-    df["EMA50"] = df["Close"].ewm(span=50, adjust=False).mean()
-    df["EMA200"] = df["Close"].ewm(span=200, adjust=False).mean()
-    df["VolMA20"] = df["Volume"].rolling(window=20).mean()
+    df_calc = calculate_indicators(df)
+    df_calc["EMA20"] = df_calc["Close"].ewm(span=20, adjust=False).mean()
+    df_calc["EMA50"] = df_calc["Close"].ewm(span=50, adjust=False).mean()
+    df_calc["EMA200"] = df_calc["Close"].ewm(span=200, adjust=False).mean()
+    df_calc["VolMA20"] = df_calc["Volume"].rolling(window=20).mean()
+
+    last_row = df_calc.iloc[-1]
+    curr_price = float(last_row["Close"])
+    curr_atr = float(last_row.get("ATR", curr_price * 0.04))
+    trade_plan = generate_trade_plan(curr_price, curr_atr, "Trade Plan")
 
     # Format untuk TradingView Lightweight Charts
     candles = []
@@ -394,7 +401,7 @@ async def api_chart(ticker: str):
     ema200_series = []
     vol_ma20_series = []
 
-    for idx, row in df.iterrows():
+    for idx, row in df_calc.iterrows():
         time_str = idx.strftime("%Y-%m-%d")
         open_val = round(float(row["Open"]), 2)
         close_val = round(float(row["Close"]), 2)
@@ -431,7 +438,8 @@ async def api_chart(ticker: str):
         "ema20": ema20_series[-180:],
         "ema50": ema50_series[-180:],
         "ema200": ema200_series[-180:],
-        "vol_ma20": vol_ma20_series[-180:]
+        "vol_ma20": vol_ma20_series[-180:],
+        "trade_plan": trade_plan
     }
 
 @app.get("/api/journal")

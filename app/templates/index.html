@@ -970,6 +970,10 @@
                     <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-200 dark:border-white/[0.06] text-xs font-mono">
                         <div class="flex items-center gap-1.5 flex-wrap">
                             <span class="text-[11px] text-slate-500 dark:text-gray-400 font-sans mr-1">Indikator:</span>
+                            <!-- Trade Plan (SL/TP Overlay) -->
+                            <button onclick="toggleIndicator('plan')" id="toggle-plan" class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle Garis Trade Plan (Entry, Stop Loss Merah, Target TP Hijau)">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Trade Plan (SL/TP)
+                            </button>
                             <!-- EMA 20 -->
                             <button onclick="toggleIndicator('ema20')" id="toggle-ema20" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 20">
                                 <span class="w-2 h-2 rounded-full bg-blue-500"></span> EMA 20
@@ -1535,13 +1539,16 @@
         let candleSeries = null;
         let volumeSeries = null;
         let chartEma20 = null, chartEma50 = null, chartEma200 = null, chartVolMa = null;
+        let chartPriceLines = [];
         
         let terminalChartInstance = null;
         let terminalCandleSeries = null;
         let terminalVolumeSeries = null;
         let termEma20 = null, termEma50 = null, termEma200 = null, termVolMa = null;
+        let termPriceLines = [];
 
         let indicatorVisibility = {
+            plan: true,
             ema20: true,
             ema50: true,
             ema200: true,
@@ -2290,6 +2297,80 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             copyGtcOrder(t.ticker, t.entry_price, t.stop_loss, t.target_price, t.target_price + (t.target_price - t.entry_price), t.setup_name, 3.5, 7.0, 14.0);
         }
 
+        function renderTradePlanLines(tradePlan) {
+            // Hapus garis horizontal sebelumnya
+            if (candleSeries && chartPriceLines.length > 0) {
+                chartPriceLines.forEach(l => {
+                    try { candleSeries.removePriceLine(l); } catch(e) {}
+                });
+            }
+            chartPriceLines = [];
+
+            if (terminalCandleSeries && termPriceLines.length > 0) {
+                termPriceLines.forEach(l => {
+                    try { terminalCandleSeries.removePriceLine(l); } catch(e) {}
+                });
+            }
+            termPriceLines = [];
+
+            if (!tradePlan || !indicatorVisibility.plan) return;
+
+            const p = tradePlan;
+            // 1. Entry Line (Biru Putus-putus)
+            const entryOpt = {
+                price: p.entry_price,
+                color: '#3B82F6',
+                lineWidth: 1.5,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: `ENTRY Rp ${p.entry_price.toLocaleString('id-ID')}`
+            };
+            // 2. Stop Loss Line (Merah Solid)
+            const slOpt = {
+                price: p.stop_loss,
+                color: '#EF4444',
+                lineWidth: 2,
+                lineStyle: LightweightCharts.LineStyle.Solid,
+                axisLabelVisible: true,
+                title: `SL Rp ${p.stop_loss.toLocaleString('id-ID')} (-${p.risk_pct}%)`
+            };
+            // 3. TP1 Line (Hijau Dashed)
+            const tp1Opt = {
+                price: p.tp1,
+                color: '#10B981',
+                lineWidth: 1.5,
+                lineStyle: LightweightCharts.LineStyle.Dashed,
+                axisLabelVisible: true,
+                title: `TP1 Rp ${p.tp1.toLocaleString('id-ID')} (+${p.tp1_gain_pct}%)`
+            };
+            // 4. TP2 Line (Ungu Dotted)
+            const tp2Opt = {
+                price: p.tp2,
+                color: '#A855F7',
+                lineWidth: 1.5,
+                lineStyle: LightweightCharts.LineStyle.Dotted,
+                axisLabelVisible: true,
+                title: `TP2 Rp ${p.tp2.toLocaleString('id-ID')} (+${p.tp2_gain_pct}%)`
+            };
+
+            try {
+                if (candleSeries) {
+                    chartPriceLines.push(candleSeries.createPriceLine(entryOpt));
+                    chartPriceLines.push(candleSeries.createPriceLine(slOpt));
+                    chartPriceLines.push(candleSeries.createPriceLine(tp1Opt));
+                    chartPriceLines.push(candleSeries.createPriceLine(tp2Opt));
+                }
+                if (terminalCandleSeries) {
+                    termPriceLines.push(terminalCandleSeries.createPriceLine(entryOpt));
+                    termPriceLines.push(terminalCandleSeries.createPriceLine(slOpt));
+                    termPriceLines.push(terminalCandleSeries.createPriceLine(tp1Opt));
+                    termPriceLines.push(terminalCandleSeries.createPriceLine(tp2Opt));
+                }
+            } catch(e) {
+                console.error("Error creating price lines", e);
+            }
+        }
+
         async function loadChart(symbol, name, setup) {
             const cleanSymbol = symbol.toUpperCase().replace('.JK', '').trim();
             const displayName = name || cleanSymbol;
@@ -2340,6 +2421,11 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         if (termVolMa) termVolMa.setData(json.vol_ma20);
                     }
 
+                    // Render Trade Plan Price Lines Overlay (Entry, SL, TP1, TP2)
+                    if (json.trade_plan) {
+                        renderTradePlanLines(json.trade_plan);
+                    }
+
                     if (chartInstance) chartInstance.timeScale().fitContent();
                     if (terminalChartInstance) terminalChartInstance.timeScale().fitContent();
                 } else {
@@ -2368,7 +2454,14 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             const isVisible = indicatorVisibility[name];
             const btn = document.getElementById(`toggle-${name}`);
             
-            if (name === 'ema20') {
+            if (name === 'plan') {
+                if (btn) btn.className = isVisible 
+                    ? 'px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+                if (lastLoadedChartData && lastLoadedChartData.trade_plan) {
+                    renderTradePlanLines(lastLoadedChartData.trade_plan);
+                }
+            } else if (name === 'ema20') {
                 if (chartEma20) chartEma20.applyOptions({ visible: isVisible });
                 if (termEma20) termEma20.applyOptions({ visible: isVisible });
                 if (btn) btn.className = isVisible 
