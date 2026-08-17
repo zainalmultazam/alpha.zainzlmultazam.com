@@ -2080,7 +2080,11 @@
                 layout: { background: { color: isDark ? '#06080F' : '#FFFFFF' }, textColor: isDark ? '#94A3B8' : '#475569' },
                 grid: { vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' }, horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' } },
                 timeScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' },
-                rightPriceScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }
+                rightPriceScale: { 
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+                    scaleMargins: { top: 0.08, bottom: 0.04 },
+                    autoScale: true
+                }
             });
 
             candleSeries = chartInstance.addCandlestickSeries({
@@ -2096,15 +2100,16 @@
 
             volumeSeries = chartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
-                priceScaleId: '',
-                scaleMargins: { top: 0.82, bottom: 0 },
+                priceScaleId: 'overlay_vol_calc'
+            });
+            chartInstance.priceScale('overlay_vol_calc').applyOptions({
+                scaleMargins: { top: 0.82, bottom: 0 }
             });
 
             chartVolMa = chartInstance.addLineSeries({
                 color: '#94A3B8',
                 lineWidth: 1,
-                priceScaleId: '',
-                scaleMargins: { top: 0.82, bottom: 0 },
+                priceScaleId: 'overlay_vol_calc',
                 priceFormat: { type: 'volume' }
             });
 
@@ -2122,7 +2127,11 @@
                 layout: { background: { color: isDark ? '#06080F' : '#FFFFFF' }, textColor: isDark ? '#94A3B8' : '#475569' },
                 grid: { vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' }, horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' } },
                 timeScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' },
-                rightPriceScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }
+                rightPriceScale: { 
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
+                    scaleMargins: { top: 0.08, bottom: 0.04 },
+                    autoScale: true
+                }
             });
 
             terminalCandleSeries = terminalChartInstance.addCandlestickSeries({
@@ -2138,15 +2147,16 @@
 
             terminalVolumeSeries = terminalChartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
-                priceScaleId: '',
-                scaleMargins: { top: 0.82, bottom: 0 },
+                priceScaleId: 'overlay_vol_term'
+            });
+            terminalChartInstance.priceScale('overlay_vol_term').applyOptions({
+                scaleMargins: { top: 0.82, bottom: 0 }
             });
 
             termVolMa = terminalChartInstance.addLineSeries({
                 color: '#94A3B8',
                 lineWidth: 1,
-                priceScaleId: '',
-                scaleMargins: { top: 0.82, bottom: 0 },
+                priceScaleId: 'overlay_vol_term',
                 priceFormat: { type: 'volume' }
             });
 
@@ -2685,16 +2695,21 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 title: `VAL Rp ${volProfile.val_price.toLocaleString('id-ID')} (70% Vol)`
             };
 
+            // Filter VAL agar tidak menarik sumbu Y terlalu jauh ke bawah jika harga sudah naik tinggi
+            const latestCandles = (lastLoadedChartData && lastLoadedChartData.candles) ? lastLoadedChartData.candles.slice(-60) : [];
+            const minRecentPrice = latestCandles.length > 0 ? Math.min(...latestCandles.map(c => c.low)) : 0;
+            const isValRelevant = !minRecentPrice || (volProfile.val_price >= minRecentPrice * 0.85);
+
             try {
                 if (candleSeries) {
                     chartPocLines.push(candleSeries.createPriceLine(pocOpt));
                     chartPocLines.push(candleSeries.createPriceLine(vahOpt));
-                    chartPocLines.push(candleSeries.createPriceLine(valOpt));
+                    if (isValRelevant) chartPocLines.push(candleSeries.createPriceLine(valOpt));
                 }
                 if (terminalCandleSeries) {
                     termPocLines.push(terminalCandleSeries.createPriceLine(pocOpt));
                     termPocLines.push(terminalCandleSeries.createPriceLine(vahOpt));
-                    termPocLines.push(terminalCandleSeries.createPriceLine(valOpt));
+                    if (isValRelevant) termPocLines.push(terminalCandleSeries.createPriceLine(valOpt));
                 }
             } catch(e) {
                 console.error("Error creating POC price lines", e);
