@@ -69,13 +69,16 @@ async def health_check():
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {
-        "request": request, 
-        "domain": settings.APP_DOMAIN,
-        "default_capital": settings.DEFAULT_CAPITAL,
-        "default_risk_pct": settings.DEFAULT_MAX_RISK_PCT,
-        "app_name": settings.APP_NAME
-    })
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "domain": settings.APP_DOMAIN,
+            "default_capital": settings.DEFAULT_CAPITAL,
+            "default_risk_pct": settings.DEFAULT_MAX_RISK_PCT,
+            "app_name": settings.APP_NAME
+        }
+    )
 
 @app.get("/api/scan")
 async def api_scan(force: bool = False):
