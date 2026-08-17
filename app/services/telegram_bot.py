@@ -223,8 +223,72 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
     if not data:
         return
 
+    # 0. Callback Buka Lot Picker Grid: picklot:TICKER:RECLOTS:ENTRY:SL:TP1
+    if data.startswith("picklot:"):
+        parts = data.split(":")
+        if len(parts) >= 6:
+            ticker = parts[1]
+            rec_lots = int(parts[2])
+            entry = float(parts[3])
+            sl = float(parts[4])
+            tp1 = float(parts[5])
+
+            await answer_callback_query(callback_id, text=f"Pilih jumlah lot {ticker}...", show_alert=False)
+
+            half_lots = max(1, rec_lots // 2)
+            
+            # Buat opsi tombol lot yang dinamis dan bervariasi
+            lot_options = [half_lots, rec_lots, 10, 25, 50, 100]
+            # Hapus duplikat dan urutkan
+            unique_lots = sorted(list(set([l for l in lot_options if l > 0])))
+
+            msg = f"<b>PILIH JUMLAH LOT: {ticker}</b>\n"
+            msg += f"<i>Harga Entry: Rp {entry:,.0f} | Stop Loss: Rp {sl:,.0f}</i>\n"
+            msg += "────────────\n"
+            msg += "Pilih jumlah lot yang Anda beli di Stockbit:\n"
+
+            inline_keyboard = []
+            
+            # Baris 1: Preset Rekomendasi
+            row_rec = [
+                {"text": f"🛒 {rec_lots} Lot (Rekomendasi)", "callback_data": f"buy:{ticker}:{rec_lots}:{entry}:{sl}:{tp1}"}
+            ]
+            if half_lots != rec_lots:
+                row_rec.insert(0, {"text": f"🛒 {half_lots} Lot (50%)", "callback_data": f"buy:{ticker}:{half_lots}:{entry}:{sl}:{tp1}"})
+            inline_keyboard.append(row_rec)
+
+            # Baris 2: Pilihan Angka Bulat Populer
+            row_numbers = []
+            for l in [10, 25, 50, 100]:
+                if l != rec_lots and l != half_lots:
+                    row_numbers.append({"text": f"{l} Lot", "callback_data": f"buy:{ticker}:{l}:{entry}:{sl}:{tp1}"})
+            if row_numbers:
+                inline_keyboard.append(row_numbers[:4])
+
+            # Baris 3: Custom Input
+            inline_keyboard.append([
+                {"text": "✏️ Ketik Jumlah Lot Lain", "callback_data": f"customlot:{ticker}:{entry}:{sl}:{tp1}"}
+            ])
+
+            reply_markup = {"inline_keyboard": inline_keyboard}
+            await send_telegram_message(msg, reply_markup=reply_markup)
+            return
+
+    # 0.1 Callback Petunjuk Custom Lot: customlot:TICKER:ENTRY:SL:TP1
+    elif data.startswith("customlot:"):
+        parts = data.split(":")
+        ticker = parts[1]
+        await answer_callback_query(callback_id, text=f"Ketik /beli {ticker} [LOT]", show_alert=False)
+        msg = f"<b>INPUT JUMLAH LOT CUSTOM: {ticker}</b>\n"
+        msg += "────────────\n"
+        msg += "Ketik perintah berikut di chat dengan jumlah lot yang Anda beli:\n"
+        msg += f"<code>/beli {ticker} [JUMLAH_LOT]</code>\n\n"
+        msg += f"Contoh: <code>/beli {ticker} 15</code>"
+        await send_telegram_message(msg)
+        return
+
     # 1. Callback 1-Click Beli: buy:TICKER:LOTS:ENTRY:SL:TP1
-    if data.startswith("buy:"):
+    elif data.startswith("buy:"):
         parts = data.split(":")
         if len(parts) >= 6:
             ticker = parts[1]

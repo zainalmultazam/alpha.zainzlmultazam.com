@@ -138,11 +138,11 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         if i < len(top_3):
             msg += "────────────\n\n"
 
-        # Buat Baris Tombol Interaktif 1-Click Beli & Catat
+        # Tombol Membuka Lot Picker Grid
         inline_keyboard.append([
             {
-                "text": f"🛒 Beli & Catat {lots} Lot {p['symbol']}",
-                "callback_data": f"buy:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
+                "text": f"🛒 Catat Beli {p['symbol']}",
+                "callback_data": f"picklot:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
             }
         ])
 
