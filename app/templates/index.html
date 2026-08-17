@@ -757,35 +757,34 @@
                     </div>
                 </div>
 
-                <!-- Big Money & Institutional Flow Radar Banner Card -->
-                <div id="flow-radar-card" class="clean-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div class="flex items-start gap-3.5">
-                        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
-                            <i data-lucide="radar" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight">Institutional Big Money Radar</span>
-                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800">Flow Tracker</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-gray-400 font-mono mt-0.5">Deteksi akumulasi vs distribusi dana institusi & asing (Chaikin Money Flow & OBV).</p>
-                        </div>
+                <!-- Ultra-Compact 1-Line Big Money Flow Strip -->
+                <div id="flow-radar-card" class="clean-card px-3.5 py-2 sm:px-4 sm:py-2.5 flex items-center justify-between gap-3 text-xs font-mono overflow-x-auto">
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-purple-100 text-purple-800 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-300 dark:border-purple-800/80">
+                            <i data-lucide="radar" class="w-3 h-3"></i> Big Money
+                        </span>
                     </div>
 
-                    <!-- Flow Inflow / Outflow Chips -->
-                    <div class="flex items-center gap-2.5 flex-wrap font-mono text-xs" id="flow-radar-chips">
-                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="font-bold font-sans text-xs">Top Inflow:</span>
-                            <div id="flow-top-inflows" class="flex items-center gap-1.5">
-                                <span class="text-slate-400 dark:text-gray-500">Memuat...</span>
+                    <div class="flex items-center gap-3 sm:gap-4 overflow-x-auto no-scrollbar whitespace-nowrap text-xs flex-1 justify-start sm:justify-end">
+                        <!-- Top Inflow Chips -->
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-emerald-600 dark:text-emerald-400 font-sans font-bold text-[11px] flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Inflow:
+                            </span>
+                            <div id="flow-top-inflows" class="flex items-center gap-1">
+                                <span class="text-slate-400 dark:text-gray-500 text-[11px]">Memuat...</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300">
-                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                            <span class="font-bold font-sans text-xs">Top Outflow:</span>
-                            <div id="flow-top-outflows" class="flex items-center gap-1.5">
-                                <span class="text-slate-400 dark:text-gray-500">Memuat...</span>
+
+                        <span class="text-slate-300 dark:text-white/10 shrink-0">|</span>
+
+                        <!-- Top Outflow Chips -->
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-rose-600 dark:text-rose-400 font-sans font-bold text-[11px] flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Outflow:
+                            </span>
+                            <div id="flow-top-outflows" class="flex items-center gap-1">
+                                <span class="text-slate-400 dark:text-gray-500 text-[11px]">Memuat...</span>
                             </div>
                         </div>
                     </div>
