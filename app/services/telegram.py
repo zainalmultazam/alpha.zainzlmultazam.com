@@ -1,17 +1,18 @@
 import httpx
+import html
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from app.config import settings
 from app.engine.strategy import calculate_lot_size
 
 async def send_telegram_message(message: str) -> bool:
-    """Mengirim pesan teks ke Telegram pribadi / channel."""
+    """Mengirim pesan teks ke Telegram pribadi / grup / channel."""
     if not settings.TELEGRAM_BOT_TOKEN or not settings.TELEGRAM_CHAT_ID:
         return False
         
     url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
-        "chat_id": settings.TELEGRAM_CHAT_ID,
+        "chat_id": str(settings.TELEGRAM_CHAT_ID),
         "text": message,
         "parse_mode": "HTML",
         "disable_web_page_preview": True
@@ -20,6 +21,8 @@ async def send_telegram_message(message: str) -> bool:
     try:
         async with httpx.AsyncClient() as client:
             res = await client.post(url, json=payload, timeout=12.0)
+            if res.status_code != 200:
+                print(f"Telegram API response error: {res.status_code} - {res.text}")
             return res.status_code == 200
     except Exception as e:
         print(f"Telegram error: {e}")
@@ -33,7 +36,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     now_str = datetime.now().strftime("%d %b %Y, %H:%M WIB")
     
     # 1. Header & Market Climate Banner
-    regime_title = climate.get("title", "Risk-On") if climate else "Risk-On"
+    regime_title = html.escape(str(climate.get("title", "Risk-On") if climate else "Risk-On"))
     regime_status = climate.get("regime", "BULLISH") if climate else "BULLISH"
     ihsg_price = climate.get("price", 0) if climate else 0
     ihsg_change = climate.get("change_pct", 0) if climate else 0
@@ -54,7 +57,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n"
     msg += f"{climate_icon} <b>IHSG CLIMATE:</b> {regime_title}\n"
     msg += f"• Indeks: <b>{ihsg_price:,.0f} ({sign}{ihsg_change}%)</b>\n"
-    msg += f"• Rekomendasi: <i>{exposure_text}</i>\n"
+    msg += f"• Rekomendasi: <i>{html.escape(exposure_text)}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
     # 2. Top 3 Picks Details
@@ -74,9 +77,11 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         risk_idr = sizing["max_risk_idr"]
 
         weekly_tag = "🟢 Weekly Confirmed" if p.get("weekly_confirmed") else "🟡 Daily Setup"
+        safe_name = html.escape(str(p.get("name", "")))
+        safe_setup = html.escape(str(p.get("primary_setup", "")))
 
-        msg += f"<b>#{i} 🎯 {p['symbol']} ({p['name']})</b>\n"
-        msg += f"• Setup: <code>{p['primary_setup']}</code> (Skor: <b>{p['score']} PTS</b>)\n"
+        msg += f"<b>#{i} 🎯 {p['symbol']} ({safe_name})</b>\n"
+        msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p['score']} PTS</b>)\n"
         msg += f"• Status: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n"
         msg += f"• 🟢 <b>BUY STOP / ENTRY:</b> Rp {entry:,}\n"
         msg += f"• 🔴 <b>STOP LOSS:</b> Rp {sl:,} (-{plan['risk_pct']}%)\n"
