@@ -140,10 +140,21 @@ def get_journal_stats() -> Dict[str, Any]:
 
     return {
         "total_trades": total_trades,
-        "open_count": len(open_trades),
-        "closed_count": len(closed_trades),
-        "win_count": len(winning_trades),
-        "loss_count": len(losing_trades),
-        "win_rate_pct": win_rate,
-        "total_pnl_idr": round(total_pnl, 2)
+        "open_trades": len(open_trades),
+        "closed_trades": len(closed_trades),
+        "winning_trades": len(winning_trades),
+        "losing_trades": len(losing_trades),
+        "win_rate": win_rate,
+        "total_pnl": round(total_pnl, 2)
     }
+
+def delete_trade(trade_id: int) -> bool:
+    """Menghapus transaksi dari database berdasarkan ID."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM trades WHERE id = ?", (trade_id,))
+    deleted = cursor.rowcount > 0
+    conn.commit()
+    conn.close()
+    return deleted

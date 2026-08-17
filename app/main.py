@@ -13,7 +13,7 @@ from app.engine.universe import get_universe
 from app.services.market_data import fetch_stock_df, clear_cache, get_market_climate, get_idx_market_status
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
-from app.engine.journal import log_trade, get_all_trades, close_trade, get_journal_stats, init_db
+from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, init_db
 from app.services.telegram import send_telegram_message, notify_super_digest
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
 
@@ -204,6 +204,12 @@ async def api_close_trade(
 ):
     ok = close_trade(trade_id, exit_price, notes or "")
     return {"status": "success" if ok else "error"}
+
+@app.post("/api/journal/delete/{trade_id}")
+@app.delete("/api/journal/{trade_id}")
+async def api_delete_trade(trade_id: int):
+    ok = delete_trade(trade_id)
+    return {"status": "success" if ok else "error", "deleted": ok}
 
 @app.get("/api/journal/check-safety")
 async def api_check_safety():

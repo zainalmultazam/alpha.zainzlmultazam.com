@@ -663,7 +663,7 @@
                         <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Riwayat Transaksi Jurnal</h3>
                         <div class="flex items-center gap-2">
                             <button onclick="openManualJournalModal()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm shadow-emerald-600/20 transition active:scale-[0.98]">
-                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> + Catat Transaksi Manual
+                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Catat Transaksi Manual
                             </button>
                             <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
                                 <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
@@ -1550,27 +1550,89 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         : '<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold">CLOSED</span>';
 
                     const actionCol = t.status === 'OPEN'
-                        ? `<button onclick="promptCloseTrade(${t.id}, ${t.entry_price})" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Tutup Trade</button>`
+                        ? `<button onclick="promptCloseTrade(${t.id}, ${t.entry_price})" class="text-blue-600 dark:text-blue-400 hover:underline font-medium text-xs">Tutup Trade</button>`
                         : `<span class="${(t.pnl_amount || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-danger-500 dark:text-danger-400 font-bold'}">Rp ${(t.pnl_amount || 0).toLocaleString('id-ID')} (${(t.pnl_pct || 0)}%)</span>`;
 
                     return `
                     <tr class="hover:bg-slate-100 dark:hover:bg-surface-800/40 transition">
                         <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.entry_date}</td>
                         <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${t.ticker}</td>
-                        <td class="py-3 px-3.5 text-emerald-600 dark:text-emerald-400">Rp ${t.entry_price.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-danger-500 dark:text-danger-400">Rp ${t.stop_loss.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-target-500 dark:text-target-400">Rp ${t.target_price.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${t.lots}</td>
+                        <td class="py-3 px-3.5 text-emerald-600 dark:text-emerald-400">Rp ${Number(t.entry_price).toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-3.5 text-danger-500 dark:text-danger-400">Rp ${Number(t.stop_loss).toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-3.5 text-target-500 dark:text-target-400">Rp ${Number(t.target_price).toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${Number(t.lots).toLocaleString('id-ID')}</td>
                         <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.setup_name || '-'}</td>
                         <td class="py-3 px-3.5">${statusBadge}</td>
-                        <td class="py-3 px-3.5 text-right">${actionCol}</td>
+                        <td class="py-3 px-3.5 text-right whitespace-nowrap">
+                            <div class="inline-flex items-center justify-end gap-2.5">
+                                ${actionCol}
+                                
+                                <div class="relative inline-block text-left">
+                                    <button onclick="toggleRowMenu(event, ${t.id})" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-surface-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition flex items-center justify-center" title="Menu Opsi">
+                                        <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                                    </button>
+                                    
+                                    <div id="row-menu-${t.id}" class="row-dropdown-menu hidden fixed z-[9999] w-36 bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl py-1 text-xs font-sans text-left">
+                                        <button onclick="deleteJournalTrade(${t.id}, '${t.ticker}')" class="w-full px-3 py-2 text-danger-500 hover:bg-danger-50 dark:hover:bg-danger-500/10 flex items-center gap-2 font-medium transition">
+                                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                            <span>Hapus Data</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                     `;
                 }).join('');
+                lucide.createIcons();
             } catch (err) {
                 tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-red-500 font-sans">Gagal memuat data jurnal.</td></tr>';
             }
         }
+
+        function toggleRowMenu(event, tradeId) {
+            event.stopPropagation();
+            const allMenus = document.querySelectorAll('.row-dropdown-menu');
+            const targetMenu = document.getElementById(`row-menu-${tradeId}`);
+            const isCurrentlyOpen = targetMenu && !targetMenu.classList.contains('hidden');
+
+            allMenus.forEach(m => m.classList.add('hidden'));
+
+            if (!isCurrentlyOpen && targetMenu) {
+                const btnRect = event.currentTarget.getBoundingClientRect();
+                targetMenu.style.top = `${btnRect.bottom + 4}px`;
+                targetMenu.style.left = `${btnRect.right - 144}px`;
+                targetMenu.classList.remove('hidden');
+                lucide.createIcons();
+            }
+        }
+
+        async function deleteJournalTrade(tradeId, ticker) {
+            document.querySelectorAll('.row-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            if (!confirm(`Apakah Anda yakin ingin menghapus data transaksi ${ticker} dari jurnal?`)) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/journal/delete/${tradeId}`, { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    showToast(`Transaksi ${ticker} berhasil dihapus!`);
+                    loadJournalData();
+                } else {
+                    showToast("Gagal menghapus transaksi", "error");
+                }
+            } catch (e) {
+                showToast("Terjadi kesalahan saat menghapus", "error");
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.row-dropdown-menu') && !e.target.closest('button[onclick^="toggleRowMenu"]')) {
+                document.querySelectorAll('.row-dropdown-menu').forEach(m => m.classList.add('hidden'));
+            }
+        });
 
         function closeJournalModal() {
             document.getElementById('journal-modal').classList.add('hidden');
