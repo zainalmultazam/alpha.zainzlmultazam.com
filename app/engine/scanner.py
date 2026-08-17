@@ -20,8 +20,17 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         volume = float(last["Volume"]) if pd.notnull(last["Volume"]) else 0
         turnover = price * volume
         
-        # Filter likuiditas minimum (Rp 1 Miliar turnover per hari)
-        if turnover < 1_000_000_000:
+        # Temuan Audit #4: Filter likuiditas rata-rata 20 hari (Turnover MA20 >= Rp 1 Miliar)
+        # Menghindari saham gorengan/illiquid yang mendadak dipompa dalam 1 hari
+        try:
+            turnover_series = df["Close"] * df["Volume"]
+            turnover_ma20 = float(turnover_series.rolling(20, min_periods=3).mean().iloc[-1])
+            if pd.isna(turnover_ma20) or turnover_ma20 <= 0:
+                turnover_ma20 = turnover
+        except Exception:
+            turnover_ma20 = turnover
+
+        if turnover_ma20 < 1_000_000_000:
             return None
 
         # Trend Filter (Stage 2 Uptrend Minervini)
@@ -89,6 +98,7 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "change_pct": change_pct,
             "volume": int(volume),
             "turnover_bio": round(turnover / 1_000_000_000, 2),
+            "turnover_ma20_bio": round(turnover_ma20 / 1_000_000_000, 2),
             "rvol": round(rvol, 2),
             "rsi": round(float(last["rsi14"]), 1) if pd.notnull(last["rsi14"]) else 50.0,
             "weekly_confirmed": weekly_confirmed,
@@ -102,14 +112,17 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         return None
 
 def run_full_scan() -> list:
-    """Melakukan scan sinkron seluruh universe saham."""
+    """Melakukan scan cepat seluruh universe saham secara batch."""
     from app.engine.universe import get_universe
-    from app.services.market_data import fetch_stock_df
+    from app.services.market_data import batch_fetch_stock_dfs
     
     universe = get_universe()
+    tickers = [item["ticker"] for item in universe]
+    dfs = batch_fetch_stock_dfs(tickers, batch_size=35)
+    
     results = []
     for item in universe:
-        df = fetch_stock_df(item["ticker"])
+        df = dfs.get(item["ticker"])
         res = scan_stock(item, df)
         if res is not None:
             results.append(res)

@@ -1,16 +1,18 @@
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import os
 import asyncio
+import time
+import json
 import pandas as pd
 from typing import Optional
 
 from app.config import settings
 from app.engine.universe import get_universe
-from app.services.market_data import fetch_stock_df, clear_cache, get_market_climate, get_idx_market_status
+from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
 from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
@@ -70,22 +72,28 @@ async def startup_event():
     asyncio.create_task(sentinel_scheduler_worker())
 
 cached_scan_results = []
+last_scan_duration = 0.0
 
 async def execute_market_scan() -> list:
-    """Melakukan scan seluruh universe saham secara asinkron."""
+    """Melakukan scan seluruh universe saham secara asinkron dengan batch downloader."""
+    global last_scan_duration
+    t0 = time.time()
     universe = get_universe()
+    tickers = [item["ticker"] for item in universe]
     loop = asyncio.get_event_loop()
     
-    def scan_single(item):
-        df = fetch_stock_df(item["ticker"])
-        return scan_stock(item, df)
-
-    # Menjalankan pemindaian dengan thread pool agar non-blocking
-    tasks = [loop.run_in_executor(None, scan_single, item) for item in universe]
-    scanned = await asyncio.gather(*tasks)
+    # Ambil seluruh data saham secara batch multi-threaded
+    dfs = await loop.run_in_executor(None, batch_fetch_stock_dfs, tickers, 35)
     
-    results = [res for res in scanned if res is not None]
+    results = []
+    for item in universe:
+        df = dfs.get(item["ticker"])
+        res = scan_stock(item, df)
+        if res is not None:
+            results.append(res)
+            
     results.sort(key=lambda x: x["score"], reverse=True)
+    last_scan_duration = round(time.time() - t0, 2)
     return results
 
 async def run_daily_scheduled_scan():
@@ -164,18 +172,62 @@ async def api_market_status():
 
 @app.get("/api/scan")
 async def api_scan(force: bool = False):
-    global cached_scan_results
+    global cached_scan_results, last_scan_duration
     if not cached_scan_results or force:
         if force:
             clear_cache()
         cached_scan_results = await execute_market_scan()
     climate = get_market_climate()
+    universe = get_universe()
     return {
         "status": "success", 
-        "total": len(cached_scan_results), 
+        "total": len(cached_scan_results),
+        "total_universe": len(universe),
+        "duration_sec": last_scan_duration,
         "climate": climate,
         "data": cached_scan_results
     }
+
+@app.get("/api/scan-stream")
+async def api_scan_stream(force: bool = False):
+    """Server-Sent Events endpoint untuk streaming persentase scan langsung ke frontend."""
+    async def event_generator():
+        global cached_scan_results, last_scan_duration
+        t0 = time.time()
+        if force:
+            clear_cache()
+        
+        universe = get_universe()
+        total_universe = len(universe)
+        
+        # Step 1: Inisialisasi
+        yield f"data: {json.dumps({'progress': 10, 'stage': 'Menyiapkan 104 watchlist universe IDX...', 'total': total_universe})}\n\n"
+        await asyncio.sleep(0.05)
+        
+        # Step 2: Batch Download Data Bursa
+        yield f"data: {json.dumps({'progress': 30, 'stage': 'Mengunduh data candle & volume bursa paralel...', 'total': total_universe})}\n\n"
+        loop = asyncio.get_event_loop()
+        tickers = [item["ticker"] for item in universe]
+        dfs = await loop.run_in_executor(None, batch_fetch_stock_dfs, tickers, 35)
+        
+        # Step 3: Analisis Pola Breakout Raider & Validasi Likuiditas MA20
+        yield f"data: {json.dumps({'progress': 70, 'stage': 'Menganalisis Stage 2, VCP, EMA Pullback & Likuiditas MA20...', 'total': total_universe})}\n\n"
+        results = []
+        for idx, item in enumerate(universe):
+            df = dfs.get(item["ticker"])
+            res = scan_stock(item, df)
+            if res is not None:
+                results.append(res)
+                
+        results.sort(key=lambda x: x["score"], reverse=True)
+        cached_scan_results = results
+        last_scan_duration = round(time.time() - t0, 2)
+        climate = get_market_climate()
+        
+        # Step 4: Selesai
+        yield f"data: {json.dumps({'progress': 100, 'stage': 'Pemindaian selesai!', 'total': len(results), 'total_universe': total_universe, 'duration_sec': last_scan_duration, 'climate': climate, 'data': results})}\n\n"
+
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
 
 @app.post("/api/calculate-size")
 async def api_calculate_size(

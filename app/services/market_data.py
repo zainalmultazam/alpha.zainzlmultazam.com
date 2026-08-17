@@ -135,12 +135,24 @@ def get_idx_market_status() -> Dict[str, Any]:
             "current_wib": now_jkt.strftime("%H:%M WIB")
         }
 
+def get_dynamic_cache_ttl_seconds() -> int:
+    """
+    Menentukan durasi TTL cache secara cerdas:
+    - Jam bursa aktif (09:00 - 16:15 WIB Senin-Jumat): 15 menit (900 detik).
+    - Di luar jam bursa / setelah closing (16:30 - 08:45 WIB & Weekend/Libur): 12 jam (43200 detik).
+    """
+    status = get_idx_market_status()
+    if status.get("is_open"):
+        return 15 * 60  # 15 menit saat bursa aktif
+    return 12 * 3600  # 12 jam (EOD persistent) saat bursa tutup
+
 def fetch_stock_df(ticker: str) -> Optional[pd.DataFrame]:
-    """Mengambil data historis saham IDX dari Yahoo Finance dengan sistem cache cerdas."""
+    """Mengambil data historis saham IDX dari Yahoo Finance dengan sistem smart cache cerdas."""
     now = datetime.now()
+    ttl = get_dynamic_cache_ttl_seconds()
     if ticker in _CACHE:
         cached = _CACHE[ticker]
-        if (now - cached["timestamp"]).total_seconds() < (_CACHE_EXPIRY_MINUTES * 60):
+        if (now - cached["timestamp"]).total_seconds() < ttl:
             return cached["data"]
 
     try:
@@ -153,6 +165,60 @@ def fetch_stock_df(ticker: str) -> Optional[pd.DataFrame]:
         print(f"Error fetching {ticker}: {e}")
     
     return None
+
+def batch_fetch_stock_dfs(tickers: list, batch_size: int = 30) -> Dict[str, pd.DataFrame]:
+    """
+    Mengambil data banyak saham secara batch efisien menggunakan yf.download dan thread pool.
+    Memeriksa cache in-memory terlebih dahulu untuk meminimalkan beban request ke server.
+    """
+    now = datetime.now()
+    ttl = get_dynamic_cache_ttl_seconds()
+    results: Dict[str, pd.DataFrame] = {}
+    uncached: list = []
+
+    for t in tickers:
+        if t in _CACHE:
+            cached = _CACHE[t]
+            if (now - cached["timestamp"]).total_seconds() < ttl:
+                results[t] = cached["data"]
+                continue
+        uncached.append(t)
+
+    if not uncached:
+        return results
+
+    # Batch download uncached tickers in chunks
+    for i in range(0, len(uncached), batch_size):
+        chunk = uncached[i:i + batch_size]
+        try:
+            if len(chunk) == 1:
+                t = chunk[0]
+                df = fetch_stock_df(t)
+                if df is not None and not df.empty:
+                    results[t] = df
+            else:
+                data = yf.download(chunk, period="1y", interval="1d", group_by="ticker", threads=True, progress=False)
+                if data is not None and not data.empty:
+                    for t in chunk:
+                        try:
+                            if hasattr(data.columns, "levels") and t in data.columns.levels[0]:
+                                sub_df = data[t].dropna(how="all")
+                                if not sub_df.empty and len(sub_df) > 5:
+                                    _CACHE[t] = {"data": sub_df, "timestamp": now}
+                                    results[t] = sub_df
+                        except Exception:
+                            pass
+        except Exception as e:
+            print(f"Error during batch chunk download: {e}")
+
+    # Fallback to single fetch for any tickers missed in batch
+    for t in uncached:
+        if t not in results:
+            df = fetch_stock_df(t)
+            if df is not None and not df.empty:
+                results[t] = df
+
+    return results
 
 def get_market_climate() -> Dict[str, Any]:
     """Menganalisis rezim pasar IHSG (^JKSE) untuk menentukan iklim risiko pasar (Risk-On / Caution / Risk-Off) serta status operasional bursa."""

@@ -598,6 +598,30 @@
                     </div>
                 </div>
 
+                <!-- Live Scan Progress Bar & Speed Indicator -->
+                <div id="scan-progress-box" class="hidden clean-card p-4 space-y-2.5 border-blue-500/30 bg-blue-50/40 dark:bg-blue-950/20">
+                    <div class="flex items-center justify-between text-xs font-mono">
+                        <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+                            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                            <span id="scan-progress-stage">Memulai pemindaian pasar...</span>
+                        </div>
+                        <span id="scan-progress-pct" class="font-bold text-blue-600 dark:text-blue-400">0%</span>
+                    </div>
+                    <!-- Progress bar track -->
+                    <div class="w-full bg-slate-200 dark:bg-surface-800 rounded-full h-2 overflow-hidden">
+                        <div id="scan-progress-bar" class="bg-gradient-to-r from-blue-600 to-indigo-500 h-2 rounded-full transition-all duration-300 w-0"></div>
+                    </div>
+                </div>
+
+                <!-- Scan Speed / Duration Info Badge -->
+                <div id="scan-speed-badge" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono">
+                    <div class="flex items-center gap-2 text-slate-700 dark:text-gray-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span id="scan-duration-text" class="font-semibold">⚡ Dipindai dalam 1.2 detik · 104 saham</span>
+                    </div>
+                    <span class="text-slate-500 dark:text-gray-400 text-[11px]">Filter Likuiditas: Turnover MA20 ≥ Rp 1 Miliar</span>
+                </div>
+
                 <!-- Category Filters -->
                 <div class="flex items-center gap-2 overflow-x-auto pb-1" id="filter-tabs">
                     <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm" data-filter="ALL">
@@ -1385,30 +1409,91 @@
         async function runScan(force = false) {
             const container = document.getElementById('top-picks-container');
             const icon = document.getElementById('icon-scan');
+            const progressBox = document.getElementById('scan-progress-box');
+            const progressBar = document.getElementById('scan-progress-bar');
+            const progressPct = document.getElementById('scan-progress-pct');
+            const progressStage = document.getElementById('scan-progress-stage');
+            const speedBadge = document.getElementById('scan-speed-badge');
+            const durationText = document.getElementById('scan-duration-text');
             
             icon.classList.add('animate-spin');
+            if (progressBox) {
+                progressBox.classList.remove('hidden');
+                progressBar.style.width = '10%';
+                progressPct.innerText = '10%';
+                progressStage.innerText = 'Menyiapkan 104 watchlist universe IDX...';
+            }
 
-            try {
-                const res = await fetch(`/api/scan${force ? '?force=true' : ''}`);
+            const fallbackScanFetch = async (forceParam) => {
+                const res = await fetch(`/api/scan${forceParam ? '?force=true' : ''}`);
                 const json = await res.json();
                 allScanResults = json.data || [];
                 currentClimate = json.climate;
                 
                 updateClimateUI(json.climate);
                 document.getElementById('count-all').innerText = allScanResults.length;
-
                 renderPicks();
+
+                if (speedBadge && durationText && json.duration_sec) {
+                    durationText.innerText = `⚡ Dipindai dalam ${json.duration_sec} detik · ${json.total_universe || 104} saham`;
+                    speedBadge.classList.remove('hidden');
+                }
 
                 if (allScanResults.length > 0) {
                     loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup);
                 }
 
-                if (force) {
-                    showToast(`Pemindaian selesai: ${allScanResults.length} saham siap dieksekusi.`);
+                if (progressBox) progressBox.classList.add('hidden');
+                if (forceParam) {
+                    showToast(`⚡ Pemindaian selesai: ${allScanResults.length} saham lolos filter.`);
+                }
+            };
+
+            try {
+                if (window.EventSource && force) {
+                    const evtSource = new EventSource(`/api/scan-stream?force=true`);
+                    evtSource.onmessage = (event) => {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (progressBar) progressBar.style.width = `${data.progress}%`;
+                            if (progressPct) progressPct.innerText = `${data.progress}%`;
+                            if (progressStage) progressStage.innerText = data.stage;
+
+                            if (data.progress === 100) {
+                                evtSource.close();
+                                allScanResults = data.data || [];
+                                currentClimate = data.climate;
+                                updateClimateUI(data.climate);
+                                document.getElementById('count-all').innerText = allScanResults.length;
+                                renderPicks();
+
+                                if (speedBadge && durationText) {
+                                    durationText.innerText = `⚡ Dipindai dalam ${data.duration_sec} detik · ${data.total_universe || 104} saham`;
+                                    speedBadge.classList.remove('hidden');
+                                }
+
+                                if (allScanResults.length > 0) {
+                                    loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup);
+                                }
+                                setTimeout(() => {
+                                    if (progressBox) progressBox.classList.add('hidden');
+                                }, 800);
+                                showToast(`⚡ Pemindaian selesai dalam ${data.duration_sec}s (${allScanResults.length} setup lolos)`, "success");
+                            }
+                        } catch (e) {
+                            console.error("SSE parse error", e);
+                        }
+                    };
+                    evtSource.onerror = async () => {
+                        evtSource.close();
+                        await fallbackScanFetch(force);
+                    };
+                } else {
+                    await fallbackScanFetch(force);
                 }
             } catch (err) {
                 console.error("Scan error", err);
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-red-500 clean-card p-8">Gagal mengambil data pasar BEI. Silakan klik Scan lagi.</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-rose-500 clean-card p-8">Gagal mengambil data pasar BEI. Silakan klik Scan lagi.</div>`;
             } finally {
                 icon.classList.remove('animate-spin');
             }
@@ -1540,6 +1625,8 @@
                        </span>`
                     : '';
 
+                const turnoverText = item.turnover_ma20_bio ? `MA20: Rp ${item.turnover_ma20_bio}B` : `Turnover: Rp ${item.turnover_bio}B`;
+
                 return `
                 <div class="clean-card clean-card-hover p-5 cursor-pointer group flex flex-col justify-between" onclick="loadChart('${item.symbol}', '${item.name}', '${item.primary_setup}')">
                     <div class="space-y-4">
@@ -1564,8 +1651,8 @@
                                 ${item.primary_setup}
                             </span>
                             ${weeklyBadge}
-                            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">
-                                Turnover: Rp ${item.turnover_bio}B
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]" title="Rata-rata turnover 20 hari">
+                                ${turnoverText}
                             </span>
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">
                                 RVOL: ${item.rvol}x
