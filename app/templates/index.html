@@ -918,32 +918,80 @@
 
             </div>
 
-            <!-- VIEW 3: CHARTS (Formerly Terminal) -->
+            <!-- VIEW 3: CHARTS (Terminal) -->
             <div id="view-charts" class="view-panel hidden space-y-4">
                 
-                <div class="clean-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                            <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                <!-- Chart Controls Bar -->
+                <div class="clean-card p-4 sm:p-5 space-y-3.5">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        <!-- Ticker Info -->
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                                <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
+                                <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume + Exponential Moving Averages (EMA 20/50/200)</p>
+                            </div>
                         </div>
-                        <div>
-                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
-                            <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume Histogram Engine (Yahoo Finance EOD)</p>
+
+                        <!-- Direct Search Input Inside Charts -->
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                                <input type="text" id="charts-search-input" onkeydown="if(event.key==='Enter') searchDirectChart()" placeholder="Cari ticker (cth: ADRO)..." class="bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2 pl-8 text-xs text-slate-900 dark:text-white placeholder-slate-400 font-mono uppercase focus:outline-none focus:border-blue-500 w-44 sm:w-56 transition">
+                                <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5"></i>
+                            </div>
+                            <button onclick="searchDirectChart()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition shadow-sm shadow-blue-600/20 active:scale-95">
+                                Buka
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Quick Switcher Pills -->
-                    <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs" id="quick-tickers">
-                        <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBCA</button>
-                        <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBRI</button>
-                        <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BMRI</button>
-                        <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ASII</button>
-                        <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">AUTO</button>
-                        <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ADRO</button>
+                    <!-- Quick Switcher Pills Row -->
+                    <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-white/[0.04] overflow-x-auto pb-1 text-xs font-mono">
+                        <span class="text-[11px] text-slate-500 dark:text-gray-400 font-sans shrink-0">Pilihan Cepat:</span>
+                        <div class="flex items-center gap-1.5 flex-wrap" id="quick-tickers">
+                            <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition">BBCA</button>
+                            <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition">BBRI</button>
+                            <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition">BMRI</button>
+                            <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition">ASII</button>
+                            <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition">AUTO</button>
+                            <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition">ADRO</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="clean-card p-4 sm:p-5">
+                <!-- Main Chart Card with Indicator Toggles -->
+                <div class="clean-card p-4 sm:p-5 space-y-3">
+                    <!-- Indicator Toggles & Legend -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-200 dark:border-white/[0.06] text-xs font-mono">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[11px] text-slate-500 dark:text-gray-400 font-sans mr-1">Indikator:</span>
+                            <!-- EMA 20 -->
+                            <button onclick="toggleIndicator('ema20')" id="toggle-ema20" class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 20">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span> EMA 20
+                            </button>
+                            <!-- EMA 50 -->
+                            <button onclick="toggleIndicator('ema50')" id="toggle-ema50" class="px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 50">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span> EMA 50
+                            </button>
+                            <!-- EMA 200 -->
+                            <button onclick="toggleIndicator('ema200')" id="toggle-ema200" class="px-2.5 py-1 rounded-lg bg-pink-50 text-pink-700 dark:bg-pink-950/70 dark:text-pink-400 border border-pink-200 dark:border-pink-800 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle EMA 200 (Major Trend)">
+                                <span class="w-2 h-2 rounded-full bg-pink-500"></span> EMA 200
+                            </button>
+                            <!-- Volume MA 20 -->
+                            <button onclick="toggleIndicator('volMa')" id="toggle-volMa" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 dark:bg-surface-800 dark:text-gray-300 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] transition" title="Toggle Volume MA 20">
+                                <span class="w-2 h-2 rounded-full bg-slate-400"></span> Vol MA20
+                            </button>
+                        </div>
+
+                        <!-- Timeframe Badge -->
+                        <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-gray-400">
+                            <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-surface-800 border border-slate-200 dark:border-white/10 font-bold text-slate-700 dark:text-gray-300">Daily (1D)</span>
+                        </div>
+                    </div>
+
+                    <!-- Candlestick Container -->
                     <div id="tv-terminal-chart" class="w-full h-[580px] rounded-xl overflow-hidden bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06]"></div>
                 </div>
 
@@ -1448,10 +1496,20 @@
         let chartInstance = null;
         let candleSeries = null;
         let volumeSeries = null;
+        let chartEma20 = null, chartEma50 = null, chartEma200 = null, chartVolMa = null;
         
         let terminalChartInstance = null;
         let terminalCandleSeries = null;
         let terminalVolumeSeries = null;
+        let termEma20 = null, termEma50 = null, termEma200 = null, termVolMa = null;
+
+        let indicatorVisibility = {
+            ema20: true,
+            ema50: true,
+            ema200: true,
+            volMa: true
+        };
+        let lastLoadedChartData = null;
 
         let allScanResults = [];
         let currentClimate = null;
@@ -1742,10 +1800,22 @@
                 wickUpColor: '#10B981', wickDownColor: '#F43F5E'
             });
 
+            chartEma20 = chartInstance.addLineSeries({ color: '#3B82F6', lineWidth: 1.5, title: 'EMA 20' });
+            chartEma50 = chartInstance.addLineSeries({ color: '#F59E0B', lineWidth: 1.5, title: 'EMA 50' });
+            chartEma200 = chartInstance.addLineSeries({ color: '#EC4899', lineWidth: 2, title: 'EMA 200' });
+
             volumeSeries = chartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
                 priceScaleId: '',
                 scaleMargins: { top: 0.82, bottom: 0 },
+            });
+
+            chartVolMa = chartInstance.addLineSeries({
+                color: '#94A3B8',
+                lineWidth: 1,
+                priceScaleId: '',
+                scaleMargins: { top: 0.82, bottom: 0 },
+                priceFormat: { type: 'volume' }
             });
 
             new ResizeObserver(entries => {
@@ -1771,10 +1841,22 @@
                 wickUpColor: '#10B981', wickDownColor: '#F43F5E'
             });
 
+            termEma20 = terminalChartInstance.addLineSeries({ color: '#3B82F6', lineWidth: 1.5, title: 'EMA 20' });
+            termEma50 = terminalChartInstance.addLineSeries({ color: '#F59E0B', lineWidth: 1.5, title: 'EMA 50' });
+            termEma200 = terminalChartInstance.addLineSeries({ color: '#EC4899', lineWidth: 2, title: 'EMA 200' });
+
             terminalVolumeSeries = terminalChartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
                 priceScaleId: '',
                 scaleMargins: { top: 0.82, bottom: 0 },
+            });
+
+            termVolMa = terminalChartInstance.addLineSeries({
+                color: '#94A3B8',
+                lineWidth: 1,
+                priceScaleId: '',
+                scaleMargins: { top: 0.82, bottom: 0 },
+                priceFormat: { type: 'volume' }
             });
 
             new ResizeObserver(entries => {
@@ -1811,6 +1893,7 @@
                 updateClimateUI(json.climate);
                 document.getElementById('count-all').innerText = allScanResults.length;
                 renderPicks();
+                updateQuickTickersFromScan(allScanResults);
 
                 if (speedBadge && durationText && json.duration_sec) {
                     durationText.innerText = `⚡ Dipindai dalam ${json.duration_sec} detik · ${json.total_universe || 104} saham`;
@@ -1844,6 +1927,7 @@
                                 updateClimateUI(data.climate);
                                 document.getElementById('count-all').innerText = allScanResults.length;
                                 renderPicks();
+                                updateQuickTickersFromScan(allScanResults);
 
                                 if (speedBadge && durationText) {
                                     durationText.innerText = `⚡ Dipindai dalam ${data.duration_sec} detik · ${data.total_universe || 104} saham`;
@@ -2168,31 +2252,120 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
         }
 
         async function loadChart(symbol, name, setup) {
-            document.getElementById('chart-title').innerText = `${symbol} - ${name}`;
-            document.getElementById('chart-badge').innerText = setup;
-            document.getElementById('terminal-ticker-title').innerText = `${symbol} - ${name}`;
+            const cleanSymbol = symbol.toUpperCase().replace('.JK', '').trim();
+            const displayName = name || cleanSymbol;
+            const displaySetup = setup || 'Liquid';
+
+            const titleEl = document.getElementById('chart-title');
+            const badgeEl = document.getElementById('chart-badge');
+            const termTitleEl = document.getElementById('terminal-ticker-title');
+            const searchInput = document.getElementById('charts-search-input');
+
+            if (titleEl) titleEl.innerText = `${cleanSymbol} - ${displayName}`;
+            if (badgeEl) badgeEl.innerText = displaySetup;
+            if (termTitleEl) termTitleEl.innerText = `${cleanSymbol} - ${displayName}`;
+            if (searchInput) searchInput.value = cleanSymbol;
             
             const loader = document.getElementById('chart-loading');
-            loader.classList.remove('hidden');
+            if (loader) loader.classList.remove('hidden');
 
             try {
-                const res = await fetch(`/api/chart/${symbol}`);
+                const res = await fetch(`/api/chart/${cleanSymbol}`);
                 const json = await res.json();
-                if (json.candles) {
-                    candleSeries.setData(json.candles);
-                    terminalCandleSeries.setData(json.candles);
+                lastLoadedChartData = json;
+
+                if (json.candles && json.candles.length > 0) {
+                    if (candleSeries) candleSeries.setData(json.candles);
+                    if (terminalCandleSeries) terminalCandleSeries.setData(json.candles);
+                    
                     if (json.volumes) {
-                        volumeSeries.setData(json.volumes);
-                        terminalVolumeSeries.setData(json.volumes);
+                        if (volumeSeries) volumeSeries.setData(json.volumes);
+                        if (terminalVolumeSeries) terminalVolumeSeries.setData(json.volumes);
                     }
-                    chartInstance.timeScale().fitContent();
-                    terminalChartInstance.timeScale().fitContent();
+
+                    // Technical Indicators
+                    if (json.ema20) {
+                        if (chartEma20) chartEma20.setData(json.ema20);
+                        if (termEma20) termEma20.setData(json.ema20);
+                    }
+                    if (json.ema50) {
+                        if (chartEma50) chartEma50.setData(json.ema50);
+                        if (termEma50) termEma50.setData(json.ema50);
+                    }
+                    if (json.ema200) {
+                        if (chartEma200) chartEma200.setData(json.ema200);
+                        if (termEma200) termEma200.setData(json.ema200);
+                    }
+                    if (json.vol_ma20) {
+                        if (chartVolMa) chartVolMa.setData(json.vol_ma20);
+                        if (termVolMa) termVolMa.setData(json.vol_ma20);
+                    }
+
+                    if (chartInstance) chartInstance.timeScale().fitContent();
+                    if (terminalChartInstance) terminalChartInstance.timeScale().fitContent();
+                } else {
+                    showToast(`Data candlestick untuk ${cleanSymbol} tidak ditemukan.`, "error");
                 }
             } catch (e) {
                 console.error("Error loading chart", e);
+                showToast(`Gagal memuat chart ${cleanSymbol}`, "error");
             } finally {
-                loader.classList.add('hidden');
+                if (loader) loader.classList.add('hidden');
             }
+        }
+
+        function searchDirectChart() {
+            const input = document.getElementById('charts-search-input');
+            const ticker = (input ? input.value : '').toUpperCase().trim();
+            if (!ticker) {
+                showToast("Masukkan kode saham (Ticker).", "error");
+                return;
+            }
+            loadChart(ticker, ticker, 'Custom Search');
+        }
+
+        function toggleIndicator(name) {
+            indicatorVisibility[name] = !indicatorVisibility[name];
+            const isVisible = indicatorVisibility[name];
+            const btn = document.getElementById(`toggle-${name}`);
+            
+            if (name === 'ema20') {
+                if (chartEma20) chartEma20.applyOptions({ visible: isVisible });
+                if (termEma20) termEma20.applyOptions({ visible: isVisible });
+                if (btn) btn.className = isVisible 
+                    ? 'px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-400 border border-blue-200 dark:border-blue-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+            } else if (name === 'ema50') {
+                if (chartEma50) chartEma50.applyOptions({ visible: isVisible });
+                if (termEma50) termEma50.applyOptions({ visible: isVisible });
+                if (btn) btn.className = isVisible
+                    ? 'px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-400 border border-amber-200 dark:border-amber-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+            } else if (name === 'ema200') {
+                if (chartEma200) chartEma200.applyOptions({ visible: isVisible });
+                if (termEma200) termEma200.applyOptions({ visible: isVisible });
+                if (btn) btn.className = isVisible
+                    ? 'px-2.5 py-1 rounded-lg bg-pink-50 text-pink-700 dark:bg-pink-950/70 dark:text-pink-400 border border-pink-200 dark:border-pink-800 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+            } else if (name === 'volMa') {
+                if (chartVolMa) chartVolMa.applyOptions({ visible: isVisible });
+                if (termVolMa) termVolMa.applyOptions({ visible: isVisible });
+                if (btn) btn.className = isVisible
+                    ? 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 dark:bg-surface-800 dark:text-gray-300 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] transition'
+                    : 'px-2.5 py-1 rounded-lg bg-slate-100 text-slate-400 dark:bg-surface-800 dark:text-gray-500 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 font-semibold text-[11px] opacity-60 transition';
+            }
+        }
+
+        function updateQuickTickersFromScan(results) {
+            const container = document.getElementById('quick-tickers');
+            if (!container || !results || results.length === 0) return;
+            const topTickers = results.slice(0, 8);
+            container.innerHTML = topTickers.map(r => `
+                <button onclick="loadChart('${r.symbol}', '${r.name || r.symbol}', '${r.primary_setup || 'Setup'}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition flex items-center gap-1">
+                    <span class="font-bold">${r.symbol}</span>
+                    <span class="text-[9px] px-1 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-mono">${r.score || ''}</span>
+                </button>
+            `).join('');
         }
 
         // ==========================================

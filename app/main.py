@@ -372,16 +372,28 @@ async def api_calculate_size(
 
 @app.get("/api/chart/{ticker}")
 async def api_chart(ticker: str):
-    full_ticker = ticker if ticker.endswith(".JK") else f"{ticker}.JK"
+    clean_ticker = ticker.upper().replace(".JK", "").strip()
+    full_ticker = f"{clean_ticker}.JK"
     loop = asyncio.get_event_loop()
     df = await loop.run_in_executor(None, fetch_stock_df, full_ticker)
     
     if df is None or df.empty:
         return JSONResponse(status_code=404, content={"error": "Data not found"})
     
+    # Hitung Indikator Teknikal: EMA 20, EMA 50, EMA 200 & Volume MA 20
+    df["EMA20"] = df["Close"].ewm(span=20, adjust=False).mean()
+    df["EMA50"] = df["Close"].ewm(span=50, adjust=False).mean()
+    df["EMA200"] = df["Close"].ewm(span=200, adjust=False).mean()
+    df["VolMA20"] = df["Volume"].rolling(window=20).mean()
+
     # Format untuk TradingView Lightweight Charts
     candles = []
     volumes = []
+    ema20_series = []
+    ema50_series = []
+    ema200_series = []
+    vol_ma20_series = []
+
     for idx, row in df.iterrows():
         time_str = idx.strftime("%Y-%m-%d")
         open_val = round(float(row["Open"]), 2)
@@ -402,8 +414,25 @@ async def api_chart(ticker: str):
             "value": vol_val,
             "color": "rgba(16, 185, 129, 0.4)" if close_val >= open_val else "rgba(239, 68, 68, 0.4)"
         })
+
+        if pd.notnull(row.get("EMA20")):
+            ema20_series.append({"time": time_str, "value": round(float(row["EMA20"]), 2)})
+        if pd.notnull(row.get("EMA50")):
+            ema50_series.append({"time": time_str, "value": round(float(row["EMA50"]), 2)})
+        if pd.notnull(row.get("EMA200")):
+            ema200_series.append({"time": time_str, "value": round(float(row["EMA200"]), 2)})
+        if pd.notnull(row.get("VolMA20")):
+            vol_ma20_series.append({"time": time_str, "value": round(float(row["VolMA20"]), 2)})
         
-    return {"ticker": ticker, "candles": candles[-150:], "volumes": volumes[-150:]}
+    return {
+        "ticker": clean_ticker,
+        "candles": candles[-180:],
+        "volumes": volumes[-180:],
+        "ema20": ema20_series[-180:],
+        "ema50": ema50_series[-180:],
+        "ema200": ema200_series[-180:],
+        "vol_ma20": vol_ma20_series[-180:]
+    }
 
 @app.get("/api/journal")
 async def api_get_journal():
