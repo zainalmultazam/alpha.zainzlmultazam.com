@@ -2142,7 +2142,7 @@
                 }
 
                 if (allScanResults.length > 0) {
-                    loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup);
+                    loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup, false);
                 }
 
                 if (progressBox) progressBox.classList.add('hidden');
@@ -2176,7 +2176,7 @@
                                 }
 
                                 if (allScanResults.length > 0) {
-                                    loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup);
+                                    loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup, false);
                                 }
                                 setTimeout(() => {
                                     if (progressBox) progressBox.classList.add('hidden');
@@ -2643,10 +2643,14 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
-        async function loadChart(symbol, name, setup) {
+        async function loadChart(symbol, name, setup, autoSwitch = true) {
             const cleanSymbol = symbol.toUpperCase().replace('.JK', '').trim();
             const displayName = name || cleanSymbol;
             const displaySetup = setup || 'Liquid';
+
+            if (autoSwitch) {
+                switchView('terminal');
+            }
 
             const titleEl = document.getElementById('chart-title');
             const badgeEl = document.getElementById('chart-badge');
