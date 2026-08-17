@@ -59,10 +59,10 @@
                             card: '#161F33'
                         },
                         brand: {
-                            500: '#10B981',
-                            400: '#34D399',
-                            600: '#059669',
-                            950: '#022C22'
+                            500: '#3B82F6',
+                            400: '#60A5FA',
+                            600: '#2563EB',
+                            950: '#0F172A'
                         },
                         danger: {
                             500: '#F43F5E',
@@ -102,10 +102,10 @@
             z-index: 0;
         }
         .dark .ambient-glow {
-            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.10), rgba(14, 165, 233, 0.03), transparent 70%);
+            background: radial-gradient(circle 400px at 50% -20%, rgba(59, 130, 246, 0.12), rgba(6, 182, 212, 0.03), transparent 70%);
         }
         html:not(.dark) .ambient-glow {
-            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.06), rgba(14, 165, 233, 0.02), transparent 70%);
+            background: radial-gradient(circle 400px at 50% -20%, rgba(59, 130, 246, 0.08), rgba(6, 182, 212, 0.02), transparent 70%);
         }
 
         /* Single-Surface Clean Card Design */
@@ -130,24 +130,24 @@
             transform: translateY(-2px);
         }
         .dark .clean-card-hover:hover {
-            border-color: rgba(16, 185, 129, 0.4);
-            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 18px -4px rgba(16, 185, 129, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 18px -4px rgba(59, 130, 246, 0.15);
         }
         html:not(.dark) .clean-card-hover:hover {
-            border-color: rgba(16, 185, 129, 0.5);
-            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.06), 0 0 16px -2px rgba(16, 185, 129, 0.12);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.06), 0 0 16px -2px rgba(59, 130, 246, 0.12);
         }
 
         /* Sidebar Nav Link Active State */
         .dark .nav-item.active {
-            background: rgba(16, 185, 129, 0.12);
-            color: #34D399;
-            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(59, 130, 246, 0.12);
+            color: #60A5FA;
+            border-color: rgba(59, 130, 246, 0.35);
         }
         html:not(.dark) .nav-item.active {
-            background: #ECFDF5;
-            color: #059669;
-            border-color: #A7F3D0;
+            background: #EFF6FF;
+            color: #2563EB;
+            border-color: #BFDBFE;
         }
 
         /* Custom Tooltip Styling */
@@ -210,15 +210,15 @@
         html:not(.dark) ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
     </style>
 </head>
-<body class="min-h-screen flex antialiased bg-slate-50 text-slate-800 dark:bg-oled dark:text-slate-200 selection:bg-emerald-500/30 selection:text-emerald-400">
+<body class="min-h-screen flex antialiased bg-slate-50 text-slate-800 dark:bg-oled dark:text-slate-200 selection:bg-blue-500/30 selection:text-blue-400">
     <div class="ambient-glow"></div>
 
     <!-- PIN SECURITY OVERLAY (Default Unlocked Check) -->
     <div id="pin-lock-overlay" class="fixed inset-0 z-[999999] bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4 transition-all duration-300">
         <div id="pin-card" class="w-full max-w-sm bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-2xl text-center flex flex-col items-center relative">
             
-            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500 mb-4 shadow-inner">
-                <i data-lucide="shield-check" class="w-7 h-7 text-emerald-500"></i>
+            <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500 mb-4 shadow-inner">
+                <i data-lucide="shield-check" class="w-7 h-7 text-blue-500"></i>
             </div>
 
             <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Alpha Security</h2>
@@ -227,7 +227,7 @@
             <!-- PIN Input form -->
             <form id="pin-form" onsubmit="handlePinSubmit(event)" class="w-full space-y-4">
                 <div class="relative">
-                    <input type="password" id="pin-input" maxlength="8" autofocus placeholder="••••" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-center text-2xl font-mono tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                    <input type="password" id="pin-input" maxlength="8" autofocus placeholder="••••" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-center text-2xl font-mono tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                 </div>
 
                 <div id="pin-error" class="text-xs text-danger-500 dark:text-danger-400 font-mono hidden flex items-center justify-center gap-1.5 py-1">
@@ -235,7 +235,7 @@
                     <span id="pin-error-text">PIN salah. Silakan coba lagi.</span>
                 </div>
 
-                <button type="submit" id="pin-btn" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2 active:scale-95">
+                <button type="submit" id="pin-btn" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition flex items-center justify-center gap-2 active:scale-95">
                     <i data-lucide="key-round" class="w-4 h-4"></i>
                     <span>Buka Kunci Terminal</span>
                 </button>
@@ -253,7 +253,7 @@
         <div class="w-full max-w-md bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-2xl p-6 shadow-2xl space-y-4 relative">
             <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500">
+                    <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-500">
                         <i data-lucide="book-plus" class="w-5 h-5"></i>
                     </div>
                     <div>
@@ -270,38 +270,38 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Ticker Saham</label>
-                        <input type="text" id="manual-ticker" required placeholder="AUTO" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+                        <input type="text" id="manual-ticker" required placeholder="AUTO" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Jumlah Lot</label>
-                        <input type="text" inputmode="numeric" id="manual-lots" required placeholder="35" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        <input type="text" inputmode="numeric" id="manual-lots" required placeholder="35" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Harga Beli / Entry (Rp)</label>
-                        <input type="text" inputmode="numeric" id="manual-entry" required placeholder="2.900" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        <input type="text" inputmode="numeric" id="manual-entry" required placeholder="2.900" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Stop Loss (Rp)</label>
-                        <input type="text" inputmode="numeric" id="manual-sl" required placeholder="2.800" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        <input type="text" inputmode="numeric" id="manual-sl" required placeholder="2.800" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Target TP (Rp)</label>
-                        <input type="text" inputmode="numeric" id="manual-tp" placeholder="3.100" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        <input type="text" inputmode="numeric" id="manual-tp" placeholder="3.100" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1">Setup / Catatan</label>
-                        <input type="text" id="manual-setup" placeholder="Swing Breakout" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-sans focus:outline-none focus:border-emerald-500 transition">
+                        <input type="text" id="manual-setup" placeholder="Swing Breakout" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-white font-sans focus:outline-none focus:border-blue-500 transition">
                     </div>
                 </div>
 
                 <div class="pt-2">
-                    <button type="submit" id="btn-submit-manual-journal" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 active:scale-[0.98]">
+                    <button type="submit" id="btn-submit-manual-journal" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 active:scale-[0.98]">
                         <i data-lucide="check" class="w-4 h-4"></i> Simpan ke Jurnal & Awasi
                     </button>
                 </div>
@@ -318,8 +318,8 @@
         <!-- Sidebar Header (Aligned h-16) -->
         <div class="h-16 border-b border-slate-200 dark:border-white/[0.07] flex items-center justify-center shrink-0">
             <button onclick="toggleSidebar()" class="group relative text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-surface-800 transition flex items-center w-full" title="Toggle Sidebar">
-                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-inner shrink-0 group-hover:scale-105 transition-transform">
-                    <i data-lucide="zap" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/5 border border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-inner shrink-0 group-hover:scale-105 transition-transform">
+                    <i data-lucide="zap" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                 </div>
                 <div class="sidebar-tooltip">
                     Buka / Tutup Sidebar
@@ -328,7 +328,7 @@
                 <div class="truncate transition-opacity duration-200 hidden ml-2.5 text-left" id="brand-text">
                     <div class="flex items-center gap-1.5">
                         <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">Alpha</span>
-                        <span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">IDX</span>
+                        <span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400 border border-blue-300 dark:border-blue-800">IDX</span>
                     </div>
                     <p class="text-[10px] font-mono text-slate-500 dark:text-gray-500 truncate">{{ domain }}</p>
                 </div>
@@ -342,7 +342,7 @@
             <div class="relative group w-full">
                 <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                        <i data-lucide="layout-grid" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                     </div>
                     <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Screener</span>
                 </button>
@@ -507,7 +507,7 @@
                 </button>
 
                 <!-- Scan Button -->
-                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-md shadow-emerald-600/20 active:scale-[0.98]">
+                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-md shadow-blue-600/20 active:scale-[0.98]">
                     <i data-lucide="refresh-cw" id="icon-scan" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">Scan Market</span>
                 </button>
@@ -1066,18 +1066,18 @@
                     <div class="space-y-4 text-xs font-mono">
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 dark:text-gray-300 mb-1">Modal Portofolio Default (Rp)</label>
-                            <input type="text" id="settings-capital" value="50.000.000" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500">
+                            <input type="text" id="settings-capital" value="50.000.000" oninput="formatRupiahInput(this)" class="w-full bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500">
                         </div>
 
                         <div>
                             <label class="block font-sans font-semibold text-slate-700 dark:text-gray-300 mb-1">Maksimal Risiko per Trade (%)</label>
-                            <input type="number" id="settings-risk" value="1.0" step="0.1" class="w-full bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500">
+                            <input type="number" id="settings-risk" value="1.0" step="0.1" class="w-full bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500">
                         </div>
 
                         <div class="p-3 bg-slate-50 dark:bg-oled rounded-xl border border-slate-200 dark:border-white/10 space-y-1.5 text-[11px] text-slate-600 dark:text-gray-400">
-                            <div>• Domain: <b class="text-emerald-600 dark:text-emerald-400">{{ domain }}</b></div>
-                            <div>• Engine: <b class="text-blue-600 dark:text-blue-400">Python 3.11 + Uvicorn + LiteSpeed</b></div>
-                            <div>• Database: <b class="text-purple-600 dark:text-purple-400">alpha.db</b></div>
+                            <div>• Domain: <b class="text-blue-600 dark:text-blue-400">{{ domain }}</b></div>
+                            <div>• Engine: <b class="text-indigo-600 dark:text-indigo-400">Python 3.11 + Uvicorn + LiteSpeed</b></div>
+                            <div>• Database: <b class="text-cyan-600 dark:text-cyan-400">alpha.db</b></div>
                         </div>
                     </div>
 
@@ -1085,7 +1085,7 @@
                         <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 transition">
                             Tutup
                         </button>
-                        <button onclick="saveSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition active:scale-95">
+                        <button onclick="saveSettingsModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white shadow-sm transition active:scale-95">
                             Simpan
                         </button>
                     </div>
@@ -2233,7 +2233,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 const yIhsg = getY(p.ihsg_pct);
 
                 pointsHtml += `
-                    <circle cx="${x}" cy="${yAcc}" r="4" class="fill-emerald-500 stroke-white dark:stroke-surface-950" stroke-width="2">
+                    <circle cx="${x}" cy="${yAcc}" r="4" class="fill-blue-500 stroke-white dark:stroke-surface-950" stroke-width="2">
                         <title>${p.date} | Account: ${p.account_pct >= 0 ? '+' : ''}${p.account_pct}% (Rp ${p.equity.toLocaleString('id-ID')})</title>
                     </circle>
                     <circle cx="${x}" cy="${yIhsg}" r="3" class="fill-cyan-400 stroke-white dark:stroke-surface-950" stroke-width="1.5">
@@ -2246,14 +2246,14 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 <svg viewBox="0 0 ${width} ${height}" class="w-full h-full overflow-visible">
                     <defs>
                         <linearGradient id="accGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stop-color="#10B981" stop-opacity="0.3" />
-                            <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
+                            <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.35" />
+                            <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.0" />
                         </linearGradient>
                     </defs>
                     ${gridLinesHtml}
                     <path d="${accAreaD}" fill="url(#accGradient)" />
                     <path d="${ihsgPathD}" fill="none" stroke="#22D3EE" stroke-width="2" stroke-dasharray="4,4" />
-                    <path d="${accPathD}" fill="none" stroke="#10B981" stroke-width="2.5" />
+                    <path d="${accPathD}" fill="none" stroke="#3B82F6" stroke-width="2.5" />
                     ${pointsHtml}
                     ${xLabelsHtml}
                 </svg>

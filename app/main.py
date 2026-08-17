@@ -32,16 +32,16 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "t
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="alphaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#34d399"/>
-      <stop offset="100%" stop-color="#06b6d4"/>
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#2563eb"/>
     </linearGradient>
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
       <feGaussianBlur stdDeviation="1.5" result="blur"/>
       <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
-  <rect width="64" height="64" rx="16" fill="#090d16"/>
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#10b981" stroke-width="1.5" stroke-opacity="0.35"/>
+  <rect width="64" height="64" rx="16" fill="#06080F"/>
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-opacity="0.4"/>
   <path d="M34 10 L16 36 L30 36 L24 54 L48 26 L34 26 Z" fill="url(#alphaGrad)" filter="url(#glow)"/>
 </svg>"""
 
