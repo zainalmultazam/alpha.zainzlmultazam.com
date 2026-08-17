@@ -430,37 +430,42 @@
 
         </nav>
 
-        <!-- Sidebar Footer Actions & Status -->
-        <div class="py-2.5 px-0 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col gap-2 shrink-0 overflow-hidden">
+        <!-- Sidebar Footer Actions & Status (Vertical Stack) -->
+        <div class="py-3 px-0 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50/50 dark:bg-oled/50 flex flex-col gap-1 shrink-0 overflow-hidden">
             
-            <!-- 2 Footer Mini Action Icons (Settings & Lock) -->
-            <div class="grid grid-cols-2 gap-1 w-full px-0.5">
-                <!-- Settings Icon -->
-                <div class="relative group w-full">
-                    <button onclick="openSettingsModal()" class="w-full h-7 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Settings">
-                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <div class="sidebar-tooltip font-mono">
-                        Settings
+            <!-- Settings Button -->
+            <div class="relative group w-full">
+                <button onclick="openSettingsModal()" class="w-full flex items-center p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-surface-800 transition" title="Settings">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <i data-lucide="settings" class="w-4.5 h-4.5"></i>
                     </div>
+                    <span class="sidebar-text hidden ml-3 text-xs font-semibold text-left whitespace-nowrap">Settings</span>
+                </button>
+                <div class="sidebar-tooltip font-mono">
+                    Settings
                 </div>
+            </div>
 
-                <!-- Lock Icon -->
-                <div class="relative group w-full">
-                    <button onclick="lockTerminal()" class="w-full h-7 rounded-lg text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Lock">
-                        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-                    </button>
-                    <div class="sidebar-tooltip font-mono">
-                        Lock
+            <!-- Lock Button -->
+            <div class="relative group w-full">
+                <button onclick="lockTerminal()" class="w-full flex items-center p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-200/70 dark:hover:bg-surface-800 transition" title="Lock">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <i data-lucide="lock" class="w-4.5 h-4.5"></i>
                     </div>
+                    <span class="sidebar-text hidden ml-3 text-xs font-semibold text-left whitespace-nowrap">Lock</span>
+                </button>
+                <div class="sidebar-tooltip font-mono">
+                    Lock
                 </div>
             </div>
 
             <!-- Engine Online Status -->
-            <div class="relative group w-full">
-                <div class="h-8 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center justify-center cursor-pointer px-1">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0"></span>
-                    <span class="sidebar-text hidden ml-2.5 truncate text-[10px] font-mono font-semibold text-slate-800 dark:text-white whitespace-nowrap">Engine Online</span>
+            <div class="relative group w-full pt-1">
+                <div class="w-full flex items-center p-2 rounded-xl bg-slate-100/70 dark:bg-surface-900/60 border border-slate-200/60 dark:border-white/[0.04] cursor-pointer">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                    </div>
+                    <span class="sidebar-text hidden ml-3 truncate text-[10px] font-mono font-semibold text-slate-700 dark:text-gray-300 whitespace-nowrap">Engine online · 17:00 WIB</span>
                 </div>
                 <div class="sidebar-tooltip font-mono">
                     Engine online · 17:00 WIB
