@@ -810,7 +810,7 @@
                 </div>
 
                 <!-- Cards Grid -->
-                <div id="top-picks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div id="top-picks-container" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4">
                     <div class="col-span-full py-16 text-center text-slate-500 dark:text-gray-400 clean-card">
                         <div class="flex flex-col items-center">
                             <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400 mb-3"></i>
@@ -2213,23 +2213,24 @@
                     </div>
 
                     <!-- Card Footer Action with Copy GTC & Calculate -->
-                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between text-xs">
-                        <span class="text-slate-500 dark:text-gray-400 font-mono text-[11px]">R:R <b class="text-slate-900 dark:text-white">${plan.rr_ratio}</b></span>
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between text-xs gap-2">
+                        <span class="text-slate-500 dark:text-gray-400 font-mono text-[11px] shrink-0">R:R <b class="text-slate-900 dark:text-white">${plan.rr_ratio}</b></span>
                         
-                        <div class="flex items-center gap-1.5">
-                            <!-- 1-Click Copy Stockbit Order -->
-                            <button onclick="event.stopPropagation(); copyGtcOrder('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, ${plan.tp2}, '${item.primary_setup}', ${plan.risk_pct}, ${plan.tp1_gain_pct}, ${plan.tp2_gain_pct})" class="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white font-medium bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 transition flex items-center gap-1 active:scale-95" title="Salin format Stockbit Auto-Order">
-                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                                <span>Copy Stockbit</span>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <!-- 1-Click Copy Stockbit GTC Order -->
+                            <button onclick="event.stopPropagation(); copyGtcOrder('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, ${plan.tp2}, '${item.primary_setup}', ${plan.risk_pct}, ${plan.tp1_gain_pct}, ${plan.tp2_gain_pct})" class="text-slate-700 hover:text-slate-900 dark:text-gray-300 dark:hover:text-white font-medium bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 px-2 sm:px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 transition flex items-center gap-1.5 active:scale-95 text-[11px] whitespace-nowrap" title="Salin format Stockbit Auto-Order">
+                                <i data-lucide="copy" class="w-3.5 h-3.5 shrink-0"></i>
+                                <span class="hidden sm:inline">Copy GTC</span>
                             </button>
 
                             <!-- Direct Stockbit Link -->
-                            <a href="https://stockbit.com/#/symbol/${item.symbol}" target="_blank" onclick="event.stopPropagation()" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center gap-1" title="Buka ${item.symbol} di Stockbit">
+                            <a href="https://stockbit.com/#/symbol/${item.symbol}" target="_blank" onclick="event.stopPropagation()" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 p-1.5 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center justify-center shrink-0" title="Buka ${item.symbol} di Stockbit">
                                 <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                             </a>
 
-                            <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-950 px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800/80 transition flex items-center gap-1 active:scale-[0.98]">
-                                <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+                            <!-- Hitung Calculator Button -->
+                            <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-950 px-2 sm:px-2.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800/80 transition flex items-center gap-1.5 active:scale-[0.98] text-[11px] whitespace-nowrap" title="Hitung Lot & Risiko">
+                                <i data-lucide="calculator" class="w-3.5 h-3.5 shrink-0"></i>
                                 <span>Hitung</span>
                             </button>
                         </div>
