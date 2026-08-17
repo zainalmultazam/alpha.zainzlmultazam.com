@@ -361,10 +361,11 @@ async def api_calculate_size(
     capital: float = Form(...),
     risk_pct: float = Form(1.0),
     entry_price: float = Form(...),
-    stop_loss: float = Form(...)
+    stop_loss: float = Form(...),
+    target_price: Optional[float] = Form(None)
 ):
     try:
-        result = calculate_lot_size(capital, risk_pct, entry_price, stop_loss)
+        result = calculate_lot_size(capital, risk_pct, entry_price, stop_loss, target_price)
         return {"status": "success", "data": result}
     except ValueError as e:
         return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})

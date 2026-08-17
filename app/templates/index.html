@@ -979,40 +979,70 @@
             <!-- VIEW 5: CALCULATOR -->
             <div id="view-calculator" class="view-panel hidden space-y-6">
                 
-                <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
-                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4">
-                        <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
-                            <i data-lucide="calculator" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
-                            Kalkulator Position Sizing Saham IDX
-                        </h3>
-                        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Gunakan aturan batas risiko maksimal 1% per trade untuk menjaga modal portofolio jangka panjang.</p>
+                <div class="clean-card max-w-2xl mx-auto p-5 sm:p-6 space-y-5">
+                    
+                    <!-- Header -->
+                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4 flex items-start justify-between">
+                        <div>
+                            <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                                </div>
+                                Kalkulator Position Sizing Saham IDX
+                            </h3>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Disiplin batas risiko 0.5%–1.0% per trade untuk proteksi portofolio jangka panjang.</p>
+                        </div>
                     </div>
 
+                    <!-- Input Form -->
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
-                            <input type="text" inputmode="numeric" id="calc-capital" value="50.000.000" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        
+                        <!-- Modal & Preset Risk Row -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
+                                <input type="text" inputmode="numeric" id="calc-capital" value="50.000.000" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-semibold text-slate-700 dark:text-gray-300">Maksimal Risiko (%)</label>
+                                    <!-- Quick Presets -->
+                                    <div class="flex items-center gap-1 font-mono text-[10px]">
+                                        <button type="button" onclick="setRiskPreset(0.5)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="0.5">0.5%</button>
+                                        <button type="button" onclick="setRiskPreset(1.0)" class="risk-preset-btn active px-1.5 py-0.5 rounded bg-blue-600 text-white font-semibold transition" data-preset="1.0">1.0%</button>
+                                        <button type="button" onclick="setRiskPreset(1.5)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="1.5">1.5%</button>
+                                        <button type="button" onclick="setRiskPreset(2.0)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="2.0">2.0%</button>
+                                    </div>
+                                </div>
+                                <input type="number" id="calc-risk-pct" value="1.0" step="0.1" min="0.1" max="10" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
+                            </div>
                         </div>
 
+                        <!-- Ticker & Entry Price -->
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Maksimal Risiko (%)</label>
-                                <input type="number" id="calc-risk-pct" value="1.0" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
-                            </div>
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Ticker Saham</label>
-                                <input type="text" id="calc-ticker" placeholder="AUTO" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+                                <input type="text" id="calc-ticker" placeholder="AUTO" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-blue-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Entry Price (Rp)</label>
+                                <input type="text" inputmode="numeric" id="calc-entry" placeholder="2.900" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
                             </div>
                         </div>
 
+                        <!-- Stop Loss & Target Price (TP) -->
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Entry Price (Rp)</label>
-                                <input type="text" inputmode="numeric" id="calc-entry" placeholder="2.900" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Stop Loss (Rp)</label>
+                                <input type="text" inputmode="numeric" id="calc-sl" placeholder="2.800" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-rose-500/60 transition">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Stop Loss (Rp)</label>
-                                <input type="text" inputmode="numeric" id="calc-sl" placeholder="2.800" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label class="text-xs font-semibold text-slate-700 dark:text-gray-300">Target TP (Rp)</label>
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400 font-mono" id="calc-tp-hint">Otomatis 2R</span>
+                                </div>
+                                <input type="text" inputmode="numeric" id="calc-tp" placeholder="Opsional (Auto 2R)" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500/60 transition">
                             </div>
                         </div>
 
@@ -1028,25 +1058,52 @@
                             <span id="calc-notice-text">Lot dibatasi kapasitas modal.</span>
                         </div>
 
-                        <!-- Live Result Box -->
-                        <div id="calc-result" class="bg-slate-100 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2.5 text-xs font-mono">
-                            <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
-                                <span class="text-slate-500 dark:text-gray-400 font-sans">Rekomendasi Jumlah:</span>
-                                <span class="text-emerald-600 dark:text-emerald-400 font-bold text-base" id="res-lots">0 Lot (0 Lembar)</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
-                                <span class="text-slate-500 dark:text-gray-400 font-sans">Total Modal Beli:</span>
-                                <span class="text-slate-900 dark:text-white font-semibold" id="res-cost">Rp 0</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
-                                <span class="text-slate-500 dark:text-gray-400 font-sans">Maksimal Risiko (Kena SL):</span>
-                                <span class="text-danger-500 dark:text-danger-400 font-semibold" id="res-risk">Rp 0</span>
-                            </div>
-                            <div class="flex justify-between items-center py-1">
-                                <span class="text-slate-500 dark:text-gray-400 font-sans">Alokasi Portofolio:</span>
-                                <span class="text-target-500 dark:text-target-400 font-semibold" id="res-alloc">0%</span>
+                        <!-- Live Result Panel -->
+                        <div id="calc-result" class="bg-slate-100 dark:bg-oled p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-white/10 space-y-4 text-xs font-mono">
+                            
+                            <!-- Hero Recommendation -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-white/[0.06]">
+                                <div>
+                                    <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Rekomendasi Pembelian:</span>
+                                    <div class="text-emerald-600 dark:text-emerald-400 font-extrabold text-xl sm:text-2xl mt-0.5" id="res-lots">0 Lot (0 Lembar)</div>
+                                </div>
+                                <div class="sm:text-right">
+                                    <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Modal Pembelian:</span>
+                                    <div class="text-slate-900 dark:text-white font-bold text-base sm:text-lg mt-0.5" id="res-cost">Rp 0</div>
+                                </div>
                             </div>
 
+                            <!-- 3 Key Metric Cards -->
+                            <div class="grid grid-cols-3 gap-2.5 text-center">
+                                <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200/70 dark:border-white/[0.06]">
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Batas Risiko (SL)</span>
+                                    <span class="text-rose-600 dark:text-rose-400 font-bold text-xs sm:text-sm block mt-1" id="res-risk">Rp 0</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400" id="res-risk-pct">-0.0%</span>
+                                </div>
+                                <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200/70 dark:border-white/[0.06]">
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Potensi Target (TP)</span>
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-bold text-xs sm:text-sm block mt-1" id="res-reward">Rp 0</span>
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400" id="res-reward-pct">+0.0%</span>
+                                </div>
+                                <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200/70 dark:border-white/[0.06]">
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Risk : Reward</span>
+                                    <span class="text-cyan-600 dark:text-cyan-400 font-bold text-xs sm:text-sm block mt-1" id="res-rr">1 : 2.0</span>
+                                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold" id="res-rr-label">Asimetris</span>
+                                </div>
+                            </div>
+
+                            <!-- Capital Allocation Bar -->
+                            <div class="space-y-1.5 pt-1">
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-slate-500 dark:text-gray-400 font-sans">Alokasi Portofolio:</span>
+                                    <span class="font-bold text-slate-800 dark:text-gray-200" id="res-alloc-text">0% dari modal</span>
+                                </div>
+                                <div class="w-full bg-slate-200 dark:bg-surface-800 rounded-full h-2 overflow-hidden">
+                                    <div id="res-alloc-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300 w-0"></div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
                             <div class="grid grid-cols-2 gap-2 pt-2">
                                 <button onclick="copyCurrentCalcGTC()" class="bg-slate-200 hover:bg-slate-300 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 font-sans active:scale-[0.98]">
                                     <i data-lucide="copy" class="w-4 h-4"></i> Copy Auto-Order GTC
@@ -1055,6 +1112,7 @@
                                     <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal
                                 </button>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -2056,10 +2114,23 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             return parseFloat(clean) || 0;
         }
 
+        function setRiskPreset(pct) {
+            document.getElementById('calc-risk-pct').value = pct;
+            document.querySelectorAll('.risk-preset-btn').forEach(btn => {
+                if (parseFloat(btn.dataset.preset) === pct) {
+                    btn.className = 'risk-preset-btn active px-1.5 py-0.5 rounded bg-blue-600 text-white font-semibold transition';
+                } else {
+                    btn.className = 'risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition';
+                }
+            });
+            calculateLotFromForm();
+        }
+
         function quickCalculate(ticker, entry, sl, tp, setup) {
             document.getElementById('calc-ticker').value = ticker;
             document.getElementById('calc-entry').value = Number(entry).toLocaleString('id-ID');
             document.getElementById('calc-sl').value = Number(sl).toLocaleString('id-ID');
+            document.getElementById('calc-tp').value = tp ? Number(tp).toLocaleString('id-ID') : '';
             switchView('calculator');
             calculateLotFromForm();
         }
@@ -2069,12 +2140,14 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             const riskPct = parseFloat(document.getElementById('calc-risk-pct').value) || 1.0;
             const entry = parseRupiahInput(document.getElementById('calc-entry').value) || 0;
             const sl = parseRupiahInput(document.getElementById('calc-sl').value) || 0;
+            const tp = parseRupiahInput(document.getElementById('calc-tp').value) || 0;
             const ticker = (document.getElementById('calc-ticker').value || 'AUTO').toUpperCase();
 
             const errorBanner = document.getElementById('calc-error-banner');
             const errorText = document.getElementById('calc-error-text');
             const noticeBanner = document.getElementById('calc-notice-banner');
             const noticeText = document.getElementById('calc-notice-text');
+            const tpHint = document.getElementById('calc-tp-hint');
 
             if (errorBanner) errorBanner.classList.add('hidden');
             if (noticeBanner) noticeBanner.classList.add('hidden');
@@ -2091,7 +2164,12 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 document.getElementById('res-lots').innerText = `0 Lot (0 Lembar)`;
                 document.getElementById('res-cost').innerText = `Rp 0`;
                 document.getElementById('res-risk').innerText = `Rp 0`;
-                document.getElementById('res-alloc').innerText = `0%`;
+                document.getElementById('res-risk-pct').innerText = `-0.0%`;
+                document.getElementById('res-reward').innerText = `Rp 0`;
+                document.getElementById('res-reward-pct').innerText = `+0.0%`;
+                document.getElementById('res-rr').innerText = `1 : 0.0`;
+                document.getElementById('res-alloc-text').innerText = `0% dari modal`;
+                document.getElementById('res-alloc-bar').style.width = `0%`;
                 return;
             }
 
@@ -2100,6 +2178,12 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             formData.append('risk_pct', riskPct);
             formData.append('entry_price', entry);
             formData.append('stop_loss', sl);
+            if (tp && tp > entry) {
+                formData.append('target_price', tp);
+                if (tpHint) tpHint.innerText = "Custom TP";
+            } else {
+                if (tpHint) tpHint.innerText = "Otomatis 2R";
+            }
 
             try {
                 const res = await fetch('/api/calculate-size', { method: 'POST', body: formData });
@@ -2113,7 +2197,12 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     document.getElementById('res-lots').innerText = `0 Lot (0 Lembar)`;
                     document.getElementById('res-cost').innerText = `Rp 0`;
                     document.getElementById('res-risk').innerText = `Rp 0`;
-                    document.getElementById('res-alloc').innerText = `0%`;
+                    document.getElementById('res-risk-pct').innerText = `-0.0%`;
+                    document.getElementById('res-reward').innerText = `Rp 0`;
+                    document.getElementById('res-reward-pct').innerText = `+0.0%`;
+                    document.getElementById('res-rr').innerText = `1 : 0.0`;
+                    document.getElementById('res-alloc-text').innerText = `0% dari modal`;
+                    document.getElementById('res-alloc-bar').style.width = `0%`;
                     return;
                 }
 
@@ -2121,7 +2210,41 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 document.getElementById('res-lots').innerText = `${d.lots} Lot (${d.shares.toLocaleString('id-ID')} Lembar)`;
                 document.getElementById('res-cost').innerText = `Rp ${d.total_cost.toLocaleString('id-ID')}`;
                 document.getElementById('res-risk').innerText = `Rp ${d.max_risk_idr.toLocaleString('id-ID')}`;
-                document.getElementById('res-alloc').innerText = `${d.capital_allocation_pct}% dari modal portofolio`;
+                document.getElementById('res-risk-pct').innerText = `-${d.risk_pct_price}%`;
+                document.getElementById('res-reward').innerText = `Rp ${d.tp_gain_idr.toLocaleString('id-ID')}`;
+                document.getElementById('res-reward-pct').innerText = `+${d.tp_gain_pct}%`;
+                
+                const elRr = document.getElementById('res-rr');
+                const elRrLabel = document.getElementById('res-rr-label');
+                if (elRr) elRr.innerText = `1 : ${d.rr_ratio}`;
+                if (elRrLabel) {
+                    if (d.rr_ratio >= 2.0) {
+                        elRrLabel.innerText = "Asimetris (Sangat Bagus)";
+                        elRrLabel.className = "text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold";
+                    } else if (d.rr_ratio >= 1.5) {
+                        elRrLabel.innerText = "Moderat";
+                        elRrLabel.className = "text-[10px] text-blue-600 dark:text-blue-400 font-semibold";
+                    } else {
+                        elRrLabel.innerText = "Sub-Optimal (<1.5R)";
+                        elRrLabel.className = "text-[10px] text-amber-600 dark:text-amber-400 font-semibold";
+                    }
+                }
+
+                // Capital Allocation Bar
+                const allocPct = d.capital_allocation_pct || 0;
+                const allocBar = document.getElementById('res-alloc-bar');
+                const allocText = document.getElementById('res-alloc-text');
+                if (allocText) allocText.innerText = `${allocPct}% dari total modal Rp ${capital.toLocaleString('id-ID')}`;
+                if (allocBar) {
+                    allocBar.style.width = `${Math.min(100, allocPct)}%`;
+                    if (allocPct <= 25) {
+                        allocBar.className = 'bg-blue-600 h-2 rounded-full transition-all duration-300';
+                    } else if (allocPct <= 50) {
+                        allocBar.className = 'bg-amber-500 h-2 rounded-full transition-all duration-300';
+                    } else {
+                        allocBar.className = 'bg-rose-500 h-2 rounded-full transition-all duration-300';
+                    }
+                }
 
                 if (d.capped_by_capital) {
                     if (noticeBanner && noticeText) {
@@ -2134,7 +2257,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     ticker: ticker,
                     entry_price: entry,
                     stop_loss: sl,
-                    target_price: entry + (entry - sl) * 2,
+                    target_price: d.target_price || (entry + (entry - sl) * 2),
                     lots: d.lots,
                     setup_name: 'Alpha Plan'
                 };

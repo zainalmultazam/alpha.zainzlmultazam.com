@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 def round_to_idx_fraction(price: float) -> float:
     """Membulatkan harga sesuai fraksi resmi BEI (IDX Tick Size)."""
@@ -49,8 +49,14 @@ def generate_trade_plan(price: float, atr: float, setup_type: str) -> Dict[str, 
         "action": "READY TO BUY" if setup_type in ["VCP Breakout", "EMA 20 Pullback", "Volume Surge"] else "WATCHLIST"
     }
 
-def calculate_lot_size(capital: float, risk_pct: float, entry_price: float, stop_loss: float) -> Dict[str, Any]:
-    """Menghitung jumlah Lot yang aman berdasarkan batas risiko maksimal modal."""
+def calculate_lot_size(
+    capital: float, 
+    risk_pct: float, 
+    entry_price: float, 
+    stop_loss: float, 
+    target_price: Optional[float] = None
+) -> Dict[str, Any]:
+    """Menghitung jumlah Lot yang aman, potensi profit, dan rasio R:R berdasarkan batas risiko portofolio."""
     if capital <= 0:
         raise ValueError("Modal harus lebih besar dari 0.")
     if entry_price <= 0:
@@ -76,15 +82,30 @@ def calculate_lot_size(capital: float, risk_pct: float, entry_price: float, stop
 
     total_cost = final_lots * 100 * entry_price
     max_loss_idr = final_lots * 100 * risk_per_share
+    risk_pct_price = round((risk_per_share / entry_price) * 100, 2)
     actual_risk_pct = round((max_loss_idr / capital) * 100, 2)
+
+    # Target Price & Reward Metrics
+    tp = target_price if (target_price and target_price > entry_price) else (entry_price + (2 * risk_per_share))
+    reward_per_share = tp - entry_price
+    tp_gain_idr = int(final_lots * 100 * reward_per_share)
+    tp_gain_pct = round((reward_per_share / entry_price) * 100, 2)
+    rr_ratio = round(reward_per_share / risk_per_share, 2) if risk_per_share > 0 else 0.0
 
     return {
         "lots": final_lots,
         "shares": final_lots * 100,
         "total_cost": int(total_cost),
         "max_risk_idr": int(max_loss_idr),
+        "risk_pct_price": risk_pct_price,
         "target_risk_pct": risk_pct,
         "actual_risk_pct": actual_risk_pct,
         "capital_allocation_pct": round((total_cost / capital) * 100, 1),
         "capped_by_capital": capped_by_capital,
+        "target_price": int(tp),
+        "tp_gain_idr": tp_gain_idr,
+        "tp_gain_pct": tp_gain_pct,
+        "rr_ratio": rr_ratio,
+        "is_default_tp": target_price is None or target_price <= entry_price
     }
+
