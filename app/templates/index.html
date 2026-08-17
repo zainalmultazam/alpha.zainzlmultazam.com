@@ -1127,15 +1127,20 @@
                         <span class="text-slate-500 dark:text-gray-400 font-mono text-[11px]">R:R <b class="text-slate-900 dark:text-white">${plan.rr_ratio}</b></span>
                         
                         <div class="flex items-center gap-1.5">
-                            <!-- 1-Click Copy GTC Order -->
-                            <button onclick="event.stopPropagation(); copyGtcOrder('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, ${plan.tp2}, '${item.primary_setup}', ${plan.risk_pct}, ${plan.tp1_gain_pct}, ${plan.tp2_gain_pct})" class="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white font-medium bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 transition flex items-center gap-1 active:scale-95" title="Salin format Auto-Order GTC untuk sekuritas">
+                            <!-- 1-Click Copy Stockbit Order -->
+                            <button onclick="event.stopPropagation(); copyGtcOrder('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, ${plan.tp2}, '${item.primary_setup}', ${plan.risk_pct}, ${plan.tp1_gain_pct}, ${plan.tp2_gain_pct})" class="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white font-medium bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 transition flex items-center gap-1 active:scale-95" title="Salin format Stockbit Auto-Order">
                                 <i data-lucide="copy" class="w-3.5 h-3.5"></i>
-                                <span>Copy GTC</span>
+                                <span>Copy Stockbit</span>
                             </button>
 
-                            <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center gap-1 active:scale-[0.98]">
+                            <!-- Direct Stockbit Link -->
+                            <a href="https://stockbit.com/#/symbol/${item.symbol}" target="_blank" onclick="event.stopPropagation()" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 px-2 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center gap-1" title="Buka ${item.symbol} di Stockbit">
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </a>
+
+                            <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-blue-700 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-semibold bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-950 px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800/80 transition flex items-center gap-1 active:scale-[0.98]">
                                 <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-                                <span>Hitung Lot</span>
+                                <span>Hitung</span>
                             </button>
                         </div>
                     </div>
@@ -1153,31 +1158,35 @@
             const shares = Math.floor(riskAmount / riskPerShare);
             const lots = Math.max(1, Math.floor(shares / 100));
             const halfLots = Math.max(1, Math.floor(lots / 2));
+            const runnerLots = lots - halfLots;
+            const costIdr = lots * 100 * entry;
 
-            const gtcScript = 
+            const stockbitScript = 
 `=======================================
-ALPHASWING IDX AUTO-ORDER GTC
+STOCKBIT AUTO-ORDER (GTC)
 =======================================
-Ticker        : ${ticker}.JK
-Strategi      : ${setup} (Weekly Confirmed)
+Saham      : ${ticker}
+Strategi   : ${setup} (Weekly Confirmed)
 ---------------------------------------
-1. ACTION     : BUY IF BREAK / BUY STOP
-   Entry Price: Rp ${entry.toLocaleString('id-ID')}
-   Jumlah Lot : ${lots} Lot (${(lots * 100).toLocaleString('id-ID')} Lembar)
-   Validitas  : GTC (Good Till Cancelled)
+1. AUTO BUY (BUY STOP):
+   • Kondisi  : Last Price >= Rp ${entry.toLocaleString('id-ID')}
+   • Order    : Buy ${lots} Lot @ Rp ${entry.toLocaleString('id-ID')}
+   • Total    : Rp ${costIdr.toLocaleString('id-ID')}
+   • Validitas: GTC (Good-Till-Cancelled)
 
-2. AUTO STOP LOSS (OCO):
-   SL Price   : Rp ${sl.toLocaleString('id-ID')} (-${riskPct}%)
-   Max Risiko : Rp ${riskAmount.toLocaleString('id-ID')} (1.0% Modal)
+2. AUTO CUT LOSS (STOP LOSS):
+   • Kondisi  : Last Price <= Rp ${sl.toLocaleString('id-ID')} (-${riskPct}%)
+   • Order    : Sell ${lots} Lot @ Rp ${sl.toLocaleString('id-ID')}
+   • Proteksi : Max Rugi Rp ${riskAmount.toLocaleString('id-ID')} (1.0% Modal)
 
-3. TAKE PROFIT TARGETS:
-   TP 1 (2R)  : Rp ${tp1.toLocaleString('id-ID')} (+${tp1Gain}%) -> Jual ${halfLots} Lot
-   TP 2 (Run) : Rp ${tp2.toLocaleString('id-ID')} (+${tp2Gain}%) -> Jual ${lots - halfLots} Lot
+3. TAKE PROFIT (PASANG SETELAH BELI):
+   • TP 1 (2R): Last Price >= Rp ${tp1.toLocaleString('id-ID')} (+${tp1Gain}%) -> Jual ${halfLots} Lot
+   • TP 2 (Run): Last Price >= Rp ${tp2.toLocaleString('id-ID')} (+${tp2Gain}%) -> Jual ${runnerLots} Lot
 =======================================
-*Siap dipasang di Stockbit, IPOT, Mirae, MOST, Ajaib.*`;
+Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
 
-            navigator.clipboard.writeText(gtcScript).then(() => {
-                showToast(`Auto-Order GTC ${ticker} (${lots} Lot) berhasil disalin ke clipboard!`);
+            navigator.clipboard.writeText(stockbitScript).then(() => {
+                showToast(`Auto-Order Stockbit ${ticker} (${lots} Lot) berhasil disalin!`);
             }).catch(() => {
                 showToast("Gagal menyalin order ke clipboard", "error");
             });

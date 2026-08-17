@@ -29,7 +29,7 @@ async def send_telegram_message(message: str) -> bool:
         return False
 
 async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
-    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan parameter order GTC presisi dan alokasi lot otomatis."""
+    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) yang disesuaikan khusus untuk Stockbit Auto Order."""
     if not picks:
         return False
 
@@ -49,11 +49,11 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     else:
         exposure_text = "DEFENSIVE / CASH IS KING (IHSG < EMA200)"
 
-    msg = f"<b>[ALPHASWING SUPER-DIGEST] TOP 3 PICKS</b>\n"
+    msg = f"<b>[ALPHASWING x STOCKBIT] TOP 3 PICKS</b>\n"
     msg += f"<i>{now_str} • {settings.APP_DOMAIN}</i>\n"
     msg += "────────────\n"
     
-    # Status Operasional Bursa (Libur / Buka / Tutup)
+    # Status Operasional Bursa
     market_status = climate.get("market_status") if climate else None
     if market_status:
         status_title = html.escape(str(market_status.get("title", "")))
@@ -64,7 +64,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     msg += f"• Rekomendasi: <i>{html.escape(exposure_text)}</i>\n"
     msg += "────────────\n\n"
 
-    # 2. Top 3 Picks Details
+    # 2. Top 3 Picks Details (Disesuaikan Menu Stockbit)
     top_3 = picks[:3]
     for i, p in enumerate(top_3, 1):
         plan = p["plan"]
@@ -77,6 +77,8 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         sizing = calculate_lot_size(settings.DEFAULT_CAPITAL, settings.DEFAULT_MAX_RISK_PCT, entry, sl)
         lots = sizing["lots"]
         shares = sizing["shares"]
+        half_lots = max(1, lots // 2)
+        runner_lots = lots - half_lots
         cost_idr = sizing["total_cost"]
         risk_idr = sizing["max_risk_idr"]
 
@@ -87,20 +89,21 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         msg += f"<b>#{i} {p['symbol']} - {safe_name}</b>\n"
         msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p['score']} PTS</b>)\n"
         msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n"
-        msg += f"• [BUY STOP / ENTRY]: Rp {entry:,}\n"
-        msg += f"• [STOP LOSS]: Rp {sl:,} (-{plan['risk_pct']}%)\n"
-        msg += f"• [TARGET TP 1]: Rp {tp1:,} (+{plan['tp1_gain_pct']}%)\n"
-        msg += f"• [TARGET TP 2]: Rp {tp2:,} (+{plan['tp2_gain_pct']}%)\n"
-        msg += f"• [ALOKASI AMAN]: <b>{lots} Lot</b> ({shares:,} lembar)\n"
-        msg += f"   <i>Modal Beli: Rp {cost_idr:,} | Max Risiko: Rp {risk_idr:,} (1%)</i>\n\n"
+        msg += f"• [AUTO BUY GTC]: <b>Last Price &gt;= Rp {entry:,}</b> (Order {lots} Lot)\n"
+        msg += f"• [AUTO SL CUT]: <b>Last Price &lt;= Rp {sl:,}</b> (-{plan['risk_pct']}%)\n"
+        msg += f"• [TAKE PROFIT 1]: <b>Last Price &gt;= Rp {tp1:,}</b> (+{plan['tp1_gain_pct']}% | Jual {half_lots} Lot)\n"
+        msg += f"• [TAKE PROFIT 2]: <b>Last Price &gt;= Rp {tp2:,}</b> (+{plan['tp2_gain_pct']}% | Jual {runner_lots} Lot)\n"
+        msg += f"• [ALOKASI MODAL]: <b>{lots} Lot</b> ({shares:,} lembar)\n"
+        msg += f"   <i>Total Beli: Rp {cost_idr:,} | Max Risiko: Rp {risk_idr:,} (1%)</i>\n"
+        msg += f"• <i>Stockbit Link: https://stockbit.com/#/symbol/{p['symbol']}</i>\n\n"
 
-    # 3. Action Call to Trader
+    # 3. Panduan Khusus Aplikasi Stockbit
     msg += "────────────\n"
-    msg += "<b>PANDUAN EKSEKUSI AUTO-ORDER GTC:</b>\n"
-    msg += "1. Buka aplikasi sekuritas (Stockbit, IPOT, Mirae, MOST, Ajaib).\n"
-    msg += "2. Pasang Auto-Order GTC Buy Stop pada harga Entry di atas.\n"
-    msg += "3. Pasang Auto Stop Loss (OCO) untuk proteksi modal otomatis.\n"
-    msg += "4. Disiplin posisi sesuai alokasi lot yang tertera.\n"
+    msg += "<b>PANDUAN SETTING DI APLIKASI STOCKBIT:</b>\n"
+    msg += "1. Buka Stockbit → Cari Saham → Tekan 'Auto Order'.\n"
+    msg += "2. Pilih Tab 'BUY', pilih kondisi: <code>Price &gt;= Rp [Entry]</code>.\n"
+    msg += "3. Set Expiry 'GTC' dan masukkan jumlah Lot di atas.\n"
+    msg += "4. Pasang Auto Order 'SELL' Cut Loss: <code>Price &lt;= Rp [SL]</code>.\n"
     msg += f"Terminal: https://{settings.APP_DOMAIN}"
 
     return await send_telegram_message(msg)
