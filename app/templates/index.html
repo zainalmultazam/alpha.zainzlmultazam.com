@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaSwing IDX | {{ domain }}</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#10B981', 600: '#059669' },
+                        dark: { 950: '#07090E', 900: '#0B0F19', 800: '#111827', 700: '#1F2937', 600: '#374151' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Lightweight Charts (TradingView) -->
+    <script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #07090E; color: #E5E7EB; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .glass { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .glass-card:hover { border-color: rgba(16, 185, 129, 0.4); }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0B0F19; }
+        ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #374151; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+    <!-- Navbar Header -->
+    <header class="border-b border-gray-800/80 bg-dark-900/90 sticky top-0 z-40 backdrop-blur">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 font-bold text-xl shadow-inner shadow-emerald-500/20">
+                    ⚡
+                </div>
+                <div>
+                    <h1 class="font-bold text-white tracking-wide flex items-center gap-2 text-base md:text-lg">
+                        AlphaSwing <span class="text-xs bg-emerald-950/80 text-emerald-400 border border-emerald-800/80 px-2.5 py-0.5 rounded-full font-mono font-semibold">IDX BEI</span>
+                    </h1>
+                    <p class="text-xs text-gray-400">{{ domain }}</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="openCalculatorModal()" class="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-gray-200 text-xs sm:text-sm font-medium px-3 sm:px-3.5 py-2 rounded-lg transition">
+                    <i data-lucide="calculator" class="w-4 h-4 text-emerald-400"></i>
+                    <span class="hidden sm:inline">Kalkulator</span> Lot
+                </button>
+
+                <button onclick="openJournalModal()" class="flex items-center gap-1.5 bg-dark-800 hover:bg-dark-700 border border-gray-700 text-gray-200 text-xs sm:text-sm font-medium px-3 sm:px-3.5 py-2 rounded-lg transition">
+                    <i data-lucide="book-open" class="w-4 h-4 text-blue-400"></i>
+                    <span class="hidden sm:inline">Jurnal</span> Trading
+                </button>
+
+                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold px-3.5 sm:px-4 py-2 rounded-lg transition shadow-lg shadow-emerald-900/30">
+                    <i data-lucide="refresh-cw" id="icon-scan" class="w-4 h-4"></i>
+                    <span>Scan Market</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+        
+        <!-- Summary Stats Banner -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div class="glass p-4 rounded-2xl border-l-4 border-l-emerald-500">
+                <div class="text-xs text-gray-400 font-medium">Universe Saham</div>
+                <div class="text-xl md:text-2xl font-bold text-white mt-1">150+ <span class="text-xs font-normal text-gray-500">Likuid IDX</span></div>
+            </div>
+            <div class="glass p-4 rounded-2xl border-l-4 border-l-blue-500">
+                <div class="text-xs text-gray-400 font-medium">Setup Sistem</div>
+                <div class="text-xl md:text-2xl font-bold text-blue-400 mt-1">VCP & Stage 2</div>
+            </div>
+            <div class="glass p-4 rounded-2xl border-l-4 border-l-yellow-500">
+                <div class="text-xs text-gray-400 font-medium">Maksimal Risiko</div>
+                <div class="text-xl md:text-2xl font-bold text-yellow-400 mt-1">{{ default_risk_pct }}% <span class="text-xs font-normal text-gray-500">Per Trade</span></div>
+            </div>
+            <div class="glass p-4 rounded-2xl border-l-4 border-l-purple-500">
+                <div class="text-xs text-gray-400 font-medium">Risk to Reward</div>
+                <div class="text-xl md:text-2xl font-bold text-purple-400 mt-1">1 : 2.0+ <span class="text-xs font-normal text-gray-500">Asimetris</span></div>
+            </div>
+        </div>
+
+        <!-- Top 5 Alpha Picks Section -->
+        <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h2 class="text-lg md:text-xl font-bold text-white flex items-center gap-2">
+                        <span>🚀</span> Top Alpha Playbook Hari Ini
+                    </h2>
+                    <p class="text-xs text-gray-400">Sinyal probabilitas tertinggi siap dieksekusi dengan Auto Order GTC</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span id="scan-status" class="text-xs text-gray-400 bg-dark-800/80 px-2.5 py-1 rounded-md border border-gray-800">Menyiapkan data...</span>
+                </div>
+            </div>
+
+            <!-- Setup Filter Tabs -->
+            <div class="flex flex-wrap items-center gap-2 mb-4" id="filter-tabs">
+                <button onclick="filterPicks('ALL')" class="filter-btn active text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium transition" data-filter="ALL">Semua (<span id="count-all">0</span>)</button>
+                <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-dark-800 text-gray-300 hover:bg-dark-700 border border-gray-700 font-medium transition" data-filter="VCP Breakout">VCP Breakout</button>
+                <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-dark-800 text-gray-300 hover:bg-dark-700 border border-gray-700 font-medium transition" data-filter="EMA 20 Pullback">EMA 20 Pullback</button>
+                <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-dark-800 text-gray-300 hover:bg-dark-700 border border-gray-700 font-medium transition" data-filter="Volume Surge">Volume Surge</button>
+                <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs px-3 py-1.5 rounded-lg bg-dark-800 text-gray-300 hover:bg-dark-700 border border-gray-700 font-medium transition" data-filter="Stage 2 Leader">Stage 2 Leader</button>
+            </div>
+
+            <div id="top-picks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Kartu saham akan di-generate via JavaScript -->
+                <div class="col-span-full py-16 text-center text-gray-400 glass rounded-2xl">
+                    <i data-lucide="loader-2" class="w-8 h-8 animate-spin mx-auto mb-3 text-emerald-500"></i>
+                    <p class="text-sm font-medium">Memindai dan menghitung indikator saham IDX...</p>
+                    <p class="text-xs text-gray-500 mt-1">Mengambil data dari Yahoo Finance BEI</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Preview & Interactive Analyzer -->
+        <div class="glass p-4 sm:p-5 rounded-2xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                        📊
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-base sm:text-lg flex items-center gap-2">
+                            <span id="chart-title">Pilih Saham untuk Menampilkan Chart</span>
+                        </h3>
+                        <span id="chart-badge" class="text-[11px] text-emerald-400 font-medium"></span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 bg-dark-800 px-2.5 py-1 rounded-md border border-gray-700">Daily Candlestick + Volume (BEI)</span>
+                </div>
+            </div>
+            <div id="tv-chart" class="w-full h-[420px] rounded-xl overflow-hidden bg-dark-950 border border-gray-800"></div>
+        </div>
+
+    </main>
+
+    <!-- Modal Kalkulator Lot -->
+    <div id="calc-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass bg-dark-900 border border-gray-700 max-w-md w-full rounded-2xl p-6 shadow-2xl relative">
+            <button onclick="closeCalculatorModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <h3 class="text-lg font-bold text-white flex items-center gap-2 mb-1">
+                <i data-lucide="calculator" class="w-5 h-5 text-emerald-400"></i> Kalkulator Position Sizing
+            </h3>
+            <p class="text-xs text-gray-400 mb-5">Hitung jumlah lot aman dengan proteksi modal maksimal 1% risk.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Total Modal Portofolio (Rp)</label>
+                    <input type="number" id="calc-capital" value="{{ default_capital }}" class="w-full bg-dark-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Maksimal Risiko (%)</label>
+                        <input type="number" id="calc-risk-pct" value="{{ default_risk_pct }}" step="0.1" class="w-full bg-dark-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Ticker Saham</label>
+                        <input type="text" id="calc-ticker" placeholder="BBCA" class="w-full bg-dark-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white uppercase focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Entry Price (Rp)</label>
+                        <input type="number" id="calc-entry" placeholder="8500" class="w-full bg-dark-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Stop Loss (Rp)</label>
+                        <input type="number" id="calc-sl" placeholder="8200" class="w-full bg-dark-950 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <button onclick="calculateLotFromForm()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-lg text-sm transition">
+                    Hitung Posisi Aman
+                </button>
+
+                <!-- Calculation Result Box -->
+                <div id="calc-result" class="hidden bg-dark-950/80 p-4 rounded-xl border border-gray-800 space-y-2 text-xs">
+                    <div class="flex justify-between items-center py-1 border-b border-gray-800">
+                        <span class="text-gray-400">Rekomendasi Jumlah:</span>
+                        <span class="text-emerald-400 font-bold text-base" id="res-lots">0 Lot (0 Lembar)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-gray-800">
+                        <span class="text-gray-400">Total Modal Diperlukan:</span>
+                        <span class="text-white font-semibold" id="res-cost">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1 border-b border-gray-800">
+                        <span class="text-gray-400">Maksimal Risiko (Jika Kena SL):</span>
+                        <span class="text-red-400 font-semibold" id="res-risk">Rp 0</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-gray-400">Alokasi dari Total Modal:</span>
+                        <span class="text-blue-400 font-semibold" id="res-alloc">0%</span>
+                    </div>
+
+                    <button onclick="logCalculatedTrade()" id="btn-log-journal" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
+                        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Catat ke Jurnal Trading
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Jurnal Trading -->
+    <div id="journal-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="glass bg-dark-900 border border-gray-700 max-w-4xl w-full rounded-2xl p-6 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-800">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i data-lucide="book-open" class="w-5 h-5 text-blue-400"></i> Jurnal & Pelacak Transaksi
+                </h3>
+                <button onclick="closeJournalModal()" class="text-gray-400 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 my-4 pr-1">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-800 text-gray-400 uppercase font-semibold">
+                            <th class="py-2.5 px-3">Tanggal</th>
+                            <th class="py-2.5 px-3">Ticker</th>
+                            <th class="py-2.5 px-3">Entry</th>
+                            <th class="py-2.5 px-3">Stop Loss</th>
+                            <th class="py-2.5 px-3">Target TP</th>
+                            <th class="py-2.5 px-3">Lot</th>
+                            <th class="py-2.5 px-3">Setup</th>
+                            <th class="py-2.5 px-3">Status</th>
+                            <th class="py-2.5 px-3">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="journal-table-body" class="divide-y divide-gray-800/60">
+                        <tr>
+                            <td colspan="9" class="py-8 text-center text-gray-500">Memuat catatan transaksi...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800/80 py-6 text-center text-xs text-gray-500 bg-dark-900/40">
+        &copy; 2026 {{ domain }} • {{ app_name }} • Sistem Swing Trading Otomatis IDX
+    </footer>
+
+    <!-- Script App Logic -->
+    <script>
+        let chartInstance = null;
+        let candleSeries = null;
+        let volumeSeries = null;
+        let allScanResults = [];
+        let currentFilter = 'ALL';
+        let currentCalculatedTrade = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initChart();
+            runScan(false);
+        });
+
+        function initChart() {
+            const container = document.getElementById('tv-chart');
+            chartInstance = LightweightCharts.createChart(container, {
+                layout: { 
+                    background: { color: '#07090E' }, 
+                    textColor: '#9CA3AF' 
+                },
+                grid: { 
+                    vertLines: { color: '#111827' }, 
+                    horzLines: { color: '#111827' } 
+                },
+                timeScale: { 
+                    borderColor: '#1F2937',
+                    timeVisible: true,
+                    secondsVisible: false
+                },
+                rightPriceScale: {
+                    borderColor: '#1F2937',
+                }
+            });
+
+            candleSeries = chartInstance.addCandlestickSeries({
+                upColor: '#10B981', 
+                downColor: '#EF4444',
+                borderUpColor: '#10B981', 
+                borderDownColor: '#EF4444',
+                wickUpColor: '#10B981', 
+                wickDownColor: '#EF4444'
+            });
+
+            volumeSeries = chartInstance.addHistogramSeries({
+                priceFormat: { type: 'volume' },
+                priceScaleId: '', // Overlay on same chart
+                scaleMargins: {
+                    top: 0.8,
+                    bottom: 0,
+                },
+            });
+
+            // Resize observer for responsive chart
+            new ResizeObserver(entries => {
+                if (entries[0] && entries[0].contentRect) {
+                    chartInstance.applyOptions({
+                        width: entries[0].contentRect.width,
+                        height: 420
+                    });
+                }
+            }).observe(container);
+        }
+
+        async function runScan(force = false) {
+            const container = document.getElementById('top-picks-container');
+            const status = document.getElementById('scan-status');
+            const icon = document.getElementById('icon-scan');
+            
+            icon.classList.add('animate-spin');
+            status.innerText = 'Memindai 150+ saham IDX...';
+
+            try {
+                const res = await fetch(`/api/scan${force ? '?force=true' : ''}`);
+                const json = await res.json();
+                allScanResults = json.data || [];
+                
+                status.innerText = `Update: ${new Date().toLocaleTimeString('id-ID')} WIB (${allScanResults.length} kandidat)`;
+                document.getElementById('count-all').innerText = allScanResults.length;
+
+                renderPicks();
+
+                if (allScanResults.length > 0) {
+                    loadChart(allScanResults[0].symbol, allScanResults[0].name, allScanResults[0].primary_setup);
+                }
+            } catch (err) {
+                console.error("Scan error", err);
+                status.innerText = 'Gagal memindai data.';
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-red-400 glass rounded-2xl">Gagal mengambil data pasar BEI. Silakan klik tombol Scan Market lagi.</div>`;
+            } finally {
+                icon.classList.remove('animate-spin');
+            }
+        }
+
+        function filterPicks(category) {
+            currentFilter = category;
+            
+            // Update button styles
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.getAttribute('data-filter') === category) {
+                    btn.className = "filter-btn active text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium transition";
+                } else {
+                    btn.className = "filter-btn text-xs px-3 py-1.5 rounded-lg bg-dark-800 text-gray-300 hover:bg-dark-700 border border-gray-700 font-medium transition";
+                }
+            });
+
+            renderPicks();
+        }
+
+        function renderPicks() {
+            const container = document.getElementById('top-picks-container');
+            
+            let filtered = allScanResults;
+            if (currentFilter !== 'ALL') {
+                filtered = allScanResults.filter(item => 
+                    item.primary_setup === currentFilter || (item.setups && item.setups.includes(currentFilter))
+                );
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-400 glass rounded-2xl">
+                        <i data-lucide="shield-alert" class="w-8 h-8 mx-auto mb-2 text-yellow-500"></i>
+                        <p class="text-sm font-semibold text-gray-300">Tidak ada setup yang memenuhi kriteria '${currentFilter}' saat ini.</p>
+                        <p class="text-xs text-gray-500 mt-1">Disiplin dan sabar menunggu setup probabilitas tinggi muncul.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = filtered.slice(0, 9).map(item => {
+                const plan = item.plan;
+                const changeColor = item.change_pct >= 0 ? 'text-emerald-400' : 'text-red-400';
+                const changeSign = item.change_pct >= 0 ? '+' : '';
+
+                return `
+                <div class="glass-card p-5 rounded-2xl transition cursor-pointer flex flex-col justify-between" onclick="loadChart('${item.symbol}', '${item.name}', '${item.primary_setup}')">
+                    <div>
+                        <!-- Header Card -->
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl font-black text-white tracking-wider">${item.symbol}</span>
+                                    <span class="text-xs font-mono font-medium ${changeColor}">(${changeSign}${item.change_pct}%)</span>
+                                </div>
+                                <div class="text-xs text-gray-400 truncate max-w-[190px]" title="${item.name}">${item.name}</div>
+                            </div>
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 shadow-sm">
+                                Skor: ${item.score}
+                            </span>
+                        </div>
+
+                        <!-- Badge Setup & Stats -->
+                        <div class="flex items-center gap-2 mt-3 flex-wrap">
+                            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-950/80 text-blue-300 border border-blue-800">
+                                ${item.primary_setup}
+                            </span>
+                            <span class="text-[10px] text-gray-400 bg-dark-900 px-2 py-0.5 rounded border border-gray-800">
+                                Turnover: Rp ${item.turnover_bio}B
+                            </span>
+                            <span class="text-[10px] text-gray-400 bg-dark-900 px-2 py-0.5 rounded border border-gray-800">
+                                RVOL: ${item.rvol}x
+                            </span>
+                        </div>
+
+                        <!-- Price Levels Box -->
+                        <div class="grid grid-cols-2 gap-2 mt-4 bg-dark-950/90 p-3 rounded-xl border border-gray-800 text-xs">
+                            <div>
+                                <span class="text-gray-400 text-[11px]">Entry Price:</span>
+                                <div class="text-emerald-400 font-bold text-sm">Rp ${plan.entry_price.toLocaleString('id-ID')}</div>
+                            </div>
+                            <div>
+                                <span class="text-gray-400 text-[11px]">Stop Loss:</span>
+                                <div class="text-red-400 font-bold text-sm">Rp ${plan.stop_loss.toLocaleString('id-ID')} <span class="text-[10px] font-normal">(-${plan.risk_pct}%)</span></div>
+                            </div>
+                            <div class="mt-1">
+                                <span class="text-gray-400 text-[11px]">Target TP1 (2R):</span>
+                                <div class="text-blue-400 font-semibold">Rp ${plan.tp1.toLocaleString('id-ID')} <span class="text-[10px] font-normal">(+${plan.tp1_gain_pct}%)</span></div>
+                            </div>
+                            <div class="mt-1">
+                                <span class="text-gray-400 text-[11px]">Target TP2 (Runner):</span>
+                                <div class="text-purple-400 font-semibold">Rp ${plan.tp2.toLocaleString('id-ID')} <span class="text-[10px] font-normal">(+${plan.tp2_gain_pct}%)</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Footer -->
+                    <div class="mt-4 pt-3 border-t border-gray-800/80 flex items-center justify-between text-xs">
+                        <span class="text-gray-400">R:R <b class="text-white font-mono">${plan.rr_ratio}</b></span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-emerald-400 hover:text-emerald-300 font-medium bg-emerald-950/40 hover:bg-emerald-950 px-2 py-1 rounded border border-emerald-800/60 transition flex items-center gap-1">
+                                <i data-lucide="calculator" class="w-3 h-3"></i> Hitung Lot
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        async function loadChart(symbol, name, setup) {
+            document.getElementById('chart-title').innerText = `${symbol} - ${name}`;
+            document.getElementById('chart-badge').innerText = `Setup: ${setup}`;
+
+            try {
+                const res = await fetch(`/api/chart/${symbol}`);
+                const json = await res.json();
+                if (json.candles) {
+                    candleSeries.setData(json.candles);
+                    if (json.volumes) {
+                        volumeSeries.setData(json.volumes);
+                    }
+                    chartInstance.timeScale().fitContent();
+                }
+            } catch (e) {
+                console.error("Error loading chart", e);
+            }
+        }
+
+        // Modal Controls
+        function openCalculatorModal() {
+            document.getElementById('calc-modal').classList.remove('hidden');
+        }
+
+        function closeCalculatorModal() {
+            document.getElementById('calc-modal').classList.add('hidden');
+        }
+
+        function quickCalculate(ticker, entry, sl, tp, setup) {
+            document.getElementById('calc-ticker').value = ticker;
+            document.getElementById('calc-entry').value = entry;
+            document.getElementById('calc-sl').value = sl;
+            openCalculatorModal();
+            calculateLotFromForm();
+        }
+
+        async function calculateLotFromForm() {
+            const capital = parseFloat(document.getElementById('calc-capital').value) || 0;
+            const riskPct = parseFloat(document.getElementById('calc-risk-pct').value) || 1.0;
+            const entry = parseFloat(document.getElementById('calc-entry').value) || 0;
+            const sl = parseFloat(document.getElementById('calc-sl').value) || 0;
+            const ticker = document.getElementById('calc-ticker').value.toUpperCase() || 'IDX';
+
+            if (!capital || !entry || !sl || entry <= sl) {
+                alert("Harap masukkan modal, entry price, dan stop loss (SL harus lebih kecil dari Entry).");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('capital', capital);
+            formData.append('risk_pct', riskPct);
+            formData.append('entry_price', entry);
+            formData.append('stop_loss', sl);
+
+            try {
+                const res = await fetch('/api/calculate-size', { method: 'POST', body: formData });
+                const json = await res.json();
+                const d = json.data;
+
+                document.getElementById('res-lots').innerText = `${d.lots} Lot (${d.shares.toLocaleString('id-ID')} Lembar)`;
+                document.getElementById('res-cost').innerText = `Rp ${d.total_cost.toLocaleString('id-ID')}`;
+                document.getElementById('res-risk').innerText = `Rp ${d.max_risk_idr.toLocaleString('id-ID')}`;
+                document.getElementById('res-alloc').innerText = `${d.capital_allocation_pct}% dari modal portofolio`;
+
+                document.getElementById('calc-result').classList.remove('hidden');
+
+                currentCalculatedTrade = {
+                    ticker: ticker,
+                    entry_price: entry,
+                    stop_loss: sl,
+                    target_price: entry + (entry - sl) * 2,
+                    lots: d.lots,
+                    setup_name: 'Alpha Plan'
+                };
+            } catch (err) {
+                console.error("Calculation error", err);
+            }
+        }
+
+        async function logCalculatedTrade() {
+            if (!currentCalculatedTrade) return;
+            
+            const btn = document.getElementById('btn-log-journal');
+            btn.innerText = 'Menyimpan...';
+
+            const formData = new FormData();
+            formData.append('ticker', currentCalculatedTrade.ticker);
+            formData.append('entry_price', currentCalculatedTrade.entry_price);
+            formData.append('stop_loss', currentCalculatedTrade.stop_loss);
+            formData.append('target_price', currentCalculatedTrade.target_price);
+            formData.append('lots', currentCalculatedTrade.lots);
+            formData.append('setup_name', currentCalculatedTrade.setup_name);
+
+            try {
+                const res = await fetch('/api/journal/log', { method: 'POST', body: formData });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    btn.innerText = '✅ Berhasil Dicatat ke Jurnal!';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Catat ke Jurnal Trading';
+                        lucide.createIcons();
+                        closeCalculatorModal();
+                        openJournalModal();
+                    }, 1200);
+                }
+            } catch (e) {
+                btn.innerText = 'Gagal mencatat';
+            }
+        }
+
+        async function openJournalModal() {
+            document.getElementById('journal-modal').classList.remove('hidden');
+            const tbody = document.getElementById('journal-table-body');
+            tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-gray-500">Mengambil jurnal transaksi...</td></tr>';
+
+            try {
+                const res = await fetch('/api/journal');
+                const json = await res.json();
+                const trades = json.trades || [];
+
+                if (trades.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-gray-500">Belum ada transaksi di jurnal. Anda dapat menambahkan dari kartu saham atau kalkulator.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = trades.map(t => {
+                    const statusBadge = t.status === 'OPEN' 
+                        ? '<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-semibold">OPEN</span>'
+                        : '<span class="px-2 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-700 text-[10px] font-semibold">CLOSED</span>';
+
+                    const actionBtn = t.status === 'OPEN'
+                        ? `<button onclick="promptCloseTrade(${t.id}, ${t.entry_price})" class="text-blue-400 hover:text-blue-300 font-medium">Tutup Trade</button>`
+                        : `<span class="text-gray-500">PnL: Rp ${(t.pnl_amount || 0).toLocaleString('id-ID')}</span>`;
+
+                    return `
+                    <tr class="hover:bg-dark-800/40 transition">
+                        <td class="py-2.5 px-3 font-mono text-gray-400">${t.entry_date}</td>
+                        <td class="py-2.5 px-3 font-bold text-white">${t.ticker}</td>
+                        <td class="py-2.5 px-3 font-mono text-emerald-400">Rp ${t.entry_price.toLocaleString('id-ID')}</td>
+                        <td class="py-2.5 px-3 font-mono text-red-400">Rp ${t.stop_loss.toLocaleString('id-ID')}</td>
+                        <td class="py-2.5 px-3 font-mono text-blue-400">Rp ${t.target_price.toLocaleString('id-ID')}</td>
+                        <td class="py-2.5 px-3 font-bold">${t.lots}</td>
+                        <td class="py-2.5 px-3 text-gray-400">${t.setup_name || '-'}</td>
+                        <td class="py-2.5 px-3">${statusBadge}</td>
+                        <td class="py-2.5 px-3">${actionBtn}</td>
+                    </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-red-400">Gagal memuat jurnal.</td></tr>';
+            }
+        }
+
+        function closeJournalModal() {
+            document.getElementById('journal-modal').classList.add('hidden');
+        }
+
+        async function promptCloseTrade(tradeId, entryPrice) {
+            const exitPriceStr = prompt(`Masukkan Harga Keluar / Exit Price (Entry: Rp ${entryPrice}):`);
+            if (!exitPriceStr) return;
+            const exitPrice = parseFloat(exitPriceStr);
+            if (isNaN(exitPrice)) return;
+
+            const notes = prompt("Catatan / Evaluasi Trade (opsional):") || "";
+
+            const formData = new FormData();
+            formData.append('trade_id', tradeId);
+            formData.append('exit_price', exitPrice);
+            formData.append('notes', notes);
+
+            try {
+                const res = await fetch('/api/journal/close', { method: 'POST', body: formData });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    openJournalModal();
+                }
+            } catch (e) {
+                alert("Gagal menutup trade.");
+            }
+        }
+    </script>
+</body>
+</html>

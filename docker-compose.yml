@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  alphaswing:
+    build: .
+    container_name: alphaswing_idx
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - APP_DOMAIN=alpha.zainalmultazam.com
+      - TZ=Asia/Jakarta
