@@ -93,7 +93,6 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         reply_markup = {
             "inline_keyboard": [
                 [
-                    {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"},
                     {"text": f"🔴 Tutup Posisi {ticker}", "callback_data": f"close:{ticker}"}
                 ]
             ]
@@ -189,8 +188,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
                 msg += "────────────\n\n"
 
             inline_buttons.append([
-                {"text": f"🔴 Tutup {ticker}", "callback_data": f"close:{ticker}"},
-                {"text": f"📱 {ticker} Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"}
+                {"text": f"🔴 Tutup Posisi {ticker}", "callback_data": f"close:{ticker}"}
             ])
 
         reply_markup = {"inline_keyboard": inline_buttons} if inline_buttons else None
@@ -267,7 +265,6 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
             reply_markup = {
                 "inline_keyboard": [
                     [
-                        {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"},
                         {"text": f"🔴 Tutup Posisi {ticker}", "callback_data": f"close:{ticker}"}
                     ]
                 ]
@@ -308,9 +305,8 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
         await answer_callback_query(callback_id, text=f"✅ Target TP1 {ticker} dikonfirmasi!", show_alert=False)
         msg = f"🎯 <b>KONFIRMASI TAKE PROFIT 1: {ticker}</b>\n"
         msg += "────────────\n"
-        msg += "1. Amankan 50% lot di aplikasi Stockbit.\n"
-        msg += "2. Geser Stop Loss sisa lot ke harga modal (Breakeven) agar menjadi trade bebas risiko!\n"
-        msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+        msg += "1. Amankan 50% lot di aplikasi sekuritas.\n"
+        msg += "2. Geser Stop Loss sisa lot ke harga modal (Breakeven) agar menjadi trade bebas risiko!"
         await send_telegram_message(msg)
 
 async def run_safety_sentinel_check() -> None:
@@ -349,13 +345,12 @@ async def run_safety_sentinel_check() -> None:
             msg += f"Floating Loss     : <b>{pnl_pct:.2f}% (-Rp {abs(pnl_amt):,.0f})</b>\n"
             msg += "────────────\n"
             msg += "<b>TINDAKAN SEGERA:</b>\n"
-            msg += "Buka aplikasi Stockbit sekarang dan lakukan Cut Loss manual untuk melindungi sisa modal Anda!"
+            msg += "Buka aplikasi sekuritas Anda dan lakukan Cut Loss manual untuk melindungi sisa modal!"
 
             reply_markup = {
                 "inline_keyboard": [
                     [
-                        {"text": f"🔴 Konfirmasi Cut Loss Selesai", "callback_data": f"close:{ticker}"},
-                        {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"}
+                        {"text": f"🔴 Konfirmasi Cut Loss Selesai", "callback_data": f"close:{ticker}"}
                     ]
                 ]
             }
@@ -375,14 +370,13 @@ async def run_safety_sentinel_check() -> None:
             msg += f"Harga Live   : <b>Rp {current_price:,.0f} (+{pnl_pct:.2f}%)</b>\n"
             msg += "────────────\n"
             msg += "<b>PANDUAN EKSEKUSI:</b>\n"
-            msg += f"1. Jual 50% posisi ({half_lots} Lot) di Stockbit untuk amankan profit.\n"
+            msg += f"1. Jual 50% posisi ({half_lots} Lot) untuk amankan profit.\n"
             msg += f"2. Geser Stop Loss sisa lot ke Rp {entry:,.0f} (Breakeven/Modal) agar bebas risiko!"
 
             reply_markup = {
                 "inline_keyboard": [
                     [
-                        {"text": f"🎯 Konfirmasi Amankan Profit", "callback_data": f"tp:{ticker}"},
-                        {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"}
+                        {"text": f"🎯 Konfirmasi Amankan Profit", "callback_data": f"tp:{ticker}"}
                     ]
                 ]
             }

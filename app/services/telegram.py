@@ -68,7 +68,7 @@ def format_id_date(dt: datetime) -> str:
     return f"{day_name}, {dt.day} {month_name} {dt.year} • {dt.strftime('%H:%M')} WIB"
 
 async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
-    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan tombol interaktif 1-Click Buy & Stockbit."""
+    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan tombol interaktif 1-Click Buy."""
     if not picks:
         return False
 
@@ -135,19 +135,14 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         msg += f"🚀 <b>TARGET 2  :</b> <code>{tp2}</code> (+{plan['tp2_gain_pct']}% | Jual {runner_lots} Lot)\n\n"
         
         msg += f"• Modal: <b>{cost_str}</b> | Max Risiko: <b>{risk_str}</b> (1%)\n"
-        msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
         if i < len(top_3):
             msg += "────────────\n\n"
 
-        # Buat Baris Tombol Interaktif untuk setiap saham
+        # Buat Baris Tombol Interaktif 1-Click Beli & Catat
         inline_keyboard.append([
             {
                 "text": f"🛒 Beli & Catat {lots} Lot {p['symbol']}",
                 "callback_data": f"buy:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
-            },
-            {
-                "text": f"📱 {p['symbol']} Stockbit",
-                "url": f"https://stockbit.com/#/symbol/{p['symbol']}"
             }
         ])
 
