@@ -5,8 +5,8 @@ from datetime import datetime
 from app.config import settings
 from app.engine.strategy import calculate_lot_size
 
-async def send_telegram_message(message: str) -> bool:
-    """Mengirim pesan teks ke Telegram pribadi / grup / channel."""
+async def send_telegram_message(message: str, reply_markup: Optional[Dict[str, Any]] = None) -> bool:
+    """Mengirim pesan teks ke Telegram pribadi / grup / channel dengan opsional inline keyboard buttons."""
     if not settings.TELEGRAM_BOT_TOKEN or not settings.TELEGRAM_CHAT_ID:
         return False
         
@@ -17,6 +17,8 @@ async def send_telegram_message(message: str) -> bool:
         "parse_mode": "HTML",
         "disable_web_page_preview": True
     }
+    if reply_markup:
+        payload["reply_markup"] = reply_markup
     
     try:
         async with httpx.AsyncClient() as client:
@@ -26,6 +28,24 @@ async def send_telegram_message(message: str) -> bool:
             return res.status_code == 200
     except Exception as e:
         print(f"Telegram error: {e}")
+        return False
+
+async def answer_callback_query(callback_query_id: str, text: str = "", show_alert: bool = False) -> bool:
+    """Menjawab callback query untuk menampilkan notifikasi pop-up di Telegram."""
+    if not settings.TELEGRAM_BOT_TOKEN:
+        return False
+    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/answerCallbackQuery"
+    payload = {
+        "callback_query_id": callback_query_id,
+        "text": text,
+        "show_alert": show_alert
+    }
+    try:
+        async with httpx.AsyncClient() as client:
+            res = await client.post(url, json=payload, timeout=8.0)
+            return res.status_code == 200
+    except Exception as e:
+        print(f"Callback answer error: {e}")
         return False
 
 def format_rupiah_short(amount: float) -> str:
@@ -48,7 +68,7 @@ def format_id_date(dt: datetime) -> str:
     return f"{day_name}, {dt.day} {month_name} {dt.year} • {dt.strftime('%H:%M')} WIB"
 
 async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
-    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan format kartu rapi, emoji visual, dan tap-to-copy numbers."""
+    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan tombol interaktif 1-Click Buy & Stockbit."""
     if not picks:
         return False
 
@@ -83,6 +103,8 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
 
     # 2. Top 3 Picks Details (Format Kartu Bersih & Tap to Copy)
     top_3 = picks[:3]
+    inline_keyboard = []
+
     for i, p in enumerate(top_3, 1):
         plan = p["plan"]
         entry = int(plan["entry_price"])
@@ -117,7 +139,20 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         if i < len(top_3):
             msg += "────────────\n\n"
 
-    return await send_telegram_message(msg.strip())
+        # Buat Baris Tombol Interaktif untuk setiap saham
+        inline_keyboard.append([
+            {
+                "text": f"🛒 Beli & Catat {lots} Lot {p['symbol']}",
+                "callback_data": f"buy:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
+            },
+            {
+                "text": f"📱 {p['symbol']} Stockbit",
+                "url": f"https://stockbit.com/#/symbol/{p['symbol']}"
+            }
+        ])
+
+    reply_markup = {"inline_keyboard": inline_keyboard}
+    return await send_telegram_message(msg.strip(), reply_markup=reply_markup)
 
 # Alias for backward compatibility
 notify_top_picks = notify_super_digest

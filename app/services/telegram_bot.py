@@ -6,7 +6,7 @@ import httpx
 from datetime import datetime
 
 from app.config import settings
-from app.services.telegram import send_telegram_message, notify_super_digest, format_rupiah_short
+from app.services.telegram import send_telegram_message, answer_callback_query, notify_super_digest, format_rupiah_short
 from app.services.market_data import fetch_stock_df, get_market_climate
 from app.engine.technical import calculate_indicators
 from app.engine.strategy import generate_trade_plan
@@ -42,7 +42,6 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             await send_telegram_message("❌ Jumlah lot harus berupa angka bulat. Contoh: <code>/beli AUTO 35</code>")
             return
 
-        # Ambil data teknikal saham live untuk mendapatkan harga Entry, SL, dan TP otomatis
         df = fetch_stock_df(ticker)
         if df is None or df.empty:
             await send_telegram_message(f"❌ Gagal mengambil data bursa untuk ticker <b>{ticker}</b>. Pastikan simbol benar.")
@@ -53,7 +52,6 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         current_price = float(last_row["close"])
         atr = float(last_row.get("atr", current_price * 0.035))
 
-        # Jika user memasukkan harga entry manual
         if len(parts) >= 4:
             try:
                 entry_price = float(parts[3])
@@ -62,7 +60,6 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         else:
             entry_price = current_price
 
-        # Generate Trading Plan
         plan = generate_trade_plan(entry_price, atr, "Manual / Telegram")
         sl_price = float(parts[4]) if len(parts) >= 5 else float(plan["stop_loss"])
         tp1_price = float(plan["tp1"])
@@ -91,13 +88,20 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         msg += f"Target TP1 : Rp {tp1_price:,.0f} (+{((tp1_price - entry_price)/entry_price)*100:.1f}%)\n"
         msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
         msg += "────────────\n"
-        msg += "🛡️ <i>Robot Sentinel aktif memantau posisi ini. Peringatan darurat akan otomatis dikirim jika harga mendekati Stop Loss!</i>\n"
-        msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
-        await send_telegram_message(msg)
+        msg += "🛡️ <i>Robot Sentinel aktif memantau posisi ini. Peringatan darurat akan otomatis dikirim jika harga mendekati Stop Loss!</i>"
+
+        reply_markup = {
+            "inline_keyboard": [
+                [
+                    {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"},
+                    {"text": f"🔴 Tutup Posisi {ticker}", "callback_data": f"close:{ticker}"}
+                ]
+            ]
+        }
+        await send_telegram_message(msg, reply_markup=reply_markup)
 
     # 2. Command /jual atau /sell atau /close
     elif cmd in ["/jual", "/sell", "/close"]:
-        # Format: /jual AUTO [optional_harga_jual]
         if len(parts) < 2:
             msg = "<b>PANDUAN /jual:</b>\n"
             msg += "Format: <code>/jual [TICKER] [HARGA_JUAL]</code>\n"
@@ -107,7 +111,6 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
 
         ticker = parts[1].upper().replace(".JK", "").strip()
         
-        # Cari harga exit
         if len(parts) >= 3:
             try:
                 exit_price = float(parts[2])
@@ -136,7 +139,6 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         pnl_pct = closed_trade["pnl_pct"]
         sign = "+" if pnl_amt >= 0 else ""
         badge = "PROFIT" if pnl_amt >= 0 else "CUT LOSS"
-        pnl_str = format_rupiah_short(abs(pnl_amt))
 
         msg = f"<b>TRADE CLOSED: [{badge}]</b>\n"
         msg += f"<i>{ticker} • {datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
@@ -155,7 +157,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             msg = "<b>STATUS PORTOFOLIO AKTIF:</b>\n"
             msg += "────────────\n"
             msg += "Tidak ada posisi terbuka saat ini.\n"
-            msg += "Gunakan <code>/beli [TICKER] [LOT]</code> untuk mencatat posisi baru."
+            msg += "Tekan tombol <b>[Beli & Catat]</b> pada rekomendasi atau ketik <code>/beli [TICKER] [LOT]</code> untuk mencatat."
             await send_telegram_message(msg)
             return
 
@@ -163,6 +165,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         msg += f"<i>{datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
         msg += "────────────\n\n"
 
+        inline_buttons = []
         for i, t in enumerate(open_trades, 1):
             ticker = t["ticker"]
             entry = float(t["entry_price"])
@@ -170,13 +173,11 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             tp = float(t["target_price"])
             lots = int(t["lots"])
 
-            # Cek harga live
             df = fetch_stock_df(ticker)
             current_price = float(df.iloc[-1]["close"]) if df is not None and not df.empty else entry
             pnl_pct = ((current_price - entry) / entry) * 100
             sign = "+" if pnl_pct >= 0 else ""
 
-            # Hitung jarak ke SL
             dist_to_sl = ((current_price - sl) / current_price) * 100
             status_text = "🟢 AMAN" if current_price > entry else ("🟡 WASPADA" if dist_to_sl > 1.5 else "🔴 BAHAYA DEKAT SL")
 
@@ -184,11 +185,16 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             msg += f"• Beli @ Rp {entry:,.0f} | Live: <b>Rp {current_price:,.0f} ({sign}{pnl_pct:.1f}%)</b>\n"
             msg += f"• Stop Loss: Rp {sl:,.0f} | Target: Rp {tp:,.0f}\n"
             msg += f"• Status: <i>{status_text}</i> (Jarak ke SL: {dist_to_sl:.1f}%)\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
             if i < len(open_trades):
                 msg += "────────────\n\n"
 
-        await send_telegram_message(msg)
+            inline_buttons.append([
+                {"text": f"🔴 Tutup {ticker}", "callback_data": f"close:{ticker}"},
+                {"text": f"📱 {ticker} Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"}
+            ])
+
+        reply_markup = {"inline_keyboard": inline_buttons} if inline_buttons else None
+        await send_telegram_message(msg, reply_markup=reply_markup)
 
     # 4. Command /scan atau /top3
     elif cmd in ["/scan", "/top3"]:
@@ -207,7 +213,104 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         msg += "• <code>/top3</code> : Jalankan scanner & kirim 3 rekomendasi terbaik\n"
         msg += "• <code>/help</code> : Menampilkan menu panduan ini\n"
         msg += "────────────\n"
-        msg += "<i>Semua transaksi otomatis tersinkronisasi ke web terminal.</i>"
+        msg += "<i>Anda juga bisa langsung menekan tombol interaktif di bawah setiap rekomendasi!</i>"
+        await send_telegram_message(msg)
+
+async def process_telegram_callback(callback: Dict[str, Any]) -> None:
+    """Memproses klik tombol interaktif (Inline Button Callback Query) dari Telegram."""
+    callback_id = str(callback.get("id", ""))
+    data = str(callback.get("data", ""))
+    from_user = callback.get("from", {}).get("first_name", "Trader")
+
+    if not data:
+        return
+
+    # 1. Callback 1-Click Beli: buy:TICKER:LOTS:ENTRY:SL:TP1
+    if data.startswith("buy:"):
+        parts = data.split(":")
+        if len(parts) >= 6:
+            ticker = parts[1]
+            lots = int(parts[2])
+            entry = float(parts[3])
+            sl = float(parts[4])
+            tp1 = float(parts[5])
+
+            # Jawab callback pop-up
+            await answer_callback_query(callback_id, text=f"✅ {ticker} ({lots} Lot) berhasil dicatat & dipantau!", show_alert=False)
+
+            # Catat ke Database
+            trade_id = log_trade(
+                ticker=ticker,
+                entry_price=entry,
+                stop_loss=sl,
+                target_price=tp1,
+                lots=lots,
+                setup_name="1-Click Button"
+            )
+
+            total_cost = lots * 100 * entry
+            max_risk = lots * 100 * (entry - sl)
+            cost_str = format_rupiah_short(total_cost)
+            risk_str = format_rupiah_short(max_risk)
+
+            msg = f"<b>1-CLICK BUY TERCATAT & DIAWASI</b>\n"
+            msg += f"<i>Eksekusi oleh: {from_user} • ID: #{trade_id}</i>\n"
+            msg += "────────────\n"
+            msg += f"Saham      : <b>{ticker}</b> ({lots} Lot)\n"
+            msg += f"Harga Beli : Rp {entry:,.0f}\n"
+            msg += f"Stop Loss  : Rp {sl:,.0f} (-{((entry - sl)/entry)*100:.1f}%)\n"
+            msg += f"Target TP1 : Rp {tp1:,.0f} (+{((tp1 - entry)/entry)*100:.1f}%)\n"
+            msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
+            msg += "────────────\n"
+            msg += "🛡️ <i>Radar Safety Sentinel aktif memantau saham ini dari risiko!</i>"
+
+            reply_markup = {
+                "inline_keyboard": [
+                    [
+                        {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"},
+                        {"text": f"🔴 Tutup Posisi {ticker}", "callback_data": f"close:{ticker}"}
+                    ]
+                ]
+            }
+            await send_telegram_message(msg, reply_markup=reply_markup)
+
+    # 2. Callback 1-Click Tutup / Cut Loss / Jual: close:TICKER
+    elif data.startswith("close:") or data.startswith("sl:"):
+        ticker = data.split(":")[1]
+        await answer_callback_query(callback_id, text=f"Menutup posisi {ticker}...", show_alert=False)
+
+        df = fetch_stock_df(ticker)
+        exit_price = float(df.iloc[-1]["close"]) if df is not None and not df.empty else 0.0
+
+        if exit_price > 0:
+            closed_trade = close_open_trade_by_ticker(ticker, exit_price, notes="1-Click Telegram Close")
+            if closed_trade:
+                pnl_amt = closed_trade["pnl_amount"]
+                pnl_pct = closed_trade["pnl_pct"]
+                sign = "+" if pnl_amt >= 0 else ""
+                badge = "PROFIT" if pnl_amt >= 0 else "CUT LOSS"
+
+                msg = f"<b>TRADE CLOSED VIA 1-CLICK: [{badge}]</b>\n"
+                msg += f"<i>{ticker} • Ditutup oleh: {from_user}</i>\n"
+                msg += "────────────\n"
+                msg += f"Beli @ Rp {closed_trade['entry_price']:,.0f} ({closed_trade['lots']} Lot)\n"
+                msg += f"Jual @ Rp {exit_price:,.0f}\n"
+                msg += f"Hasil PnL : <b>{sign}{pnl_pct:.2f}% ({sign}Rp {abs(pnl_amt):,.0f})</b>\n"
+                msg += "────────────\n"
+                msg += "✅ <i>Riwayat jurnal dan win rate portofolio berhasil diperbarui.</i>"
+                await send_telegram_message(msg)
+            else:
+                await send_telegram_message(f"ℹ️ Posisi {ticker} sudah tidak berstatus OPEN di database.")
+
+    # 3. Callback 1-Click Amankan TP1: tp:TICKER
+    elif data.startswith("tp:"):
+        ticker = data.split(":")[1]
+        await answer_callback_query(callback_id, text=f"✅ Target TP1 {ticker} dikonfirmasi!", show_alert=False)
+        msg = f"🎯 <b>KONFIRMASI TAKE PROFIT 1: {ticker}</b>\n"
+        msg += "────────────\n"
+        msg += "1. Amankan 50% lot di aplikasi Stockbit.\n"
+        msg += "2. Geser Stop Loss sisa lot ke harga modal (Breakeven) agar menjadi trade bebas risiko!\n"
+        msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
         await send_telegram_message(msg)
 
 async def run_safety_sentinel_check() -> None:
@@ -246,9 +349,17 @@ async def run_safety_sentinel_check() -> None:
             msg += f"Floating Loss     : <b>{pnl_pct:.2f}% (-Rp {abs(pnl_amt):,.0f})</b>\n"
             msg += "────────────\n"
             msg += "<b>TINDAKAN SEGERA:</b>\n"
-            msg += "Buka aplikasi Stockbit sekarang dan lakukan Cut Loss manual untuk melindungi sisa modal Anda!\n\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
-            await send_telegram_message(msg)
+            msg += "Buka aplikasi Stockbit sekarang dan lakukan Cut Loss manual untuk melindungi sisa modal Anda!"
+
+            reply_markup = {
+                "inline_keyboard": [
+                    [
+                        {"text": f"🔴 Konfirmasi Cut Loss Selesai", "callback_data": f"close:{ticker}"},
+                        {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"}
+                    ]
+                ]
+            }
+            await send_telegram_message(msg, reply_markup=reply_markup)
 
         # 2. ALERT PROFIT: Harga menyentuh Target TP1
         elif current_price >= tp and (trade_id, "TP") not in _alerted_trades:
@@ -265,12 +376,20 @@ async def run_safety_sentinel_check() -> None:
             msg += "────────────\n"
             msg += "<b>PANDUAN EKSEKUSI:</b>\n"
             msg += f"1. Jual 50% posisi ({half_lots} Lot) di Stockbit untuk amankan profit.\n"
-            msg += f"2. Geser Stop Loss sisa lot ke Rp {entry:,.0f} (Breakeven/Modal) agar bebas risiko!\n\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
-            await send_telegram_message(msg)
+            msg += f"2. Geser Stop Loss sisa lot ke Rp {entry:,.0f} (Breakeven/Modal) agar bebas risiko!"
+
+            reply_markup = {
+                "inline_keyboard": [
+                    [
+                        {"text": f"🎯 Konfirmasi Amankan Profit", "callback_data": f"tp:{ticker}"},
+                        {"text": f"📱 Buka {ticker} di Stockbit", "url": f"https://stockbit.com/#/symbol/{ticker}"}
+                    ]
+                ]
+            }
+            await send_telegram_message(msg, reply_markup=reply_markup)
 
 async def telegram_polling_worker():
-    """Background worker untuk mendengarkan pesan masuk dari Telegram (Long Polling)."""
+    """Background worker untuk mendengarkan pesan masuk dan klik tombol dari Telegram (Long Polling)."""
     global _last_update_id
     if not settings.TELEGRAM_BOT_TOKEN:
         return
@@ -287,13 +406,17 @@ async def telegram_polling_worker():
                     for update in data.get("result", []):
                         _last_update_id = update["update_id"]
                         
-                        # Cek pesan
+                        # 1. Cek Pesan Teks
                         msg_obj = update.get("message") or update.get("channel_post")
                         if msg_obj and "text" in msg_obj:
                             chat_id = str(msg_obj["chat"]["id"])
                             text = msg_obj["text"]
-                            # Proses perintah asinkron
                             asyncio.create_task(process_telegram_command(text, chat_id))
+
+                        # 2. Cek Klik Tombol Interaktif (Callback Query)
+                        callback_obj = update.get("callback_query")
+                        if callback_obj:
+                            asyncio.create_task(process_telegram_callback(callback_obj))
         except Exception as e:
             await asyncio.sleep(5)
         await asyncio.sleep(1)
