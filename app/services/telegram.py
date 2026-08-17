@@ -135,6 +135,7 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
         msg += f"🚀 <b>TARGET 2  :</b> <code>{tp2}</code> (+{plan['tp2_gain_pct']}% | Jual {runner_lots} Lot)\n\n"
         
         msg += f"• Modal: <b>{cost_str}</b> | Max Risiko: <b>{risk_str}</b> (1%)\n"
+        msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
         if i < len(top_3):
             msg += "────────────\n\n"
 

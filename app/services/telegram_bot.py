@@ -87,6 +87,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         msg += f"Stop Loss  : Rp {sl_price:,.0f} (-{((entry_price - sl_price)/entry_price)*100:.1f}%)\n"
         msg += f"Target TP1 : Rp {tp1_price:,.0f} (+{((tp1_price - entry_price)/entry_price)*100:.1f}%)\n"
         msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
+        msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
         msg += "────────────\n"
         msg += "🛡️ <i>Robot Sentinel aktif memantau posisi ini. Peringatan darurat akan otomatis dikirim jika harga mendekati Stop Loss!</i>"
 
@@ -323,6 +324,7 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
             msg += f"Stop Loss  : Rp {sl:,.0f} (-{((entry - sl)/entry)*100:.1f}%)\n"
             msg += f"Target TP1 : Rp {tp1:,.0f} (+{((tp1 - entry)/entry)*100:.1f}%)\n"
             msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
+            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
             msg += "────────────\n"
             msg += "🛡️ <i>Radar Safety Sentinel aktif memantau saham ini dari risiko!</i>"
 
@@ -409,7 +411,8 @@ async def run_safety_sentinel_check() -> None:
             msg += f"Floating Loss     : <b>{pnl_pct:.2f}% (-Rp {abs(pnl_amt):,.0f})</b>\n"
             msg += "────────────\n"
             msg += "<b>TINDAKAN SEGERA:</b>\n"
-            msg += "Buka aplikasi sekuritas Anda dan lakukan Cut Loss manual untuk melindungi sisa modal!"
+            msg += "Buka aplikasi sekuritas Anda dan lakukan Cut Loss manual untuk melindungi sisa modal!\n"
+            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
 
             reply_markup = {
                 "inline_keyboard": [
@@ -435,7 +438,8 @@ async def run_safety_sentinel_check() -> None:
             msg += "────────────\n"
             msg += "<b>PANDUAN EKSEKUSI:</b>\n"
             msg += f"1. Jual 50% posisi ({half_lots} Lot) untuk amankan profit.\n"
-            msg += f"2. Geser Stop Loss sisa lot ke Rp {entry:,.0f} (Breakeven/Modal) agar bebas risiko!"
+            msg += f"2. Geser Stop Loss sisa lot ke Rp {entry:,.0f} (Breakeven/Modal) agar bebas risiko!\n"
+            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
 
             reply_markup = {
                 "inline_keyboard": [
