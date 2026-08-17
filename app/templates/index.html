@@ -774,26 +774,76 @@
             <div id="view-performance" class="view-panel hidden space-y-6">
                 
                 <!-- 5 KPI Summary Cards Row -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 font-mono">
-                    <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Win Rate</span>
-                        <div class="text-emerald-600 dark:text-emerald-400 font-bold text-2xl mt-1" id="perf-win-rate">0%</div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+
+                    <!-- Win Rate -->
+                    <div class="clean-card p-4 flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500 dark:text-gray-400">Win Rate</span>
+                            <div class="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
+                                <i data-lucide="percent" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-emerald-600 dark:text-emerald-400 font-black text-2xl font-mono tracking-tight" id="perf-win-rate">0%</div>
+                            <div class="text-[10px] text-slate-500 dark:text-gray-400 mt-0.5 font-sans" id="perf-win-rate-sub">dari 0 trade closed</div>
+                        </div>
                     </div>
-                    <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Realized PnL</span>
-                        <div class="text-slate-900 dark:text-white font-bold text-2xl mt-1" id="perf-total-pnl">Rp 0</div>
+
+                    <!-- Total PnL -->
+                    <div class="clean-card p-4 flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500 dark:text-gray-400">Total Realized PnL</span>
+                            <div class="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center shrink-0" id="perf-pnl-icon-box">
+                                <i data-lucide="wallet" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-slate-900 dark:text-white font-black text-xl font-mono tracking-tight" id="perf-total-pnl">Rp 0</div>
+                            <div class="text-[10px] text-slate-500 dark:text-gray-400 mt-0.5 font-sans" id="perf-pnl-sub">belum ada transaksi selesai</div>
+                        </div>
                     </div>
-                    <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Average R</span>
-                        <div class="text-cyan-600 dark:text-cyan-400 font-bold text-2xl mt-1" id="perf-avg-r">0.0R</div>
+
+                    <!-- Average R -->
+                    <div class="clean-card p-4 flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500 dark:text-gray-400">Average R</span>
+                            <div class="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-500/10 flex items-center justify-center shrink-0">
+                                <i data-lucide="target" class="w-4 h-4 text-cyan-600 dark:text-cyan-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-cyan-600 dark:text-cyan-400 font-black text-2xl font-mono tracking-tight" id="perf-avg-r">0.0R</div>
+                            <div class="text-[10px] text-slate-500 dark:text-gray-400 mt-0.5 font-sans">rata-rata risk multiple</div>
+                        </div>
                     </div>
-                    <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Max Drawdown</span>
-                        <div class="text-danger-500 dark:text-danger-400 font-bold text-2xl mt-1" id="perf-max-dd">0.0%</div>
+
+                    <!-- Max Drawdown -->
+                    <div class="clean-card p-4 flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500 dark:text-gray-400">Max Drawdown</span>
+                            <div class="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-500/10 flex items-center justify-center shrink-0">
+                                <i data-lucide="trending-down" class="w-4 h-4 text-rose-600 dark:text-rose-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-rose-600 dark:text-rose-400 font-black text-2xl font-mono tracking-tight" id="perf-max-dd">0.0%</div>
+                            <div class="text-[10px] text-slate-500 dark:text-gray-400 mt-0.5 font-sans">dari peak equity</div>
+                        </div>
                     </div>
-                    <div class="clean-card p-4">
-                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Profit Factor</span>
-                        <div class="text-indigo-600 dark:text-indigo-400 font-bold text-2xl mt-1" id="perf-profit-factor">0.0</div>
+
+                    <!-- Profit Factor -->
+                    <div class="clean-card p-4 flex flex-col justify-between gap-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-medium text-slate-500 dark:text-gray-400">Profit Factor</span>
+                            <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center shrink-0">
+                                <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-indigo-600 dark:text-indigo-400 font-black text-2xl font-mono tracking-tight" id="perf-profit-factor">N/A</div>
+                            <div class="text-[10px] text-slate-500 dark:text-gray-400 mt-0.5 font-sans">gross profit / gross loss</div>
+                        </div>
                     </div>
                 </div>
 
@@ -805,7 +855,7 @@
                             <p class="text-xs text-slate-500 dark:text-gray-400 mt-0.5">Pertumbuhan ekuitas portofolio Alpha dibandingkan benchmark IHSG pada periode transaksi yang sama.</p>
                         </div>
                         <!-- Legend Indicator -->
-                        <div class="flex items-center gap-4 text-xs font-mono">
+                        <div class="flex items-center gap-4 text-xs font-mono shrink-0">
                             <div class="flex items-center gap-1.5">
                                 <span class="w-3 h-1 bg-emerald-500 rounded-full"></span>
                                 <span class="text-slate-700 dark:text-gray-300 font-semibold">Account Equity (%)</span>
@@ -827,6 +877,21 @@
                             <p class="text-xs text-slate-500 dark:text-gray-400 max-w-sm mx-auto">Selesaikan dan tutup transaksi di Jurnal untuk memplot grafik pertumbuhan modal portofolio terhadap IHSG.</p>
                         </div>
                         <div id="perf-svg-wrapper" class="w-full h-full"></div>
+                    </div>
+                </div>
+
+                <!-- Per-Setup Breakdown Table -->
+                <div class="clean-card p-5 space-y-4" id="perf-breakdown-section">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.06]">
+                        <div>
+                            <h3 class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">Breakdown per Setup</h3>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-0.5">Statistik Win Rate, Trades, dan PnL dikelompokkan per jenis setup sinyal.</p>
+                        </div>
+                    </div>
+                    <div id="perf-breakdown-table" class="overflow-x-auto">
+                        <div class="text-center py-8 text-slate-500 dark:text-gray-400 text-xs font-mono">
+                            Belum ada data transaksi closed untuk dianalisis per setup.
+                        </div>
                     </div>
                 </div>
 
@@ -2314,51 +2379,121 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 if (json.status !== 'success') return;
                 const d = json.data;
 
-                // 5 KPI Cards
+                // ── Win Rate card ────────────────────────────────────────────
                 const elWinRate = document.getElementById('perf-win-rate');
-                const elTotalPnl = document.getElementById('perf-total-pnl');
-                const elAvgR = document.getElementById('perf-avg-r');
-                const elMaxDd = document.getElementById('perf-max-dd');
-                const elProfitFactor = document.getElementById('perf-profit-factor');
+                const elWinRateSub = document.getElementById('perf-win-rate-sub');
+                if (elWinRate) {
+                    const wr = d.win_rate || 0;
+                    elWinRate.innerText = `${wr}%`;
+                    elWinRate.className = `font-black text-2xl font-mono tracking-tight ${wr >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+                }
+                if (elWinRateSub) elWinRateSub.innerText = `${d.winning_trades || 0}W / ${d.losing_trades || 0}L · ${d.closed_trades || 0} closed`;
 
-                if (elWinRate) elWinRate.innerText = `${d.win_rate || 0}%`;
+                // ── Total PnL card ───────────────────────────────────────────
+                const elTotalPnl = document.getElementById('perf-total-pnl');
+                const elPnlSub = document.getElementById('perf-pnl-sub');
+                const elPnlIconBox = document.getElementById('perf-pnl-icon-box');
                 if (elTotalPnl) {
                     const pnlVal = d.total_pnl || 0;
-                    elTotalPnl.innerText = `${pnlVal >= 0 ? '+' : '-'}Rp ${Math.abs(pnlVal).toLocaleString('id-ID')}`;
-                    elTotalPnl.className = `${pnlVal >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-danger-500 dark:text-danger-400'} font-bold text-2xl mt-1`;
+                    const isProfit = pnlVal >= 0;
+                    elTotalPnl.innerText = `${isProfit ? '+' : '-'}Rp ${Math.abs(pnlVal).toLocaleString('id-ID')}`;
+                    elTotalPnl.className = `font-black text-xl font-mono tracking-tight ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`;
+                    if (elPnlIconBox) {
+                        elPnlIconBox.className = `w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${isProfit ? 'bg-emerald-100 dark:bg-emerald-500/10' : 'bg-rose-100 dark:bg-rose-500/10'}`;
+                        elPnlIconBox.innerHTML = `<i data-lucide="${isProfit ? 'trending-up' : 'trending-down'}" class="w-4 h-4 ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}"></i>`;
+                    }
                 }
-                if (elAvgR) elAvgR.innerText = `${(d.avg_r || 0) >= 0 ? '+' : ''}${d.avg_r || 0}R`;
+                if (elPnlSub) elPnlSub.innerText = d.closed_trades > 0 ? `dari ${d.closed_trades} transaksi selesai` : 'belum ada transaksi selesai';
+
+                // ── Average R card ───────────────────────────────────────────
+                const elAvgR = document.getElementById('perf-avg-r');
+                if (elAvgR) {
+                    const ar = d.avg_r || 0;
+                    elAvgR.innerText = `${ar >= 0 ? '+' : ''}${ar}R`;
+                    elAvgR.className = `font-black text-2xl font-mono tracking-tight ${ar >= 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-rose-600 dark:text-rose-400'}`;
+                }
+
+                // ── Max Drawdown card ────────────────────────────────────────
+                const elMaxDd = document.getElementById('perf-max-dd');
                 if (elMaxDd) elMaxDd.innerText = `-${d.max_drawdown || 0}%`;
-                
-                // Spek #3: Profit Factor display
+
+                // ── Profit Factor card ───────────────────────────────────────
+                const elProfitFactor = document.getElementById('perf-profit-factor');
                 if (elProfitFactor) {
                     if (d.profit_factor === null || d.profit_factor === undefined) {
                         if (d.winning_trades > 0) {
-                            elProfitFactor.innerText = "∞";
-                            elProfitFactor.title = "Belum ada trade rugi (Semua Win)";
+                            elProfitFactor.innerText = '∞';
+                            elProfitFactor.title = 'Belum ada trade rugi (Semua Win)';
                         } else {
-                            elProfitFactor.innerText = "N/A";
-                            elProfitFactor.title = "Belum ada transaksi selesai";
+                            elProfitFactor.innerText = 'N/A';
+                            elProfitFactor.title = 'Belum ada transaksi selesai';
                         }
                     } else {
-                        elProfitFactor.innerText = `${d.profit_factor}`;
-                        elProfitFactor.title = "";
+                        const pf = d.profit_factor;
+                        elProfitFactor.innerText = `${pf}`;
+                        elProfitFactor.className = `font-black text-2xl font-mono tracking-tight ${pf >= 1.5 ? 'text-indigo-600 dark:text-indigo-400' : 'text-amber-600 dark:text-amber-400'}`;
+                        elProfitFactor.title = '';
                     }
                 }
 
+                // ── Equity Curve ─────────────────────────────────────────────
                 const emptyState = document.getElementById('perf-empty-state');
                 const svgWrapper = document.getElementById('perf-svg-wrapper');
 
                 if (!d.closed_trades || d.closed_trades === 0) {
                     if (emptyState) emptyState.classList.remove('hidden');
                     if (svgWrapper) svgWrapper.innerHTML = '';
-                    return;
+                } else {
+                    if (emptyState) emptyState.classList.add('hidden');
+                    renderEquityCurveSvg(d.equity_curve || []);
                 }
 
-                if (emptyState) emptyState.classList.add('hidden');
-                renderEquityCurveSvg(d.equity_curve || []);
+                // ── Per-Setup Breakdown Table ─────────────────────────────────
+                const breakdownEl = document.getElementById('perf-breakdown-table');
+                const breakdown = d.setup_breakdown || [];
+                if (breakdownEl) {
+                    if (breakdown.length === 0) {
+                        breakdownEl.innerHTML = `<div class="text-center py-8 text-slate-500 dark:text-gray-400 text-xs font-mono">Belum ada data transaksi closed untuk dianalisis per setup.</div>`;
+                    } else {
+                        breakdownEl.innerHTML = `
+                            <table class="w-full text-xs font-mono">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-white/[0.06] text-slate-500 dark:text-gray-400">
+                                        <th class="text-left py-2 pr-4 font-semibold font-sans">Setup</th>
+                                        <th class="text-center py-2 pr-4 font-semibold font-sans">Trades</th>
+                                        <th class="text-center py-2 pr-4 font-semibold font-sans">Win</th>
+                                        <th class="text-center py-2 pr-4 font-semibold font-sans">Loss</th>
+                                        <th class="text-center py-2 pr-4 font-semibold font-sans">Win Rate</th>
+                                        <th class="text-right py-2 font-semibold font-sans">Net PnL</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${breakdown.map(s => {
+                                        const wrColor = s.win_rate >= 50 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400';
+                                        const pnlSign = s.pnl >= 0 ? '+' : '';
+                                        const pnlColor = s.pnl >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400';
+                                        return `
+                                        <tr class="border-b border-slate-100 dark:border-white/[0.04] hover:bg-slate-50 dark:hover:bg-surface-900/50 transition">
+                                            <td class="py-2.5 pr-4 font-semibold text-slate-800 dark:text-gray-200">
+                                                <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/40 text-[10px]">${s.setup}</span>
+                                            </td>
+                                            <td class="text-center py-2.5 pr-4 text-slate-700 dark:text-gray-300 font-bold">${s.total}</td>
+                                            <td class="text-center py-2.5 pr-4 text-emerald-600 dark:text-emerald-400 font-semibold">${s.wins}</td>
+                                            <td class="text-center py-2.5 pr-4 text-rose-600 dark:text-rose-400 font-semibold">${s.losses}</td>
+                                            <td class="text-center py-2.5 pr-4">
+                                                <span class="font-bold ${wrColor}">${s.win_rate}%</span>
+                                            </td>
+                                            <td class="text-right py-2.5 font-bold ${pnlColor}">${pnlSign}Rp ${Math.abs(s.pnl).toLocaleString('id-ID')}</td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>`;
+                    }
+                }
+
+                lucide.createIcons();
             } catch (e) {
-                console.error("Failed to load performance metrics", e);
+                console.error('Failed to load performance metrics', e);
             }
         }
 

@@ -267,6 +267,34 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
             "ihsg_pct": real_ihsg_pct
         })
         
+    # ── Per-setup breakdown ─────────────────────────────────────────────────
+    setup_breakdown = {}
+    for t in closed_trades:
+        setup = t.get("setup_name") or "Manual"
+        if setup not in setup_breakdown:
+            setup_breakdown[setup] = {"wins": 0, "losses": 0, "pnl": 0.0}
+        pnl = float(t.get("pnl_amount") or 0)
+        setup_breakdown[setup]["pnl"] += pnl
+        if pnl > 0:
+            setup_breakdown[setup]["wins"] += 1
+        else:
+            setup_breakdown[setup]["losses"] += 1
+
+    setup_stats = []
+    for setup, data in setup_breakdown.items():
+        total_s = data["wins"] + data["losses"]
+        wr_s = round(data["wins"] / total_s * 100, 1) if total_s > 0 else 0.0
+        setup_stats.append({
+            "setup": setup,
+            "total": total_s,
+            "wins": data["wins"],
+            "losses": data["losses"],
+            "win_rate": wr_s,
+            "pnl": round(data["pnl"], 2)
+        })
+    # Sort by total trades descending
+    setup_stats.sort(key=lambda x: x["total"], reverse=True)
+
     return {
         "total_trades": total_trades,
         "open_trades": len(open_trades),
@@ -278,5 +306,6 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
         "avg_r": avg_r,
         "profit_factor": profit_factor,
         "max_drawdown": round(max_dd_pct, 2),
-        "equity_curve": equity_curve
+        "equity_curve": equity_curve,
+        "setup_breakdown": setup_stats
     }
