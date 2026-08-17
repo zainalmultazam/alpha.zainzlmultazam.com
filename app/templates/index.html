@@ -70,12 +70,12 @@
             transform: translateX(-50%);
             width: 1000px;
             height: 400px;
-            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.04), transparent 70%);
+            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.10), rgba(14, 165, 233, 0.03), transparent 70%);
             pointer-events: none;
             z-index: 0;
         }
 
-        /* Clean Single-Surface Cards (No Double Bezel/Outline) */
+        /* Single-Surface Clean Card Design */
         .clean-card {
             background: rgba(15, 21, 35, 0.85);
             backdrop-filter: blur(16px);
@@ -84,12 +84,19 @@
         }
         
         .clean-card-hover {
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .clean-card-hover:hover {
             border-color: rgba(16, 185, 129, 0.4);
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 20px -4px rgba(16, 185, 129, 0.15);
+            box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 18px -4px rgba(16, 185, 129, 0.15);
+        }
+
+        /* Sidebar Nav Link Active State */
+        .nav-item.active {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34D399;
+            border-color: rgba(16, 185, 129, 0.3);
         }
 
         /* Custom Scrollbar */
@@ -99,356 +106,496 @@
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-emerald-500/30 selection:text-emerald-300">
+<body class="min-h-screen flex antialiased selection:bg-emerald-500/30 selection:text-emerald-300">
     <div class="ambient-glow"></div>
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <!-- Floating Navigation Bar -->
-    <header class="sticky top-0 z-40 backdrop-blur-xl bg-oled/85 border-b border-white/[0.06]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-18 flex items-center justify-between">
-            
-            <!-- Brand Logo & Title -->
-            <div class="flex items-center gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg shadow-inner shadow-emerald-500/30">
-                    ⚡
-                </div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-extrabold text-white text-base sm:text-lg tracking-tight">AlphaSwing</span>
-                        <span class="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full bg-emerald-950/90 text-emerald-400 border border-emerald-700/60 uppercase">IDX BEI</span>
-                    </div>
-                    <p class="text-[11px] font-mono text-gray-400 tracking-wide">{{ domain }}</p>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-2 sm:gap-3">
-                <button onclick="openCalculatorModal()" class="group flex items-center gap-2 bg-surface-900 hover:bg-surface-800 border border-white/10 hover:border-white/20 text-gray-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition shadow-sm active:scale-[0.98]">
-                    <div class="w-5 h-5 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition">
-                        <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-                    </div>
-                    <span class="hidden sm:inline">Kalkulator</span> Lot
-                </button>
-
-                <button onclick="openJournalModal()" class="group flex items-center gap-2 bg-surface-900 hover:bg-surface-800 border border-white/10 hover:border-white/20 text-gray-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl transition shadow-sm active:scale-[0.98]">
-                    <div class="w-5 h-5 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition">
-                        <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
-                    </div>
-                    <span class="hidden sm:inline">Jurnal</span> Trading
-                </button>
-
-                <button onclick="runScan(true)" id="btn-scan" class="group flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-950/60 active:scale-[0.98]">
-                    <i data-lucide="refresh-cw" id="icon-scan" class="w-4 h-4 transition duration-300"></i>
-                    <span>Scan Market</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-1 w-full space-y-6 sm:space-y-7 relative z-10">
+    <!-- SIDEBAR NAVIGATION (Collapsible) -->
+    <aside id="sidebar" class="w-64 bg-surface-950/95 border-r border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex flex-col justify-between z-40 transition-all duration-300 select-none">
         
-        <!-- Summary KPI Banner (Clean Single-Surface) -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            
-            <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex items-center justify-between text-gray-400">
-                    <span class="text-xs font-medium">Universe Saham</span>
-                    <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+        <!-- Sidebar Header -->
+        <div class="p-4 sm:p-5 border-b border-white/[0.06]">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3 overflow-hidden" id="brand-block">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base shadow-inner shadow-emerald-500/30 shrink-0">
+                        ⚡
+                    </div>
+                    <div class="truncate transition-opacity duration-200" id="brand-text">
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-extrabold text-white text-base tracking-tight">AlphaSwing</span>
+                            <span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">IDX</span>
+                        </div>
+                        <p class="text-[10px] font-mono text-gray-500 truncate">{{ domain }}</p>
+                    </div>
                 </div>
-                <div class="mt-2.5 flex items-baseline gap-1.5">
-                    <span class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-mono">150+</span>
-                    <span class="text-[11px] text-gray-400 font-medium">Liquid IDX</span>
-                </div>
-                <p class="text-[10px] text-emerald-400/90 mt-1 font-mono">Kompas100 & High Turnover</p>
-            </div>
 
-            <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex items-center justify-between text-gray-400">
-                    <span class="text-xs font-medium">Strategi Utama</span>
-                    <i data-lucide="trending-up" class="w-4 h-4 text-blue-400"></i>
-                </div>
-                <div class="mt-2.5">
-                    <span class="text-xl sm:text-2xl font-extrabold text-blue-400 tracking-tight">VCP & Stage 2</span>
-                </div>
-                <p class="text-[10px] text-blue-300/80 mt-1 font-mono">Pullback & Pocket Pivot</p>
+                <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-surface-800 transition" title="Toggle Sidebar">
+                    <i data-lucide="panel-left" class="w-4 h-4"></i>
+                </button>
             </div>
-
-            <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex items-center justify-between text-gray-400">
-                    <span class="text-xs font-medium">Maksimal Risiko</span>
-                    <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
-                </div>
-                <div class="mt-2.5 flex items-baseline gap-1.5">
-                    <span class="text-2xl sm:text-3xl font-extrabold text-amber-400 tracking-tight font-mono">{{ default_risk_pct }}%</span>
-                    <span class="text-[11px] text-gray-400 font-medium">Per Trade</span>
-                </div>
-                <p class="text-[10px] text-amber-300/80 mt-1 font-mono">Strict Capital Protection</p>
-            </div>
-
-            <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
-                <div class="flex items-center justify-between text-gray-400">
-                    <span class="text-xs font-medium">Risk to Reward</span>
-                    <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
-                </div>
-                <div class="mt-2.5 flex items-baseline gap-1.5">
-                    <span class="text-2xl sm:text-3xl font-extrabold text-cyan-400 tracking-tight font-mono">1 : 2.0+</span>
-                    <span class="text-[11px] text-gray-400 font-medium">Asimetris</span>
-                </div>
-                <p class="text-[10px] text-cyan-300/80 mt-1 font-mono">Minimum 2R Target TP1</p>
-            </div>
-
         </div>
 
-        <!-- Section: Top Alpha Playbook -->
-        <section class="space-y-4">
+        <!-- Sidebar Menu Items -->
+        <nav class="p-3 space-y-1.5 flex-1 overflow-y-auto">
             
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div>
-                    <h2 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                        Top Alpha Playbook Hari Ini
-                    </h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Sinyal probabilitas tertinggi siap dieksekusi dengan Auto Order GTC di sekuritas Anda.</p>
-                </div>
-
-                <!-- Live Search & Refresh Status -->
-                <div class="flex items-center gap-2.5">
-                    <div class="relative">
-                        <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (misal: BBCA)..." class="bg-surface-900 border border-white/10 rounded-xl px-3.5 py-1.5 pl-9 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-48 sm:w-56 font-mono transition">
-                        <i data-lucide="search" class="w-3.5 h-3.5 text-gray-400 absolute left-3 top-2.5"></i>
-                    </div>
-                    <span id="scan-status" class="text-[11px] font-mono text-gray-400 bg-surface-900 px-3 py-1.5 rounded-xl border border-white/[0.06] whitespace-nowrap">Menyiapkan data...</span>
-                </div>
+            <div class="px-3 pt-2 pb-1 text-[10px] font-mono font-semibold text-gray-500 uppercase tracking-wider sidebar-label">
+                Workspace
             </div>
 
-            <!-- Filter Categories -->
-            <div class="flex items-center gap-2 overflow-x-auto pb-1" id="filter-tabs">
-                <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm" data-filter="ALL">
-                    Semua (<span id="count-all">0</span>)
-                </button>
-                <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="VCP Breakout">
-                    VCP Breakout
-                </button>
-                <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="EMA 20 Pullback">
-                    EMA 20 Pullback
-                </button>
-                <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="Volume Surge">
-                    Volume Surge
-                </button>
-                <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="Stage 2 Leader">
-                    Stage 2 Leader
-                </button>
-            </div>
-
-            <!-- Cards Grid (Single-Surface Clean Cards) -->
-            <div id="top-picks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Skeleton Loader State -->
-                <div class="col-span-full py-16 text-center text-gray-400 clean-card">
-                    <div class="flex flex-col items-center">
-                        <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-emerald-400 mb-3"></i>
-                        <p class="text-sm font-semibold text-white">Memindai 150+ Saham Likuid BEI...</p>
-                        <p class="text-xs text-gray-400 mt-1 font-mono">Menghitung EMA 20/50/200, VCP Ratio, RVOL, & Volatilitas ATR</p>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- Section: Interactive TradingView Candlestick Chart (Single-Surface) -->
-        <section class="clean-card p-4 sm:p-6 space-y-4">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-base">
-                        📊
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2.5">
-                            <h3 class="font-extrabold text-white text-base sm:text-lg tracking-tight" id="chart-title">Pilih Saham dari Playbook</h3>
-                            <span id="chart-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700/60 font-semibold"></span>
-                        </div>
-                        <p class="text-xs text-gray-400 font-mono" id="chart-subtitle">Daily Candlestick & Volume Histogram (BEI)</p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <span class="text-[11px] font-mono text-gray-400 bg-surface-900 px-3 py-1 rounded-lg border border-white/10">1D Candlestick</span>
-                </div>
-            </div>
-
-            <!-- TradingView Chart Container -->
-            <div id="tv-chart" class="w-full h-[420px] rounded-xl overflow-hidden bg-oled border border-white/[0.06] relative">
-                <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-oled/80 backdrop-blur-sm z-10 hidden">
-                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400"></i>
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Modal: Position Sizing Calculator (Clean Single-Surface) -->
-    <div id="calc-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="clean-card max-w-lg w-full p-6 relative space-y-5 shadow-2xl">
-            
-            <button onclick="closeCalculatorModal()" class="absolute top-5 right-5 text-gray-400 hover:text-white transition">
-                <i data-lucide="x" class="w-5 h-5"></i>
+            <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
+                <i data-lucide="layout-grid" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+                <span class="sidebar-text">Alpha Playbook</span>
             </button>
-            
-            <div>
-                <h3 class="text-lg font-black text-white flex items-center gap-2.5">
-                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                        <i data-lucide="calculator" class="w-4 h-4"></i>
-                    </div>
-                    Kalkulator Position Sizing
-                </h3>
-                <p class="text-xs text-gray-400 mt-1">Hitung lot aman dengan proteksi risiko modal maksimal 1% per trade.</p>
+
+            <button onclick="switchView('terminal')" id="nav-terminal" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
+                <i data-lucide="candlestick-chart" class="w-4 h-4 text-blue-400 shrink-0"></i>
+                <span class="sidebar-text">Chart Terminal</span>
+            </button>
+
+            <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
+                <i data-lucide="book-open" class="w-4 h-4 text-cyan-400 shrink-0"></i>
+                <span class="sidebar-text">Jurnal & Tracker</span>
+            </button>
+
+            <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
+                <i data-lucide="calculator" class="w-4 h-4 text-amber-400 shrink-0"></i>
+                <span class="sidebar-text">Kalkulator Lot</span>
+            </button>
+
+            <div class="px-3 pt-4 pb-1 text-[10px] font-mono font-semibold text-gray-500 uppercase tracking-wider sidebar-label">
+                System
             </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
-                    <input type="number" id="calc-capital" value="{{ default_capital }}" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+            <button onclick="switchView('settings')" id="nav-settings" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
+                <i data-lucide="settings-2" class="w-4 h-4 text-purple-400 shrink-0"></i>
+                <span class="sidebar-text">Settings & Alerts</span>
+            </button>
+
+        </nav>
+
+        <!-- Sidebar Footer Status -->
+        <div class="p-3 border-t border-white/[0.06] bg-oled/50">
+            <div class="p-2.5 rounded-xl bg-surface-900/90 border border-white/[0.05] flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                <div class="truncate sidebar-text">
+                    <div class="text-[11px] font-mono font-semibold text-white">Engine Online</div>
+                    <div class="text-[10px] text-gray-400 font-mono">17:00 WIB Daily Cron</div>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+        
+        <!-- Top Topbar -->
+        <header class="sticky top-0 z-30 backdrop-blur-xl bg-oled/85 border-b border-white/[0.06] px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-2" id="page-title">
+                    Alpha Playbook
+                </h1>
+                <span id="scan-status" class="text-[11px] font-mono text-gray-400 bg-surface-900 px-2.5 py-1 rounded-lg border border-white/[0.06] hidden sm:inline-block">
+                    Menyiapkan data...
+                </span>
+            </div>
+
+            <div class="flex items-center gap-2.5">
+                <!-- Search Ticker Input -->
+                <div class="relative">
+                    <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (BBCA)..." class="bg-surface-900 border border-white/10 rounded-xl px-3 py-1.5 pl-8 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-36 sm:w-48 font-mono transition">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5"></i>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Maksimal Risiko (%)</label>
-                        <input type="number" id="calc-risk-pct" value="{{ default_risk_pct }}" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition shadow-lg shadow-emerald-950/60 active:scale-[0.98]">
+                    <i data-lucide="refresh-cw" id="icon-scan" class="w-3.5 h-3.5"></i>
+                    <span class="hidden sm:inline">Scan Market</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Body -->
+        <div class="p-4 sm:p-6 lg:p-8 flex-1 space-y-6">
+            
+            <!-- VIEW 1: SCREENER & PLAYBOOK -->
+            <div id="view-screener" class="view-panel space-y-6">
+                
+                <!-- KPI Banner -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                    <div class="clean-card p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-gray-400">
+                            <span class="text-xs font-medium">Universe Likuid IDX</span>
+                            <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+                        </div>
+                        <div class="mt-2 flex items-baseline gap-1.5">
+                            <span class="text-2xl font-extrabold text-white font-mono">150+</span>
+                            <span class="text-[11px] text-gray-400">Saham</span>
+                        </div>
+                        <p class="text-[10px] text-emerald-400 mt-1 font-mono">Kompas100 High Turnover</p>
                     </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Ticker Saham</label>
-                        <input type="text" id="calc-ticker" placeholder="BBCA" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+
+                    <div class="clean-card p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-gray-400">
+                            <span class="text-xs font-medium">Strategi Utama</span>
+                            <i data-lucide="trending-up" class="w-4 h-4 text-blue-400"></i>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xl font-extrabold text-blue-400">VCP & Stage 2</span>
+                        </div>
+                        <p class="text-[10px] text-blue-300 mt-1 font-mono">Pullback & Momentum</p>
+                    </div>
+
+                    <div class="clean-card p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-gray-400">
+                            <span class="text-xs font-medium">Maksimal Risiko</span>
+                            <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                        </div>
+                        <div class="mt-2 flex items-baseline gap-1.5">
+                            <span class="text-2xl font-extrabold text-amber-400 font-mono">{{ default_risk_pct }}%</span>
+                            <span class="text-[11px] text-gray-400">Per Trade</span>
+                        </div>
+                        <p class="text-[10px] text-amber-300 mt-1 font-mono">Proteksi Modal Disiplin</p>
+                    </div>
+
+                    <div class="clean-card p-4 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-gray-400">
+                            <span class="text-xs font-medium">Risk to Reward</span>
+                            <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
+                        </div>
+                        <div class="mt-2 flex items-baseline gap-1.5">
+                            <span class="text-2xl font-extrabold text-cyan-400 font-mono">1 : 2.0+</span>
+                            <span class="text-[11px] text-gray-400">Asimetris</span>
+                        </div>
+                        <p class="text-[10px] text-cyan-300 mt-1 font-mono">Minimum 2R Target TP1</p>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Entry Price (Rp)</label>
-                        <input type="number" id="calc-entry" placeholder="8500" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Stop Loss (Rp)</label>
-                        <input type="number" id="calc-sl" placeholder="8200" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
-                    </div>
-                </div>
-
-                <!-- Live Calculation Result -->
-                <div id="calc-result" class="bg-oled p-4 rounded-xl border border-white/10 space-y-2.5 text-xs font-mono">
-                    <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
-                        <span class="text-gray-400 font-sans">Rekomendasi Jumlah Lot:</span>
-                        <span class="text-emerald-400 font-bold text-base" id="res-lots">0 Lot (0 Lembar)</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
-                        <span class="text-gray-400 font-sans">Total Modal Beli:</span>
-                        <span class="text-white font-semibold" id="res-cost">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
-                        <span class="text-gray-400 font-sans">Maksimal Risiko (Kena SL):</span>
-                        <span class="text-danger-400 font-semibold" id="res-risk">Rp 0</span>
-                    </div>
-                    <div class="flex justify-between items-center py-1">
-                        <span class="text-gray-400 font-sans">Alokasi Portofolio:</span>
-                        <span class="text-target-400 font-semibold" id="res-alloc">0%</span>
-                    </div>
-
-                    <button onclick="logCalculatedTrade()" id="btn-log-journal" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-blue-950/50 font-sans active:scale-[0.98]">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal Trading
+                <!-- Category Filters -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1" id="filter-tabs">
+                    <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm" data-filter="ALL">
+                        Semua (<span id="count-all">0</span>)
+                    </button>
+                    <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="VCP Breakout">
+                        VCP Breakout
+                    </button>
+                    <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="EMA 20 Pullback">
+                        EMA 20 Pullback
+                    </button>
+                    <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="Volume Surge">
+                        Volume Surge
+                    </button>
+                    <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="Stage 2 Leader">
+                        Stage 2 Leader
                     </button>
                 </div>
-            </div>
 
-        </div>
-    </div>
-
-    <!-- Modal: Trading Journal & Performance Tracker (Clean Single-Surface) -->
-    <div id="journal-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
-        <div class="clean-card max-w-5xl w-full p-6 max-h-[90vh] flex flex-col space-y-5 shadow-2xl overflow-hidden">
-            
-            <div class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                <div>
-                    <h3 class="text-lg font-black text-white flex items-center gap-2.5">
-                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                            <i data-lucide="book-open" class="w-4 h-4"></i>
+                <!-- Cards Grid -->
+                <div id="top-picks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="col-span-full py-16 text-center text-gray-400 clean-card">
+                        <div class="flex flex-col items-center">
+                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-emerald-400 mb-3"></i>
+                            <p class="text-sm font-semibold text-white">Memindai Saham Likuid BEI...</p>
+                            <p class="text-xs text-gray-400 mt-1 font-mono">Menghitung EMA, VCP, RVOL, & Volatilitas</p>
                         </div>
-                        Jurnal & Pelacak Transaksi Trading
-                    </h3>
-                    <p class="text-xs text-gray-400 mt-0.5 font-mono">SQLite Database: data/alpha.db</p>
+                    </div>
                 </div>
-                <button onclick="closeJournalModal()" class="text-gray-400 hover:text-white transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+
+                <!-- Interactive Preview Chart -->
+                <div class="clean-card p-4 sm:p-5 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                        <div class="flex items-center gap-2.5">
+                            <h3 class="font-extrabold text-white text-base tracking-tight" id="chart-title">TradingView Chart</h3>
+                            <span id="chart-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-800"></span>
+                        </div>
+                        <button onclick="switchView('terminal')" class="text-xs font-mono text-emerald-400 hover:underline flex items-center gap-1">
+                            Buka di Terminal <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <div id="tv-chart" class="w-full h-[380px] rounded-xl overflow-hidden bg-oled border border-white/[0.06] relative">
+                        <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-oled/80 backdrop-blur-sm z-10 hidden">
+                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400"></i>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Stats KPI Row -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                <div class="bg-oled p-3 rounded-xl border border-white/10">
-                    <span class="text-gray-400 font-sans text-[11px]">Total Transaksi</span>
-                    <div class="text-white font-bold text-lg mt-0.5" id="stat-total-trades">0</div>
+            <!-- VIEW 2: CHART TERMINAL WORKSPACE -->
+            <div id="view-terminal" class="view-panel hidden space-y-4">
+                
+                <div class="clean-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+                            📈
+                        </div>
+                        <div>
+                            <h2 class="text-base font-extrabold text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
+                            <p class="text-xs font-mono text-gray-400">Daily Candlestick + Volume Histogram Engine</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Switcher Pills -->
+                    <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs" id="quick-tickers">
+                        <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">BBCA</button>
+                        <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">BBRI</button>
+                        <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">BMRI</button>
+                        <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">ASII</button>
+                        <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">AUTO</button>
+                        <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">ADRO</button>
+                    </div>
                 </div>
-                <div class="bg-oled p-3 rounded-xl border border-white/10">
-                    <span class="text-gray-400 font-sans text-[11px]">Posisi Terbuka (Open)</span>
-                    <div class="text-emerald-400 font-bold text-lg mt-0.5" id="stat-open-trades">0</div>
+
+                <div class="clean-card p-4 sm:p-5">
+                    <div id="tv-terminal-chart" class="w-full h-[580px] rounded-xl overflow-hidden bg-oled border border-white/[0.06]"></div>
                 </div>
-                <div class="bg-oled p-3 rounded-xl border border-white/10">
-                    <span class="text-gray-400 font-sans text-[11px]">Win Rate</span>
-                    <div class="text-cyan-400 font-bold text-lg mt-0.5" id="stat-win-rate">0%</div>
-                </div>
-                <div class="bg-oled p-3 rounded-xl border border-white/10">
-                    <span class="text-gray-400 font-sans text-[11px]">Total Realized PnL</span>
-                    <div class="text-white font-bold text-lg mt-0.5" id="stat-total-pnl">Rp 0</div>
-                </div>
+
             </div>
 
-            <!-- Table Content -->
-            <div class="overflow-y-auto flex-1 pr-1 border border-white/[0.06] rounded-xl bg-oled">
-                <table class="w-full text-left text-xs border-collapse font-mono">
-                    <thead class="sticky top-0 bg-surface-900 border-b border-white/10 text-gray-400 uppercase text-[10px] font-sans font-semibold">
-                        <tr>
-                            <th class="py-3 px-3.5">Tanggal</th>
-                            <th class="py-3 px-3.5">Ticker</th>
-                            <th class="py-3 px-3.5">Entry</th>
-                            <th class="py-3 px-3.5">Stop Loss</th>
-                            <th class="py-3 px-3.5">Target TP</th>
-                            <th class="py-3 px-3.5">Lot</th>
-                            <th class="py-3 px-3.5">Setup</th>
-                            <th class="py-3 px-3.5">Status</th>
-                            <th class="py-3 px-3.5 text-right">Aksi / PnL</th>
-                        </tr>
-                    </thead>
-                    <tbody id="journal-table-body" class="divide-y divide-white/[0.04]">
-                        <tr>
-                            <td colspan="9" class="py-8 text-center text-gray-500 font-sans">Memuat catatan transaksi...</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- VIEW 3: TRADING JOURNAL & TRACKER -->
+            <div id="view-journal" class="view-panel hidden space-y-6">
+                
+                <!-- Journal Stats Row -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
+                    <div class="clean-card p-4">
+                        <span class="text-gray-400 font-sans text-xs">Total Transaksi</span>
+                        <div class="text-white font-bold text-2xl mt-1" id="stat-total-trades">0</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-gray-400 font-sans text-xs">Posisi Terbuka (Open)</span>
+                        <div class="text-emerald-400 font-bold text-2xl mt-1" id="stat-open-trades">0</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-gray-400 font-sans text-xs">Win Rate</span>
+                        <div class="text-cyan-400 font-bold text-2xl mt-1" id="stat-win-rate">0%</div>
+                    </div>
+                    <div class="clean-card p-4">
+                        <span class="text-gray-400 font-sans text-xs">Total Realized PnL</span>
+                        <div class="text-white font-bold text-2xl mt-1" id="stat-total-pnl">Rp 0</div>
+                    </div>
+                </div>
+
+                <!-- Journal Table -->
+                <div class="clean-card p-5 space-y-4">
+                    <div class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                        <h3 class="font-extrabold text-white text-base">Riwayat Transaksi Jurnal</h3>
+                        <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-400 hover:underline flex items-center gap-1">
+                            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-white/[0.06] bg-oled">
+                        <table class="w-full text-left text-xs border-collapse font-mono">
+                            <thead class="bg-surface-900 border-b border-white/10 text-gray-400 uppercase text-[10px] font-sans font-semibold">
+                                <tr>
+                                    <th class="py-3 px-3.5">Tanggal</th>
+                                    <th class="py-3 px-3.5">Ticker</th>
+                                    <th class="py-3 px-3.5">Entry</th>
+                                    <th class="py-3 px-3.5">Stop Loss</th>
+                                    <th class="py-3 px-3.5">Target TP</th>
+                                    <th class="py-3 px-3.5">Lot</th>
+                                    <th class="py-3 px-3.5">Setup</th>
+                                    <th class="py-3 px-3.5">Status</th>
+                                    <th class="py-3 px-3.5 text-right">Aksi / PnL</th>
+                                </tr>
+                            </thead>
+                            <tbody id="journal-table-body" class="divide-y divide-white/[0.04]">
+                                <tr>
+                                    <td colspan="9" class="py-8 text-center text-gray-500 font-sans">Memuat catatan transaksi...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 4: POSITION SIZING CALCULATOR -->
+            <div id="view-calculator" class="view-panel hidden space-y-6">
+                
+                <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
+                    <div class="border-b border-white/[0.06] pb-4">
+                        <h3 class="text-lg font-black text-white flex items-center gap-2.5">
+                            <i data-lucide="calculator" class="w-5 h-5 text-emerald-400"></i>
+                            Kalkulator Position Sizing Saham IDX
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">Gunakan aturan batas risiko maksimal 1% per trade untuk menjaga modal portofolio jangka panjang.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
+                            <input type="number" id="calc-capital" value="{{ default_capital }}" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Maksimal Risiko (%)</label>
+                                <input type="number" id="calc-risk-pct" value="{{ default_risk_pct }}" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Ticker Saham</label>
+                                <input type="text" id="calc-ticker" placeholder="BBCA" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Entry Price (Rp)</label>
+                                <input type="number" id="calc-entry" placeholder="8500" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Stop Loss (Rp)</label>
+                                <input type="number" id="calc-sl" placeholder="8200" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                            </div>
+                        </div>
+
+                        <!-- Live Result Box -->
+                        <div id="calc-result" class="bg-oled p-4 rounded-xl border border-white/10 space-y-2.5 text-xs font-mono">
+                            <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
+                                <span class="text-gray-400 font-sans">Rekomendasi Jumlah:</span>
+                                <span class="text-emerald-400 font-bold text-base" id="res-lots">0 Lot (0 Lembar)</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
+                                <span class="text-gray-400 font-sans">Total Modal Beli:</span>
+                                <span class="text-white font-semibold" id="res-cost">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
+                                <span class="text-gray-400 font-sans">Maksimal Risiko (Kena SL):</span>
+                                <span class="text-danger-400 font-semibold" id="res-risk">Rp 0</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1">
+                                <span class="text-gray-400 font-sans">Alokasi Portofolio:</span>
+                                <span class="text-target-400 font-semibold" id="res-alloc">0%</span>
+                            </div>
+
+                            <button onclick="logCalculatedTrade()" id="btn-log-journal" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-blue-950/50 font-sans active:scale-[0.98]">
+                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal Trading
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 5: SETTINGS & ALERTS -->
+            <div id="view-settings" class="view-panel hidden space-y-6">
+                
+                <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
+                    <div class="border-b border-white/[0.06] pb-4">
+                        <h3 class="text-lg font-black text-white flex items-center gap-2.5">
+                            <i data-lucide="settings-2" class="w-5 h-5 text-purple-400"></i>
+                            Pengaturan Sistem & Bot Notifikasi
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1">Konfigurasi notifikasi Telegram harian & monitoring server.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-oled p-4 rounded-xl border border-white/10 space-y-3">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="text-xs font-semibold text-white">Bot Notifikasi Telegram</div>
+                                    <div class="text-[11px] text-gray-400">Mengirim Top 5 Alpha Picks setiap pukul 17:00 WIB</div>
+                                </div>
+                                <button onclick="testTelegramAlert()" class="bg-surface-800 hover:bg-surface-700 text-emerald-400 border border-emerald-700/60 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition">
+                                    Test Notifikasi
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-oled p-4 rounded-xl border border-white/10 space-y-2 font-mono text-xs text-gray-400">
+                            <div class="text-white font-sans font-semibold text-xs mb-1">Informasi Environment:</div>
+                            <div>• Domain: <b class="text-emerald-400">{{ domain }}</b></div>
+                            <div>• Database: <b class="text-blue-400">data/alpha.db</b> (SQLite)</div>
+                            <div>• Default Capital: <b class="text-amber-400">Rp {{ default_capital }}</b></div>
+                            <div>• Scheduler: <b class="text-purple-400">Setiap Hari 17:00 WIB (Asia/Jakarta)</b></div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
-    </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-white/[0.06] py-6 text-center text-xs text-gray-500 bg-oled mt-12 font-mono">
-        &copy; 2026 {{ domain }} • {{ app_name }} • High-Frequency Swing Screener BEI
-    </footer>
+    </div>
 
     <!-- Logic Script -->
     <script>
         let chartInstance = null;
         let candleSeries = null;
         let volumeSeries = null;
+        
+        let terminalChartInstance = null;
+        let terminalCandleSeries = null;
+        let terminalVolumeSeries = null;
+
         let allScanResults = [];
         let currentFilter = 'ALL';
         let currentCalculatedTrade = null;
+        let isSidebarCollapsed = false;
 
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             initChart();
+            initTerminalChart();
             runScan(false);
+            loadJournalData();
         });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const brandText = document.getElementById('brand-text');
+            const labels = document.querySelectorAll('.sidebar-label');
+            const texts = document.querySelectorAll('.sidebar-text');
+
+            isSidebarCollapsed = !isSidebarCollapsed;
+
+            if (isSidebarCollapsed) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-18', 'px-2');
+                brandText.classList.add('hidden');
+                labels.forEach(l => l.classList.add('hidden'));
+                texts.forEach(t => t.classList.add('hidden'));
+            } else {
+                sidebar.classList.remove('w-18', 'px-2');
+                sidebar.classList.add('w-64');
+                brandText.classList.remove('hidden');
+                labels.forEach(l => l.classList.remove('hidden'));
+                texts.forEach(t => t.classList.remove('hidden'));
+            }
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-panel').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            const panel = document.getElementById(`view-${viewName}`);
+            const nav = document.getElementById(`nav-${viewName}`);
+            const pageTitle = document.getElementById('page-title');
+
+            if (panel) panel.classList.remove('hidden');
+            if (nav) nav.classList.add('active');
+
+            const titleMap = {
+                'screener': 'Alpha Playbook Screener',
+                'terminal': 'Chart Terminal Workspace',
+                'journal': 'Jurnal Trading & Performance Tracker',
+                'calculator': 'Kalkulator Position Sizing',
+                'settings': 'Pengaturan & Bot Notifikasi'
+            };
+            if (pageTitle && titleMap[viewName]) {
+                pageTitle.innerText = titleMap[viewName];
+            }
+
+            if (viewName === 'terminal' && terminalChartInstance) {
+                setTimeout(() => {
+                    const cont = document.getElementById('tv-terminal-chart');
+                    terminalChartInstance.applyOptions({ width: cont.clientWidth, height: 580 });
+                    terminalChartInstance.timeScale().fitContent();
+                }, 100);
+            }
+        }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -472,52 +619,55 @@
         function initChart() {
             const container = document.getElementById('tv-chart');
             chartInstance = LightweightCharts.createChart(container, {
-                layout: { 
-                    background: { color: '#06080F' }, 
-                    textColor: '#94A3B8' 
-                },
-                grid: { 
-                    vertLines: { color: 'rgba(255, 255, 255, 0.03)' }, 
-                    horzLines: { color: 'rgba(255, 255, 255, 0.03)' } 
-                },
-                timeScale: { 
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                    timeVisible: true,
-                    secondsVisible: false
-                },
-                rightPriceScale: {
-                    borderColor: 'rgba(255, 255, 255, 0.08)',
-                },
-                crosshair: {
-                    vertLine: { color: 'rgba(16, 185, 129, 0.4)', width: 1, style: 2 },
-                    horzLine: { color: 'rgba(16, 185, 129, 0.4)', width: 1, style: 2 }
-                }
+                layout: { background: { color: '#06080F' }, textColor: '#94A3B8' },
+                grid: { vertLines: { color: 'rgba(255, 255, 255, 0.03)' }, horzLines: { color: 'rgba(255, 255, 255, 0.03)' } },
+                timeScale: { borderColor: 'rgba(255, 255, 255, 0.08)' },
+                rightPriceScale: { borderColor: 'rgba(255, 255, 255, 0.08)' }
             });
 
             candleSeries = chartInstance.addCandlestickSeries({
-                upColor: '#10B981', 
-                downColor: '#F43F5E',
-                borderUpColor: '#10B981', 
-                borderDownColor: '#F43F5E',
-                wickUpColor: '#10B981', 
-                wickDownColor: '#F43F5E'
+                upColor: '#10B981', downColor: '#F43F5E',
+                borderUpColor: '#10B981', borderDownColor: '#F43F5E',
+                wickUpColor: '#10B981', wickDownColor: '#F43F5E'
             });
 
             volumeSeries = chartInstance.addHistogramSeries({
                 priceFormat: { type: 'volume' },
                 priceScaleId: '',
-                scaleMargins: {
-                    top: 0.82,
-                    bottom: 0,
-                },
+                scaleMargins: { top: 0.82, bottom: 0 },
             });
 
             new ResizeObserver(entries => {
                 if (entries[0] && entries[0].contentRect) {
-                    chartInstance.applyOptions({
-                        width: entries[0].contentRect.width,
-                        height: 420
-                    });
+                    chartInstance.applyOptions({ width: entries[0].contentRect.width, height: 380 });
+                }
+            }).observe(container);
+        }
+
+        function initTerminalChart() {
+            const container = document.getElementById('tv-terminal-chart');
+            terminalChartInstance = LightweightCharts.createChart(container, {
+                layout: { background: { color: '#06080F' }, textColor: '#94A3B8' },
+                grid: { vertLines: { color: 'rgba(255, 255, 255, 0.03)' }, horzLines: { color: 'rgba(255, 255, 255, 0.03)' } },
+                timeScale: { borderColor: 'rgba(255, 255, 255, 0.08)' },
+                rightPriceScale: { borderColor: 'rgba(255, 255, 255, 0.08)' }
+            });
+
+            terminalCandleSeries = terminalChartInstance.addCandlestickSeries({
+                upColor: '#10B981', downColor: '#F43F5E',
+                borderUpColor: '#10B981', borderDownColor: '#F43F5E',
+                wickUpColor: '#10B981', wickDownColor: '#F43F5E'
+            });
+
+            terminalVolumeSeries = terminalChartInstance.addHistogramSeries({
+                priceFormat: { type: 'volume' },
+                priceScaleId: '',
+                scaleMargins: { top: 0.82, bottom: 0 },
+            });
+
+            new ResizeObserver(entries => {
+                if (entries[0] && entries[0].contentRect) {
+                    terminalChartInstance.applyOptions({ width: entries[0].contentRect.width, height: 580 });
                 }
             }).observe(container);
         }
@@ -550,10 +700,7 @@
             } catch (err) {
                 console.error("Scan error", err);
                 status.innerText = 'Gagal memindai data.';
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12 text-red-400 clean-card p-8">
-                        Gagal mengambil data pasar BEI. Silakan klik tombol Scan Market lagi.
-                    </div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-red-400 clean-card p-8">Gagal mengambil data pasar BEI. Silakan klik Scan lagi.</div>`;
             } finally {
                 icon.classList.remove('animate-spin');
             }
@@ -681,6 +828,8 @@
         async function loadChart(symbol, name, setup) {
             document.getElementById('chart-title').innerText = `${symbol} - ${name}`;
             document.getElementById('chart-badge').innerText = setup;
+            document.getElementById('terminal-ticker-title').innerText = `${symbol} - ${name}`;
+            
             const loader = document.getElementById('chart-loading');
             loader.classList.remove('hidden');
 
@@ -689,10 +838,13 @@
                 const json = await res.json();
                 if (json.candles) {
                     candleSeries.setData(json.candles);
+                    terminalCandleSeries.setData(json.candles);
                     if (json.volumes) {
                         volumeSeries.setData(json.volumes);
+                        terminalVolumeSeries.setData(json.volumes);
                     }
                     chartInstance.timeScale().fitContent();
+                    terminalChartInstance.timeScale().fitContent();
                 }
             } catch (e) {
                 console.error("Error loading chart", e);
@@ -701,21 +853,12 @@
             }
         }
 
-        // Modal Controls
-        function openCalculatorModal() {
-            document.getElementById('calc-modal').classList.remove('hidden');
-            calculateLotFromForm();
-        }
-
-        function closeCalculatorModal() {
-            document.getElementById('calc-modal').classList.add('hidden');
-        }
-
         function quickCalculate(ticker, entry, sl, tp, setup) {
             document.getElementById('calc-ticker').value = ticker;
             document.getElementById('calc-entry').value = entry;
             document.getElementById('calc-sl').value = sl;
-            openCalculatorModal();
+            switchView('calculator');
+            calculateLotFromForm();
         }
 
         async function calculateLotFromForm() {
@@ -777,8 +920,8 @@
                 const json = await res.json();
                 if (json.status === 'success') {
                     showToast(`Trade ${currentCalculatedTrade.ticker} (${currentCalculatedTrade.lots} Lot) berhasil dicatat ke Jurnal!`);
-                    closeCalculatorModal();
-                    openJournalModal();
+                    switchView('journal');
+                    loadJournalData();
                 }
             } catch (e) {
                 showToast("Gagal mencatat transaksi", "error");
@@ -788,8 +931,7 @@
             }
         }
 
-        async function openJournalModal() {
-            document.getElementById('journal-modal').classList.remove('hidden');
+        async function loadJournalData() {
             const tbody = document.getElementById('journal-table-body');
             tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-gray-500 font-sans">Mengambil data jurnal...</td></tr>';
 
@@ -837,10 +979,6 @@
             }
         }
 
-        function closeJournalModal() {
-            document.getElementById('journal-modal').classList.add('hidden');
-        }
-
         async function promptCloseTrade(tradeId, entryPrice) {
             const exitPriceStr = prompt(`Masukkan Harga Keluar / Exit Price (Harga Beli: Rp ${entryPrice}):`);
             if (!exitPriceStr) return;
@@ -859,10 +997,25 @@
                 const json = await res.json();
                 if (json.status === 'success') {
                     showToast("Transaksi berhasil ditutup & PnL tercatat!");
-                    openJournalModal();
+                    loadJournalData();
                 }
             } catch (e) {
                 showToast("Gagal menutup transaksi", "error");
+            }
+        }
+
+        async function testTelegramAlert() {
+            showToast("Menguji koneksi bot Telegram...");
+            try {
+                const res = await fetch('/api/telegram/test', { method: 'POST' });
+                const json = await res.json();
+                if (json.connected) {
+                    showToast("Alert Telegram berhasil terkirim!");
+                } else {
+                    showToast("Token Telegram belum disetel di .env (Opsional)", "error");
+                }
+            } catch (e) {
+                showToast("Gagal mengirim test Telegram", "error");
             }
         }
     </script>
