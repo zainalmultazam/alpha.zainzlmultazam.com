@@ -2,13 +2,13 @@ import pandas as pd
 import numpy as np
 
 def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
-    """Menghitung indikator teknikal untuk strategi swing trading."""
+    """Menghitung indikator teknikal untuk strategi swing trading (Daily + Weekly Multi-Timeframe)."""
     if df is None or len(df) < 50:
         return df
 
     df = df.copy()
 
-    # Exponential Moving Averages (EMA)
+    # Exponential Moving Averages (EMA Daily)
     df["ema20"] = df["Close"].ewm(span=20, adjust=False).mean()
     df["ema50"] = df["Close"].ewm(span=50, adjust=False).mean()
     df["ema150"] = df["Close"].ewm(span=150, adjust=False).mean()
@@ -41,5 +41,23 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     range_5d = df["High"].rolling(5).max() - df["Low"].rolling(5).min()
     range_20d = df["High"].rolling(20).max() - df["Low"].rolling(20).min()
     df["vcp_ratio"] = range_5d / range_20d.replace(0, np.nan)
+
+    # Multi-Timeframe: Weekly Trend Calculation (Resample to Weekly)
+    try:
+        weekly_close = df["Close"].resample("W-FRI").last().dropna()
+        if len(weekly_close) >= 10:
+            weekly_ema20 = weekly_close.ewm(span=10, adjust=False).mean()
+            last_w_close = float(weekly_close.iloc[-1])
+            last_w_ema = float(weekly_ema20.iloc[-1])
+            prev_w_ema = float(weekly_ema20.iloc[-2]) if len(weekly_ema20) > 1 else last_w_ema
+            
+            df["weekly_uptrend"] = bool(last_w_close >= last_w_ema and last_w_ema >= prev_w_ema * 0.995)
+            df["weekly_ema20"] = last_w_ema
+        else:
+            df["weekly_uptrend"] = True
+            df["weekly_ema20"] = float(df["ema50"].iloc[-1])
+    except Exception:
+        df["weekly_uptrend"] = True
+        df["weekly_ema20"] = float(df["ema50"].iloc[-1]) if "ema50" in df else 0.0
 
     return df

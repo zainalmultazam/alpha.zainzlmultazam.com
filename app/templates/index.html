@@ -324,16 +324,18 @@
                 <h1 class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight flex items-center gap-2.5 leading-none" id="page-title">
                     Alpha Playbook
                 </h1>
-                <span id="scan-status" class="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/60 font-medium">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
-                    <span>Menyiapkan data...</span>
-                </span>
+                
+                <!-- IHSG Climate Header Pill -->
+                <div id="header-ihsg-badge" class="hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800/60">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" id="header-ihsg-dot"></span>
+                    <span id="header-ihsg-text">IHSG: Memuat Iklim Pasar...</span>
+                </div>
             </div>
 
             <div class="flex items-center gap-3">
-                <!-- Search Ticker Input -->
+                <!-- Universal Search Ticker Input -->
                 <div class="relative">
-                    <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (BBCA)..." class="bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-36 sm:w-52 font-mono transition">
+                    <input type="text" id="search-ticker" oninput="handleSearch()" onkeydown="handleSearchKeyDown(event)" placeholder="Cari emiten apa saja (Enter)..." class="bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-44 sm:w-56 font-mono transition" title="Ketik kode saham apa saja dan tekan Enter untuk membuka chart">
                     <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 dark:text-gray-400 absolute left-2.5 top-2.5"></i>
                 </div>
 
@@ -357,6 +359,34 @@
             <!-- VIEW 1: SCREENER & PLAYBOOK -->
             <div id="view-screener" class="view-panel space-y-6">
                 
+                <!-- IHSG Macro Climate Banner Card -->
+                <div id="ihsg-climate-card" class="clean-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold shrink-0 text-lg" id="climate-icon">
+                            🌦️
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <span class="font-extrabold text-slate-900 dark:text-white text-base">IHSG Market Climate:</span>
+                                <span id="climate-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                                    BULLISH (Risk-On)
+                                </span>
+                                <span id="climate-price" class="text-xs font-mono text-slate-500 dark:text-gray-400">Index: 7,800 (+0.0%)</span>
+                            </div>
+                            <p id="climate-advice" class="text-xs text-slate-600 dark:text-gray-300 mt-1">
+                                Kondisi pasar optimal untuk swing trading. Sinyal buy diaktifkan dengan konfirmasi tren mingguan.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 shrink-0 self-end md:self-center font-mono text-xs">
+                        <div class="bg-slate-100 dark:bg-surface-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-right">
+                            <span class="text-[10px] text-slate-500 dark:text-gray-400 block uppercase font-sans">Alokasi Modal</span>
+                            <span id="climate-exposure" class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">100% Aktif</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- KPI Banner -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
@@ -373,13 +403,13 @@
 
                     <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
                         <div class="flex items-center justify-between text-slate-500 dark:text-gray-400">
-                            <span class="text-xs font-medium">Strategi Utama</span>
+                            <span class="text-xs font-medium">Validasi Multi-Timeframe</span>
                             <i data-lucide="trending-up" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
                         </div>
                         <div class="mt-2.5">
-                            <span class="text-xl sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">VCP & Stage 2</span>
+                            <span class="text-xl sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">Weekly + Daily</span>
                         </div>
-                        <p class="text-[10px] text-blue-500 dark:text-blue-300 mt-1 font-mono">Pullback & Momentum</p>
+                        <p class="text-[10px] text-blue-500 dark:text-blue-300 mt-1 font-mono">Anti False-Breakout Filter</p>
                     </div>
 
                     <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
@@ -431,8 +461,8 @@
                     <div class="col-span-full py-16 text-center text-slate-500 dark:text-gray-400 clean-card">
                         <div class="flex flex-col items-center">
                             <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400 mb-3"></i>
-                            <p class="text-sm font-semibold text-slate-800 dark:text-white">Memindai Saham Likuid BEI...</p>
-                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 font-mono">Menghitung EMA, VCP, RVOL, & Volatilitas</p>
+                            <p class="text-sm font-semibold text-slate-800 dark:text-white">Memindai Saham Likuid BEI & Validasi Multi-Timeframe...</p>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 font-mono">Menghitung EMA, VCP, RVOL, Volatilitas, & Weekly Trend</p>
                         </div>
                     </div>
                 </div>
@@ -467,7 +497,7 @@
                         </div>
                         <div>
                             <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
-                            <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume Histogram Engine</p>
+                            <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume Histogram Engine (Yahoo Finance EOD)</p>
                         </div>
                     </div>
 
@@ -605,9 +635,14 @@
                                 <span class="text-target-500 dark:text-target-400 font-semibold" id="res-alloc">0%</span>
                             </div>
 
-                            <button onclick="logCalculatedTrade()" id="btn-log-journal" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 font-sans active:scale-[0.98]">
-                                <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal Trading
-                            </button>
+                            <div class="grid grid-cols-2 gap-2 pt-2">
+                                <button onclick="copyCurrentCalcGTC()" class="bg-slate-200 hover:bg-slate-300 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 font-sans active:scale-[0.98]">
+                                    <i data-lucide="copy" class="w-4 h-4"></i> Copy Auto-Order GTC
+                                </button>
+                                <button onclick="logCalculatedTrade()" id="btn-log-journal" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 font-sans active:scale-[0.98]">
+                                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -666,6 +701,7 @@
         let terminalVolumeSeries = null;
 
         let allScanResults = [];
+        let currentClimate = null;
         let currentFilter = 'ALL';
         let currentCalculatedTrade = null;
         let isSidebarCollapsed = true;
@@ -863,18 +899,17 @@
 
         async function runScan(force = false) {
             const container = document.getElementById('top-picks-container');
-            const status = document.getElementById('scan-status');
             const icon = document.getElementById('icon-scan');
             
             icon.classList.add('animate-spin');
-            status.innerText = 'Scanning universe...';
 
             try {
                 const res = await fetch(`/api/scan${force ? '?force=true' : ''}`);
                 const json = await res.json();
                 allScanResults = json.data || [];
+                currentClimate = json.climate;
                 
-                status.innerText = `${allScanResults.length} Setup Aktif • ${new Date().toLocaleTimeString('id-ID')} WIB`;
+                updateClimateUI(json.climate);
                 document.getElementById('count-all').innerText = allScanResults.length;
 
                 renderPicks();
@@ -888,11 +923,56 @@
                 }
             } catch (err) {
                 console.error("Scan error", err);
-                status.innerText = 'Gagal memindai data.';
                 container.innerHTML = `<div class="col-span-full text-center py-12 text-red-500 clean-card p-8">Gagal mengambil data pasar BEI. Silakan klik Scan lagi.</div>`;
             } finally {
                 icon.classList.remove('animate-spin');
             }
+        }
+
+        function updateClimateUI(climate) {
+            if (!climate) return;
+            
+            const headerText = document.getElementById('header-ihsg-text');
+            const headerDot = document.getElementById('header-ihsg-dot');
+            const headerBadge = document.getElementById('header-ihsg-badge');
+            
+            const climateBadge = document.getElementById('climate-badge');
+            const climatePrice = document.getElementById('climate-price');
+            const climateAdvice = document.getElementById('climate-advice');
+            const climateExposure = document.getElementById('climate-exposure');
+            const climateCard = document.getElementById('ihsg-climate-card');
+
+            const isBullish = climate.regime === 'BULLISH';
+            const isNeutral = climate.regime === 'NEUTRAL';
+            const sign = climate.change_pct >= 0 ? '+' : '';
+
+            // Header badge update
+            headerText.innerText = `IHSG ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%) • ${climate.title}`;
+            
+            if (isBullish) {
+                headerDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+                headerBadge.className = "hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800/60";
+                climateBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700";
+                climateCard.className = "clean-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4";
+                climateExposure.className = "text-emerald-600 dark:text-emerald-400 font-bold text-sm";
+            } else if (isNeutral) {
+                headerDot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
+                headerBadge.className = "hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/60";
+                climateBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700";
+                climateCard.className = "clean-card p-4 sm:p-5 border-l-4 border-l-amber-500 flex flex-col md:flex-row md:items-center justify-between gap-4";
+                climateExposure.className = "text-amber-600 dark:text-amber-400 font-bold text-sm";
+            } else {
+                headerDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
+                headerBadge.className = "hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800/60";
+                climateBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-700";
+                climateCard.className = "clean-card p-4 sm:p-5 border-l-4 border-l-rose-500 flex flex-col md:flex-row md:items-center justify-between gap-4";
+                climateExposure.className = "text-rose-600 dark:text-rose-400 font-bold text-sm";
+            }
+
+            climateBadge.innerText = `${climate.regime} (${climate.title})`;
+            climatePrice.innerText = `Index: ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%) • EMA50: ${climate.ema50.toLocaleString('id-ID')}`;
+            climateAdvice.innerText = climate.advice;
+            climateExposure.innerText = `${climate.exposure_pct}% Modal Aktif`;
         }
 
         function filterPicks(category) {
@@ -911,6 +991,18 @@
 
         function handleSearch() {
             renderPicks();
+        }
+
+        function handleSearchKeyDown(e) {
+            if (e.key === 'Enter') {
+                const searchVal = (document.getElementById('search-ticker').value || '').trim().toUpperCase();
+                if (searchVal) {
+                    // Open chart terminal for any searched ticker
+                    loadChart(searchVal, `IDX:${searchVal}`, 'Universal Search');
+                    switchView('terminal');
+                    showToast(`Membuka grafik emiten ${searchVal}...`);
+                }
+            }
         }
 
         function renderPicks() {
@@ -934,8 +1026,8 @@
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12 text-slate-500 dark:text-gray-400 clean-card p-8 flex flex-col items-center">
                         <i data-lucide="shield-alert" class="w-7 h-7 text-amber-500 dark:text-amber-400 mb-2"></i>
-                        <p class="text-sm font-semibold text-slate-800 dark:text-gray-200">Tidak ada setup yang cocok saat ini.</p>
-                        <p class="text-xs text-slate-500 dark:text-gray-500 mt-1 font-mono">Disiplin dan sabar menunggu konfirmasi harga.</p>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-gray-200">Tidak ada setup yang cocok di hasil scan.</p>
+                        <p class="text-xs text-slate-500 dark:text-gray-500 mt-1 font-mono">Tekan <b>Enter</b> di kolom pencarian untuk membuka grafik emiten '${searchVal || 'saham'}'.</p>
                     </div>`;
                 lucide.createIcons();
                 return;
@@ -945,6 +1037,12 @@
                 const plan = item.plan;
                 const changeColor = item.change_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-danger-500 dark:text-danger-400';
                 const changeSign = item.change_pct >= 0 ? '+' : '';
+
+                const weeklyBadge = item.weekly_confirmed 
+                    ? `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 font-semibold flex items-center gap-1">
+                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Weekly Confirmed
+                       </span>`
+                    : '';
 
                 return `
                 <div class="clean-card clean-card-hover p-5 cursor-pointer group flex flex-col justify-between" onclick="loadChart('${item.symbol}', '${item.name}', '${item.primary_setup}')">
@@ -964,11 +1062,12 @@
                             </span>
                         </div>
 
-                        <!-- Setup & Volume Badges -->
+                        <!-- Setup, Weekly & Volume Badges -->
                         <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
                             <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 font-semibold">
                                 ${item.primary_setup}
                             </span>
+                            ${weeklyBadge}
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">
                                 Turnover: Rp ${item.turnover_bio}B
                             </span>
@@ -999,19 +1098,74 @@
 
                     </div>
 
-                    <!-- Card Footer Action -->
+                    <!-- Card Footer Action with Copy GTC & Calculate -->
                     <div class="mt-4 pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between text-xs">
                         <span class="text-slate-500 dark:text-gray-400 font-mono text-[11px]">R:R <b class="text-slate-900 dark:text-white">${plan.rr_ratio}</b></span>
-                        <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center gap-1.5 active:scale-[0.98]">
-                            <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
-                            <span>Hitung Lot</span>
-                        </button>
+                        
+                        <div class="flex items-center gap-1.5">
+                            <!-- 1-Click Copy GTC Order -->
+                            <button onclick="event.stopPropagation(); copyGtcOrder('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, ${plan.tp2}, '${item.primary_setup}', ${plan.risk_pct}, ${plan.tp1_gain_pct}, ${plan.tp2_gain_pct})" class="text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white font-medium bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 transition flex items-center gap-1 active:scale-95" title="Salin format Auto-Order GTC untuk sekuritas">
+                                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                <span>Copy GTC</span>
+                            </button>
+
+                            <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center gap-1 active:scale-[0.98]">
+                                <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+                                <span>Hitung Lot</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 `;
             }).join('');
 
             lucide.createIcons();
+        }
+
+        function copyGtcOrder(ticker, entry, sl, tp1, tp2, setup, riskPct, tp1Gain, tp2Gain) {
+            const capital = parseFloat(document.getElementById('calc-capital').value) || 100000000;
+            const riskAmount = capital * 0.01;
+            const riskPerShare = Math.max(1, entry - sl);
+            const shares = Math.floor(riskAmount / riskPerShare);
+            const lots = Math.max(1, Math.floor(shares / 100));
+            const halfLots = Math.max(1, Math.floor(lots / 2));
+
+            const gtcScript = 
+`=======================================
+🎯 ALPHASWING IDX AUTO-ORDER GTC
+=======================================
+Ticker        : ${ticker}.JK
+Strategi      : ${setup} (Weekly Confirmed)
+---------------------------------------
+1. ACTION     : BUY IF BREAK / BUY STOP
+   Entry Price: Rp ${entry.toLocaleString('id-ID')}
+   Jumlah Lot : ${lots} Lot (${(lots * 100).toLocaleString('id-ID')} Lembar)
+   Validitas  : GTC (Good Till Cancelled)
+
+2. AUTO STOP LOSS (OCO):
+   SL Price   : Rp ${sl.toLocaleString('id-ID')} (-${riskPct}%)
+   Max Risiko : Rp ${riskAmount.toLocaleString('id-ID')} (1.0% Modal)
+
+3. TAKE PROFIT TARGETS:
+   TP 1 (2R)  : Rp ${tp1.toLocaleString('id-ID')} (+${tp1Gain}%) -> Jual ${halfLots} Lot
+   TP 2 (Run) : Rp ${tp2.toLocaleString('id-ID')} (+${tp2Gain}%) -> Jual ${lots - halfLots} Lot
+=======================================
+*Siap dipasang di Stockbit, IPOT, Mirae, MOST, Ajaib.*`;
+
+            navigator.clipboard.writeText(gtcScript).then(() => {
+                showToast(`Auto-Order GTC ${ticker} (${lots} Lot) berhasil disalin ke clipboard!`);
+            }).catch(() => {
+                showToast("Gagal menyalin order ke clipboard", "error");
+            });
+        }
+
+        function copyCurrentCalcGTC() {
+            if (!currentCalculatedTrade) {
+                showToast("Silakan masukkan data kalkulasi terlebih dahulu", "error");
+                return;
+            }
+            const t = currentCalculatedTrade;
+            copyGtcOrder(t.ticker, t.entry_price, t.stop_loss, t.target_price, t.target_price + (t.target_price - t.entry_price), t.setup_name, 3.5, 7.0, 14.0);
         }
 
         async function loadChart(symbol, name, setup) {

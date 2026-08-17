@@ -4,7 +4,7 @@ from app.engine.technical import calculate_indicators
 from app.engine.strategy import generate_trade_plan
 
 def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[str, Any]]:
-    """Memindai satu saham untuk mendeteksi setup swing probabilitas tinggi."""
+    """Memindai satu saham untuk mendeteksi setup swing probabilitas tinggi dengan validasi Multi-Timeframe (Daily + Weekly)."""
     if df is None or len(df) < 50:
         return None
 
@@ -35,9 +35,16 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             (ema200 == 0 or price > ema200)
         )
 
+        # Multi-Timeframe Weekly Trend Confirmation
+        weekly_confirmed = bool(last.get("weekly_uptrend", True))
+
         # Deteksi Setup Khusus
         setups = []
         confidence_score = 50
+
+        # Bonus Skor untuk Multi-Timeframe Alignment
+        if weekly_confirmed:
+            confidence_score += 15
 
         rvol = float(last["rvol"]) if pd.notnull(last["rvol"]) else 1.0
         vcp_ratio = float(last["vcp_ratio"]) if pd.notnull(last["vcp_ratio"]) else 1.0
@@ -47,13 +54,13 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         # 1. VCP Breakout Setup
         if is_stage2 and vcp_ratio < 0.60 and rvol > 1.2:
             setups.append("VCP Breakout")
-            confidence_score += 25
+            confidence_score += 20
 
         # 2. Pullback EMA 20/50 Retest Setup
         distance_to_ema20 = abs(price - ema20) / price
         if is_stage2 and distance_to_ema20 < 0.025 and price >= float(last["Open"]):
             setups.append("EMA 20 Pullback")
-            confidence_score += 20
+            confidence_score += 15
 
         # 3. Volume Surge / Smart Money Pocket Pivot
         if rvol >= 1.7 and price > float(prev["Close"]):
@@ -84,9 +91,10 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "turnover_bio": round(turnover / 1_000_000_000, 2),
             "rvol": round(rvol, 2),
             "rsi": round(float(last["rsi14"]), 1) if pd.notnull(last["rsi14"]) else 50.0,
+            "weekly_confirmed": weekly_confirmed,
             "primary_setup": primary_setup,
             "setups": setups,
-            "score": min(98, confidence_score),
+            "score": min(99, confidence_score),
             "plan": trade_plan
         }
     except Exception as e:

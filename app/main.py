@@ -10,7 +10,7 @@ from typing import Optional
 
 from app.config import settings
 from app.engine.universe import get_universe
-from app.services.market_data import fetch_stock_df, clear_cache
+from app.services.market_data import fetch_stock_df, clear_cache, get_market_climate
 from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
 from app.engine.journal import log_trade, get_all_trades, close_trade, get_journal_stats, init_db
@@ -69,6 +69,7 @@ async def health_check():
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
+    climate = get_market_climate()
     return templates.TemplateResponse(
         request=request,
         name="index.html",
@@ -76,9 +77,14 @@ async def home(request: Request):
             "domain": settings.APP_DOMAIN,
             "default_capital": settings.DEFAULT_CAPITAL,
             "default_risk_pct": settings.DEFAULT_MAX_RISK_PCT,
-            "app_name": settings.APP_NAME
+            "app_name": settings.APP_NAME,
+            "climate": climate
         }
     )
+
+@app.get("/api/market-climate")
+async def api_market_climate():
+    return {"status": "success", "data": get_market_climate()}
 
 @app.get("/api/scan")
 async def api_scan(force: bool = False):
@@ -87,7 +93,13 @@ async def api_scan(force: bool = False):
         if force:
             clear_cache()
         cached_scan_results = await execute_market_scan()
-    return {"status": "success", "total": len(cached_scan_results), "data": cached_scan_results}
+    climate = get_market_climate()
+    return {
+        "status": "success", 
+        "total": len(cached_scan_results), 
+        "climate": climate,
+        "data": cached_scan_results
+    }
 
 @app.post("/api/calculate-size")
 async def api_calculate_size(
