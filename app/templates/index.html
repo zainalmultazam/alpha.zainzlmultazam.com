@@ -527,28 +527,30 @@
             <div id="view-screener" class="view-panel space-y-6">
                 
                 <!-- IHSG Macro Climate Banner Card -->
-                <div id="ihsg-climate-card" class="clean-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div class="flex items-start gap-3.5">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0" id="climate-icon">
-                            <i data-lucide="activity" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                <div id="ihsg-climate-card" class="clean-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
+                    <div class="flex items-start gap-4">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 transition-colors" id="climate-icon-box">
+                            <i data-lucide="trending-up" class="w-5.5 h-5.5" id="climate-icon"></i>
                         </div>
-                        <div>
+                        <div class="space-y-1.5 min-w-0">
                             <div class="flex items-center gap-2.5 flex-wrap">
-                                <span class="font-extrabold text-slate-900 dark:text-white text-base">IHSG Market Climate:</span>
+                                <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">IHSG Macro Climate:</span>
                                 <span id="climate-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                                    BULLISH (Risk-On)
+                                    BULLISH · Risk-On
                                 </span>
                                 <span id="climate-price" class="text-xs font-mono text-slate-500 dark:text-gray-400">Index: 7,800 (+0.0%)</span>
                             </div>
-                            <p id="climate-advice" class="text-xs text-slate-600 dark:text-gray-300 mt-1">
+                            <!-- Separate Operational / Holiday Status Pill -->
+                            <div id="climate-market-status" class="hidden flex items-center gap-2 text-xs flex-wrap"></div>
+                            <p id="climate-advice" class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed">
                                 Kondisi pasar optimal untuk swing trading. Sinyal buy diaktifkan dengan konfirmasi tren mingguan.
                             </p>
                         </div>
                     </div>
 
                     <div class="flex items-center gap-3 shrink-0 self-end md:self-center font-mono text-xs">
-                        <div class="bg-slate-100 dark:bg-surface-900 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-right">
-                            <span class="text-[10px] text-slate-500 dark:text-gray-400 block uppercase font-sans">Alokasi Modal</span>
+                        <div class="bg-slate-100 dark:bg-surface-900 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-right">
+                            <span class="text-[10px] text-slate-500 dark:text-gray-400 block uppercase font-sans font-semibold">Alokasi Modal</span>
                             <span id="climate-exposure" class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">100% Aktif</span>
                         </div>
                     </div>
@@ -1521,59 +1523,88 @@
 
         function updateClimateUI(climate) {
             if (!climate) return;
-            
+
             const headerText = document.getElementById('header-ihsg-text');
-            const headerDot = document.getElementById('header-ihsg-dot');
+            const headerDot  = document.getElementById('header-ihsg-dot');
             const headerBadge = document.getElementById('header-ihsg-badge');
-            
-            const climateBadge = document.getElementById('climate-badge');
-            const climatePrice = document.getElementById('climate-price');
-            const climateAdvice = document.getElementById('climate-advice');
+
+            const climateBadge    = document.getElementById('climate-badge');
+            const climatePrice    = document.getElementById('climate-price');
+            const climateAdvice   = document.getElementById('climate-advice');
             const climateExposure = document.getElementById('climate-exposure');
-            const climateCard = document.getElementById('ihsg-climate-card');
+            const climateCard     = document.getElementById('ihsg-climate-card');
+            const climateIconBox  = document.getElementById('climate-icon-box');
+            const climateIcon     = document.getElementById('climate-icon');
+            const mktStatus       = document.getElementById('climate-market-status');
 
             const isBullish = climate.regime === 'BULLISH';
             const isNeutral = climate.regime === 'NEUTRAL';
             const sign = climate.change_pct >= 0 ? '+' : '';
-
-            // Header badge update with market status
             const mStatus = climate.market_status;
-            let statusSuffix = '';
-            if (mStatus) {
-                statusSuffix = ` • ${mStatus.title}`;
-            }
-            
+
+            let statusSuffix = mStatus ? ` · ${mStatus.title}` : '';
             headerText.innerText = `IHSG ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%)${statusSuffix}`;
-            
+
+            let color, cardBorder, iconBox, badgeCls, topbarBadgeCls, exposureCls;
             if (isBullish) {
-                headerDot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
-                headerBadge.className = "hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800/60";
-                climateBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700";
-                climateCard.className = "clean-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4";
-                climateExposure.className = "text-emerald-600 dark:text-emerald-400 font-bold text-sm";
+                color = 'emerald';
+                cardBorder = 'border-l-emerald-500';
+                iconBox = 'bg-emerald-100 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400';
+                badgeCls = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700';
+                topbarBadgeCls = 'hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-emerald-50 text-emerald-800 border-emerald-200 dark:bg-emerald-950/80 dark:text-emerald-300 dark:border-emerald-800/60';
+                exposureCls = 'text-emerald-600 dark:text-emerald-400 font-bold text-sm';
+                headerDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
             } else if (isNeutral) {
-                headerDot.className = "w-2 h-2 rounded-full bg-amber-500 animate-pulse";
-                headerBadge.className = "hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/60";
-                climateBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700";
-                climateCard.className = "clean-card p-4 sm:p-5 border-l-4 border-l-amber-500 flex flex-col md:flex-row md:items-center justify-between gap-4";
-                climateExposure.className = "text-amber-600 dark:text-amber-400 font-bold text-sm";
+                color = 'amber';
+                cardBorder = 'border-l-amber-500';
+                iconBox = 'bg-amber-100 dark:bg-amber-500/10 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400';
+                badgeCls = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-700';
+                topbarBadgeCls = 'hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/80 dark:text-amber-300 dark:border-amber-800/60';
+                exposureCls = 'text-amber-600 dark:text-amber-400 font-bold text-sm';
+                headerDot.className = 'w-2 h-2 rounded-full bg-amber-500 animate-pulse';
             } else {
-                headerDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
-                headerBadge.className = "hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800/60";
-                climateBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-700";
-                climateCard.className = "clean-card p-4 sm:p-5 border-l-4 border-l-rose-500 flex flex-col md:flex-row md:items-center justify-between gap-4";
-                climateExposure.className = "text-rose-600 dark:text-rose-400 font-bold text-sm";
+                color = 'rose';
+                cardBorder = 'border-l-rose-500';
+                iconBox = 'bg-rose-100 dark:bg-rose-500/10 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-400';
+                badgeCls = 'px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-300 dark:border-rose-700';
+                topbarBadgeCls = 'hidden md:inline-flex items-center gap-1.5 text-[11px] font-mono font-semibold px-3 py-1 rounded-lg border transition-colors bg-rose-50 text-rose-800 border-rose-200 dark:bg-rose-950/80 dark:text-rose-300 dark:border-rose-800/60';
+                exposureCls = 'text-rose-600 dark:text-rose-400 font-bold text-sm';
+                headerDot.className = 'w-2 h-2 rounded-full bg-rose-500 animate-pulse';
             }
 
-            let adviceText = climate.advice;
-            if (mStatus && mStatus.is_holiday) {
-                adviceText = `<b>[${mStatus.title}]</b> ${mStatus.message} ${climate.advice}`;
+            headerBadge.className = topbarBadgeCls;
+            climateBadge.className = badgeCls;
+            climateExposure.className = exposureCls;
+            climateCard.className = `clean-card p-4 sm:p-5 border-l-4 ${cardBorder} flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all`;
+            climateIconBox.className = `w-11 h-11 rounded-xl ${iconBox} border flex items-center justify-center shrink-0 transition-colors`;
+
+            const iconName = isBullish ? 'trending-up' : (isNeutral ? 'activity' : 'trending-down');
+            climateIcon.setAttribute('data-lucide', iconName);
+
+            climateBadge.innerText = `${climate.regime} · ${climate.title}`;
+
+            const ema50Text  = climate.ema50  ? ` · EMA50: ${climate.ema50.toLocaleString('id-ID')}`  : '';
+            const ema200Text = climate.ema200 ? ` · EMA200: ${climate.ema200.toLocaleString('id-ID')}` : '';
+            climatePrice.innerText = `Index: ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%)${ema50Text}${ema200Text}`;
+
+            if (mStatus && (mStatus.is_holiday || !mStatus.is_open)) {
+                const pillColor = mStatus.is_holiday ? 'amber' : 'slate';
+                mktStatus.innerHTML = `
+                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-${pillColor}-100 text-${pillColor}-800 dark:bg-${pillColor}-950/60 dark:text-${pillColor}-300 border border-${pillColor}-200 dark:border-${pillColor}-800/60">
+                        <i data-lucide="${mStatus.is_holiday ? 'calendar-off' : 'clock'}" class="w-3 h-3"></i>
+                        ${mStatus.title}
+                    </span>
+                    ${mStatus.message ? `<span class="text-slate-500 dark:text-gray-400">${mStatus.message}</span>` : ''}`;
+                mktStatus.classList.remove('hidden');
+            } else {
+                mktStatus.classList.add('hidden');
+                mktStatus.innerHTML = '';
             }
 
-            climateBadge.innerText = `${climate.regime} (${climate.title})`;
-            climatePrice.innerText = `Index: ${climate.price.toLocaleString('id-ID')} (${sign}${climate.change_pct}%) • EMA50: ${climate.ema50.toLocaleString('id-ID')}`;
-            climateAdvice.innerHTML = adviceText;
+            climateAdvice.innerHTML = climate.advice;
             climateExposure.innerText = `${climate.exposure_pct}% Modal Aktif`;
+
+            lucide.createIcons();
         }
 
         function filterPicks(category) {
