@@ -9,7 +9,8 @@ cd "$APP_DIR" || exit 1
 # Check if already running on port
 PID=$(lsof -ti:$PORT 2>/dev/null)
 if [ -z "$PID" ]; then
-    nohup "$UVICORN_BIN" app.main:app --host 127.0.0.1 --port $PORT --workers 1 > "$APP_DIR/tmp/uvicorn.log" 2>&1 &
+    nohup "$UVICORN_BIN" app.main:app --host 127.0.0.1 --port $PORT --workers 1 </dev/null > "$APP_DIR/tmp/uvicorn.log" 2>&1 &
+    sleep 1
     echo "Alpha Server started on port $PORT"
 else
     echo "Alpha Server already running (PID: $PID)"
