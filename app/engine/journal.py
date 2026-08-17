@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 from typing import List, Dict, Any
 
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/trades.db"))
+DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/alpha.db"))
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)

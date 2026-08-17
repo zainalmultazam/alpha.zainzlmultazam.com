@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  alphaswing:
+  alpha:
     build: .
-    container_name: alphaswing_idx
+    container_name: alpha
     restart: always
     ports:
       - "8000:8000"
