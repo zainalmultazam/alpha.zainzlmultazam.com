@@ -8,13 +8,14 @@ import asyncio
 import time
 import json
 import pandas as pd
+from datetime import datetime
 from typing import Optional
 
 from app.config import settings
 from app.engine.universe import get_universe
 from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status, get_global_macro_data
 from app.engine.scanner import scan_stock
-from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers
+from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers, calculate_money_flow
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
 from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
 from app.services.telegram import send_telegram_message, notify_super_digest
@@ -400,10 +401,11 @@ async def api_chart(ticker: str):
     curr_atr = float(last_row.get("ATR", curr_price * 0.04))
     trade_plan = generate_trade_plan(curr_price, curr_atr, "Trade Plan")
 
-    # Hitung Volume Profile, Anchored VWAP, & Pocket Pivot Markers
+    # Hitung Volume Profile, Anchored VWAP, Pocket Pivot Markers, & Money Flow (CMF/OBV)
     vol_profile = calculate_volume_profile(df_calc, lookback=120)
     avwap_series = calculate_anchored_vwap(df_calc, lookback=120)
     markers = calculate_pocket_pivots_and_markers(df_calc, lookback=180)
+    flow_data = calculate_money_flow(df_calc)
 
     # Format untuk TradingView Lightweight Charts
     candles = []
@@ -452,10 +454,81 @@ async def api_chart(ticker: str):
         "ema200": ema200_series[-180:],
         "vol_ma20": vol_ma20_series[-180:],
         "avwap": avwap_series[-180:],
+        "cmf": flow_data["cmf_series"][-180:],
+        "big_money": {
+            "status": flow_data["status"],
+            "score": flow_data["score"],
+            "cmf_val": flow_data["cmf_val"],
+            "obv_trend": flow_data["obv_trend"]
+        },
         "markers": markers,
         "volume_profile": vol_profile,
         "trade_plan": trade_plan
     }
+
+_FLOW_RADAR_CACHE = {}
+_FLOW_RADAR_TIME = None
+_FLOW_RADAR_EXPIRY = 600  # 10 menit
+
+@app.get("/api/flow-radar")
+async def api_flow_radar():
+    """Mengembalikan radar Top Big Money Inflow & Outflow saham likuid BEI."""
+    global _FLOW_RADAR_CACHE, _FLOW_RADAR_TIME
+    now = datetime.now()
+    if _FLOW_RADAR_TIME and (now - _FLOW_RADAR_TIME).total_seconds() < _FLOW_RADAR_EXPIRY and _FLOW_RADAR_CACHE:
+        return JSONResponse(content=_FLOW_RADAR_CACHE)
+
+    loop = asyncio.get_event_loop()
+    def compute_radar():
+        global _FLOW_RADAR_CACHE, _FLOW_RADAR_TIME
+        universe = get_universe()
+        tickers = [item["ticker"] for item in universe]
+        dfs = batch_fetch_stock_dfs(tickers, batch_size=35)
+        
+        flow_list = []
+        for item in universe:
+            df = dfs.get(item["ticker"])
+            if df is not None and len(df) >= 30:
+                try:
+                    flow = calculate_money_flow(df)
+                    price = float(df["Close"].iloc[-1])
+                    prev_price = float(df["Close"].iloc[-2]) if len(df) > 1 else price
+                    chg = round(((price - prev_price) / prev_price) * 100, 2) if prev_price > 0 else 0.0
+                    turnover = price * float(df["Volume"].iloc[-1])
+                    if turnover >= 500_000_000:
+                        flow_list.append({
+                            "symbol": item["ticker"].replace(".JK", ""),
+                            "name": item["name"],
+                            "sector": item["sector"],
+                            "price": int(price),
+                            "change_pct": chg,
+                            "status": flow["status"],
+                            "score": flow["score"],
+                            "cmf": flow["cmf_val"],
+                            "turnover_bio": round(turnover / 1_000_000_000, 2)
+                        })
+                except Exception:
+                    continue
+        
+        inflows = sorted([x for x in flow_list if x["status"] == "INFLOW"], key=lambda x: x["score"], reverse=True)[:5]
+        outflows = sorted([x for x in flow_list if x["status"] == "OUTFLOW"], key=lambda x: x["score"])[:5]
+        
+        if not inflows:
+            inflows = sorted(flow_list, key=lambda x: x["score"], reverse=True)[:5]
+        if not outflows:
+            outflows = sorted(flow_list, key=lambda x: x["score"])[:5]
+
+        res = {
+            "top_inflow": inflows,
+            "top_outflow": outflows,
+            "timestamp": datetime.now().strftime("%H:%M:%S WIB")
+        }
+        _FLOW_RADAR_CACHE = res
+        _FLOW_RADAR_TIME = datetime.now()
+        return res
+
+    radar_data = await loop.run_in_executor(None, compute_radar)
+    return JSONResponse(content=radar_data)
 
 @app.get("/api/journal")
 async def api_get_journal():

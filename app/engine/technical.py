@@ -236,3 +236,79 @@ def calculate_pocket_pivots_and_markers(df: pd.DataFrame, lookback: int = 180) -
                     })
 
     return markers
+
+def calculate_money_flow(df: pd.DataFrame, period: int = 20) -> dict:
+    """
+    Menghitung Chaikin Money Flow (CMF) dan On-Balance Volume (OBV)
+    untuk mendeteksi akumulasi dana asing & institusi (Big Money Flow).
+    """
+    if df is None or len(df) < period:
+        return {
+            "status": "NEUTRAL",
+            "score": 50,
+            "cmf_val": 0.0,
+            "cmf_series": [],
+            "obv_trend": "FLAT"
+        }
+
+    df = df.copy()
+    high = df["High"]
+    low = df["Low"]
+    close = df["Close"]
+    volume = df["Volume"]
+
+    # Money Flow Multiplier = [(Close - Low) - (High - Close)] / (High - Low)
+    hl_diff = (high - low).replace(0, np.nan)
+    mf_mult = (((close - low) - (high - close)) / hl_diff).fillna(0)
+    mf_volume = mf_mult * volume
+
+    # Chaikin Money Flow (20) = 20-period Sum(MF Volume) / 20-period Sum(Volume)
+    cmf_20 = mf_volume.rolling(period).sum() / volume.rolling(period).sum().replace(0, np.nan)
+    cmf_20 = cmf_20.fillna(0)
+
+    # On-Balance Volume (OBV)
+    direction = np.where(close > close.shift(1), 1, np.where(close < close.shift(1), -1, 0))
+    obv = (direction * volume).cumsum()
+    obv_ema20 = obv.ewm(span=20, adjust=False).mean()
+
+    # Hitung series CMF untuk chart
+    cmf_series = []
+    recent = df.iloc[-180:]
+    for idx, row in recent.iterrows():
+        time_str = idx.strftime("%Y-%m-%d")
+        val = cmf_20.get(idx, 0.0)
+        cmf_series.append({
+            "time": time_str,
+            "value": round(float(val), 3) if pd.notnull(val) else 0.0
+        })
+
+    # Nilai terkini
+    last_cmf = float(cmf_20.iloc[-1]) if len(cmf_20) > 0 else 0.0
+    last_obv = float(obv.iloc[-1]) if len(obv) > 0 else 0.0
+    last_obv_ema = float(obv_ema20.iloc[-1]) if len(obv_ema20) > 0 else 0.0
+
+    # Skor Big Money (0 - 100)
+    base_score = 50 + int(last_cmf * 150)
+    if last_obv > last_obv_ema:
+        base_score += 15
+        obv_trend = "UP"
+    else:
+        base_score -= 15
+        obv_trend = "DOWN"
+
+    score = max(5, min(99, base_score))
+
+    if score >= 65 and last_cmf > 0.05:
+        status = "INFLOW"
+    elif score <= 35 and last_cmf < -0.05:
+        status = "OUTFLOW"
+    else:
+        status = "NEUTRAL"
+
+    return {
+        "status": status,
+        "score": score,
+        "cmf_val": round(last_cmf, 3),
+        "cmf_series": cmf_series,
+        "obv_trend": obv_trend
+    }

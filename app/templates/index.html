@@ -757,6 +757,40 @@
                     </div>
                 </div>
 
+                <!-- Big Money & Institutional Flow Radar Banner Card -->
+                <div id="flow-radar-card" class="clean-card p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="flex items-start gap-3.5">
+                        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                            <i data-lucide="radar" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-slate-900 dark:text-white text-sm tracking-tight">Institutional Big Money Radar</span>
+                                <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800">Flow Tracker</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 font-mono mt-0.5">Deteksi akumulasi vs distribusi dana institusi & asing (Chaikin Money Flow & OBV).</p>
+                        </div>
+                    </div>
+
+                    <!-- Flow Inflow / Outflow Chips -->
+                    <div class="flex items-center gap-2.5 flex-wrap font-mono text-xs" id="flow-radar-chips">
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60 text-emerald-700 dark:text-emerald-300">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="font-bold font-sans text-xs">Top Inflow:</span>
+                            <div id="flow-top-inflows" class="flex items-center gap-1.5">
+                                <span class="text-slate-400 dark:text-gray-500">Memuat...</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                            <span class="font-bold font-sans text-xs">Top Outflow:</span>
+                            <div id="flow-top-outflows" class="flex items-center gap-1.5">
+                                <span class="text-slate-400 dark:text-gray-500">Memuat...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- KPI Banner -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
@@ -974,8 +1008,11 @@
                                 <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                             </div>
                             <div>
-                                <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
-                                <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume + Exponential Moving Averages (EMA 20/50/200)</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
+                                    <span id="terminal-flow-badge" class="hidden text-xs font-mono font-bold px-2.5 py-0.5 rounded-full"></span>
+                                </div>
+                                <p class="text-xs font-mono text-slate-500 dark:text-gray-400 mt-0.5">Daily Candlestick + Volume + Exponential Moving Averages (EMA 20/50/200)</p>
                             </div>
                         </div>
 
@@ -1738,6 +1775,7 @@
             initTerminalChart();
             applyChartTheme(isCurrentDark());
             loadGlobalMacro();
+            loadFlowRadar();
             runScan(false);
             loadJournalData();
             loadPerformanceData();
@@ -2324,6 +2362,16 @@
                        </span>`
                     : '';
 
+                const bigMoneyBadge = item.big_money_status === 'INFLOW'
+                    ? `<span class="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 font-semibold flex items-center gap-1" title="Chaikin Money Flow: +${item.cmf_val || '0.1'} (Akumulasi Big Money)">
+                         <span class="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse"></span> Big Money Inflow
+                       </span>`
+                    : (item.big_money_status === 'OUTFLOW'
+                        ? `<span class="px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-800/80 font-semibold flex items-center gap-1" title="Tekanan Distribusi">
+                             <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Flow Outflow
+                           </span>`
+                        : '');
+
                 const turnoverText = item.turnover_ma20_bio ? `MA20: Rp ${item.turnover_ma20_bio}B` : `Turnover: Rp ${item.turnover_bio}B`;
 
                 return `
@@ -2350,6 +2398,7 @@
                                 ${item.primary_setup}
                             </span>
                             ${weeklyBadge}
+                            ${bigMoneyBadge}
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]" title="Rata-rata turnover 20 hari">
                                 ${turnoverText}
                             </span>
@@ -2666,6 +2715,26 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         renderPocLines(json.volume_profile);
                     }
 
+                    // Render Big Money Flow Badge in Chart Header
+                    const flowBadge = document.getElementById('terminal-flow-badge');
+                    if (flowBadge && json.big_money) {
+                        const bm = json.big_money;
+                        const isInf = bm.status === 'INFLOW';
+                        const isOut = bm.status === 'OUTFLOW';
+                        flowBadge.className = `text-xs font-mono font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 ${
+                            isInf 
+                            ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+                            : (isOut 
+                                ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-800' 
+                                : 'bg-slate-100 text-slate-700 dark:bg-surface-800 dark:text-gray-300 border border-slate-200 dark:border-white/10')
+                        }`;
+                        const sign = bm.cmf_val >= 0 ? '+' : '';
+                        flowBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${isInf ? 'bg-purple-500 animate-pulse' : (isOut ? 'bg-rose-500' : 'bg-slate-400')}"></span> Big Money: ${bm.status} (Score ${bm.score} · CMF ${sign}${bm.cmf_val})`;
+                        flowBadge.classList.remove('hidden');
+                    } else if (flowBadge) {
+                        flowBadge.classList.add('hidden');
+                    }
+
                     if (chartInstance) chartInstance.timeScale().fitContent();
                     if (terminalChartInstance) terminalChartInstance.timeScale().fitContent();
                 } else {
@@ -2948,6 +3017,37 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
         function closeMacroModal() {
             const modal = document.getElementById('macro-detail-modal');
             if (modal) modal.classList.add('hidden');
+        }
+
+        async function loadFlowRadar() {
+            try {
+                const res = await fetch('/api/flow-radar');
+                const data = await res.json();
+                if (!data) return;
+
+                const inContainer = document.getElementById('flow-top-inflows');
+                const outContainer = document.getElementById('flow-top-outflows');
+
+                if (inContainer && data.top_inflow && data.top_inflow.length > 0) {
+                    inContainer.innerHTML = data.top_inflow.map(s => `
+                        <button onclick="loadChart('${s.symbol}', '${s.name}', 'Big Money Inflow')" class="px-2 py-0.5 rounded-lg bg-white/70 dark:bg-oled hover:bg-emerald-100 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700/60 font-mono font-bold text-[11px] text-emerald-800 dark:text-emerald-300 transition shrink-0 active:scale-95 flex items-center gap-1" title="${s.name} (CMF: ${s.cmf > 0 ? '+' : ''}${s.cmf})">
+                            <span>${s.symbol}</span>
+                            <span class="text-[9px] text-emerald-600 dark:text-emerald-400 font-normal font-mono">${s.score}</span>
+                        </button>
+                    `).join('');
+                }
+
+                if (outContainer && data.top_outflow && data.top_outflow.length > 0) {
+                    outContainer.innerHTML = data.top_outflow.map(s => `
+                        <button onclick="loadChart('${s.symbol}', '${s.name}', 'Flow Outflow')" class="px-2 py-0.5 rounded-lg bg-white/70 dark:bg-oled hover:bg-rose-100 dark:hover:bg-rose-900/60 border border-rose-300 dark:border-rose-700/60 font-mono font-bold text-[11px] text-rose-800 dark:text-rose-300 transition shrink-0 active:scale-95 flex items-center gap-1" title="${s.name} (CMF: ${s.cmf})">
+                            <span>${s.symbol}</span>
+                            <span class="text-[9px] text-rose-600 dark:text-rose-400 font-normal font-mono">${s.score}</span>
+                        </button>
+                    `).join('');
+                }
+            } catch(e) {
+                console.error("Error loading flow radar", e);
+            }
         }
 
         function filterByMacroCommodity(id, name, tickers) {

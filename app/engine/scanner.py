@@ -1,6 +1,6 @@
 import pandas as pd
 from typing import Dict, Any, Optional
-from app.engine.technical import calculate_indicators
+from app.engine.technical import calculate_indicators, calculate_money_flow
 from app.engine.strategy import generate_trade_plan
 
 def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[str, Any]]:
@@ -60,6 +60,15 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         high_52w = float(last["high_52w"]) if pd.notnull(last["high_52w"]) else price
         atr14 = float(last["atr14"]) if pd.notnull(last["atr14"]) else (price * 0.03)
 
+        # Kalkulasi Big Money Flow & Sponsorship Institusi
+        flow_data = calculate_money_flow(df)
+        big_money_status = flow_data["status"]  # INFLOW | NEUTRAL | OUTFLOW
+        flow_score = flow_data["score"]
+        cmf_val = flow_data["cmf_val"]
+
+        if big_money_status == "INFLOW":
+            confidence_score += 15
+
         # 1. VCP Breakout Setup
         if is_stage2 and vcp_ratio < 0.60 and rvol > 1.2:
             setups.append("VCP Breakout")
@@ -105,6 +114,9 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "primary_setup": primary_setup,
             "setups": setups,
             "score": min(99, confidence_score),
+            "big_money_status": big_money_status,
+            "flow_score": flow_score,
+            "cmf_val": cmf_val,
             "plan": trade_plan
         }
     except Exception as e:
