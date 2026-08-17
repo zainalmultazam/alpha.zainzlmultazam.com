@@ -336,15 +336,15 @@
         </div>
 
         <!-- Sidebar Menu Items (Icon-Centric with Tooltips) -->
-        <nav class="py-2.5 space-y-1 flex-1 overflow-visible">
+        <nav class="py-3 space-y-1.5 flex-1 overflow-visible">
             
             <!-- Item 1: Screener -->
             <div class="relative group w-full">
-                <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="layout-grid" class="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400"></i>
+                        <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Screener</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Screener</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Screener
@@ -353,11 +353,11 @@
 
             <!-- Item 2: Journal -->
             <div class="relative group w-full">
-                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="book-open" class="w-4.5 h-4.5 text-cyan-600 dark:text-cyan-400"></i>
+                        <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Journal</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Journal</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Journal
@@ -366,11 +366,11 @@
 
             <!-- Item 3: Charts -->
             <div class="relative group w-full">
-                <button onclick="switchView('charts')" id="nav-charts" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('charts')" id="nav-charts" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="candlestick-chart" class="w-4.5 h-4.5 text-blue-600 dark:text-blue-400"></i>
+                        <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Charts</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Charts</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Charts
@@ -379,11 +379,11 @@
 
             <!-- Item 4: Performance -->
             <div class="relative group w-full">
-                <button onclick="switchView('performance')" id="nav-performance" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('performance')" id="nav-performance" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="line-chart" class="w-4.5 h-4.5 text-indigo-600 dark:text-indigo-400"></i>
+                        <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Performance</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Performance</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Performance
@@ -392,11 +392,11 @@
 
             <!-- Item 5: Calculator -->
             <div class="relative group w-full">
-                <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="calculator" class="w-4.5 h-4.5 text-amber-600 dark:text-amber-400"></i>
+                        <i data-lucide="calculator" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Calculator</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Calculator</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Calculator
@@ -405,11 +405,11 @@
 
             <!-- Item 6: Alerts -->
             <div class="relative group w-full">
-                <button onclick="switchView('alerts')" id="nav-alerts" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('alerts')" id="nav-alerts" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="bell" class="w-4.5 h-4.5 text-purple-600 dark:text-purple-400"></i>
+                        <i data-lucide="bell" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Alerts</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Alerts</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Alerts
@@ -418,11 +418,11 @@
 
             <!-- Item 7: Playbook -->
             <div class="relative group w-full">
-                <button onclick="switchView('playbook')" id="nav-playbook" class="nav-item w-full flex items-center p-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                <button onclick="switchView('playbook')" id="nav-playbook" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="shield-check" class="w-4.5 h-4.5 text-emerald-600 dark:text-emerald-400"></i>
+                        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
                     </div>
-                    <span class="sidebar-text hidden ml-2.5 text-left whitespace-nowrap">Playbook</span>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Playbook</span>
                 </button>
                 <div class="sidebar-tooltip">
                     Playbook
@@ -434,7 +434,7 @@
         <!-- Sidebar Footer Actions & Status -->
         <div class="py-2.5 px-1 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col gap-2 shrink-0">
             
-            <!-- 3 Footer Mini Action Icons -->
+            <!-- 3 Footer Mini Action Icons (Settings, Theme, Lock) -->
             <div class="flex items-center justify-around w-full px-1">
                 <!-- Settings Icon -->
                 <div class="relative group">
@@ -468,11 +468,15 @@
                 </div>
             </div>
 
-            <!-- Engine Online Status Line -->
+            <!-- Engine Online Status -->
             <div class="relative group w-full">
-                <div class="flex items-center justify-center gap-1.5 py-1 px-1.5 rounded-lg bg-slate-100/80 dark:bg-surface-900/80 border border-slate-200/80 dark:border-white/[0.04] cursor-pointer">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
-                    <span class="sidebar-text hidden text-[10px] font-mono text-slate-600 dark:text-gray-400 whitespace-nowrap">Engine online · 17:00 WIB</span>
+                <div class="p-2 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center cursor-pointer">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
+                    </div>
+                    <div class="sidebar-text hidden ml-3 truncate text-left">
+                        <div class="text-[10px] font-mono font-semibold text-slate-800 dark:text-white whitespace-nowrap">Engine Online</div>
+                    </div>
                 </div>
                 <div class="sidebar-tooltip font-mono">
                     Engine online · 17:00 WIB
