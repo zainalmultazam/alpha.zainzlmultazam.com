@@ -1166,6 +1166,17 @@
                             <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 font-mono">Disiplin batas risiko 0.5%–1.0% per trade untuk proteksi portofolio jangka panjang.</p>
                         </div>
 
+                        <!-- Quick Tickers from Screener Row -->
+                        <div class="space-y-1.5 pb-3 border-b border-slate-100 dark:border-white/[0.04]">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="font-sans font-semibold text-slate-600 dark:text-gray-400">Pilih Cepat Saham Screener:</span>
+                                <span class="text-[10px] text-slate-400 dark:text-gray-500 font-mono">1-Klik Auto-Fill</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 font-mono text-xs" id="calc-quick-pills">
+                                <span class="text-[11px] text-slate-400 dark:text-gray-500 py-1 font-sans">Jalankan scan untuk memuat rekomendasi...</span>
+                            </div>
+                        </div>
+
                         <!-- Form Fields -->
                         <div class="space-y-4 font-mono text-xs flex-1 flex flex-col justify-center">
                             <!-- Modal & Preset Risk Row -->
@@ -2176,6 +2187,8 @@
             const container = document.getElementById('top-picks-container');
             const searchVal = (document.getElementById('search-ticker').value || '').trim().toUpperCase();
             
+            updateCalculatorQuickPills(allScanResults);
+            
             let filtered = allScanResults;
             if (currentFilter !== 'ALL') {
                 filtered = filtered.filter(item => 
@@ -2691,14 +2704,35 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
 
         function updateQuickTickersFromScan(results) {
             const container = document.getElementById('quick-tickers');
+            if (container && results && results.length > 0) {
+                const topTickers = results.slice(0, 8);
+                container.innerHTML = topTickers.map(r => `
+                    <button onclick="loadChart('${r.symbol}', '${r.name || r.symbol}', '${r.primary_setup || 'Setup'}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition flex items-center gap-1">
+                        <span class="font-bold">${r.symbol}</span>
+                        <span class="text-[9px] px-1 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-mono">${r.score || ''}</span>
+                    </button>
+                `).join('');
+            }
+            updateCalculatorQuickPills(results);
+        }
+
+        function updateCalculatorQuickPills(results) {
+            const container = document.getElementById('calc-quick-pills');
             if (!container || !results || results.length === 0) return;
-            const topTickers = results.slice(0, 8);
-            container.innerHTML = topTickers.map(r => `
-                <button onclick="loadChart('${r.symbol}', '${r.name || r.symbol}', '${r.primary_setup || 'Setup'}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition flex items-center gap-1">
-                    <span class="font-bold">${r.symbol}</span>
-                    <span class="text-[9px] px-1 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-mono">${r.score || ''}</span>
-                </button>
-            `).join('');
+            const topTickers = results.slice(0, 10);
+            container.innerHTML = topTickers.map(r => {
+                const p = r.plan || {};
+                const entry = p.entry_price || r.close || 0;
+                const sl = p.stop_loss || Math.round(entry * 0.96);
+                const tp = p.tp1 || Math.round(entry * 1.08);
+                const scoreBadge = r.score ? `<span class="text-[9px] px-1 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 font-bold font-mono">${r.score}</span>` : '';
+                return `
+                    <button type="button" onclick="quickCalculate('${r.symbol}', ${entry}, ${sl}, ${tp}, '${r.primary_setup || 'Setup'}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300 transition flex items-center gap-1.5 shrink-0 active:scale-95 text-xs font-mono" title="Isi otomatis form dengan ${r.symbol}">
+                        <span class="font-bold text-slate-900 dark:text-white">${r.symbol}</span>
+                        ${scoreBadge}
+                    </button>
+                `;
+            }).join('');
         }
 
         // ==========================================
