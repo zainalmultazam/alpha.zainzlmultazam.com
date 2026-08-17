@@ -15,6 +15,7 @@ from app.engine.scanner import scan_stock
 from app.engine.strategy import calculate_lot_size
 from app.engine.journal import log_trade, get_all_trades, close_trade, get_journal_stats, init_db
 from app.services.telegram import send_telegram_message, notify_super_digest
+from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
 
 app = FastAPI(title=settings.APP_NAME)
 
@@ -34,8 +35,13 @@ scheduler = AsyncIOScheduler()
 @app.on_event("startup")
 async def startup_event():
     init_db()
+    # 1. Jadwalkan scan otomatis sore hari
     scheduler.add_job(run_daily_scheduled_scan, "cron", hour=17, minute=0, timezone="Asia/Jakarta")
     scheduler.start()
+    
+    # 2. Jalankan background worker Telegram Polling & Safety Sentinel
+    asyncio.create_task(telegram_polling_worker())
+    asyncio.create_task(sentinel_scheduler_worker())
 
 cached_scan_results = []
 
@@ -179,6 +185,11 @@ async def api_close_trade(
 ):
     ok = close_trade(trade_id, exit_price, notes or "")
     return {"status": "success" if ok else "error"}
+
+@app.get("/api/journal/check-safety")
+async def api_check_safety():
+    await run_safety_sentinel_check()
+    return {"status": "success", "message": "Safety Sentinel check executed"}
 
 @app.post("/api/telegram/test")
 async def api_telegram_test():

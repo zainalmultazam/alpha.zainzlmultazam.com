@@ -100,3 +100,19 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
     except Exception as e:
         print(f"Error scanning {ticker_info.get('ticker')}: {e}")
         return None
+
+def run_full_scan() -> list:
+    """Melakukan scan sinkron seluruh universe saham."""
+    from app.engine.universe import get_universe
+    from app.services.market_data import fetch_stock_df
+    
+    universe = get_universe()
+    results = []
+    for item in universe:
+        df = fetch_stock_df(item["ticker"])
+        res = scan_stock(item, df)
+        if res is not None:
+            results.append(res)
+    results.sort(key=lambda x: x["score"], reverse=True)
+    return results
+
