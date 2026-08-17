@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AlphaSwing IDX | {{ domain }}</title>
+    
+    <!-- Prevent Theme FOUC (Flash of Unstyled Content) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.remove('dark');
+            } else {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,11 +36,18 @@
                     colors: {
                         oled: '#06080F',
                         surface: {
+                            50: '#F8FAFC',
+                            100: '#F1F5F9',
+                            200: '#E2E8F0',
+                            300: '#CBD5E1',
+                            400: '#94A3B8',
+                            500: '#64748B',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1E293B',
+                            900: '#0F172A',
                             950: '#080B14',
-                            900: '#0F1523',
-                            800: '#161F33',
-                            700: '#202C45',
-                            600: '#2D3D5E'
+                            card: '#161F33'
                         },
                         brand: {
                             500: '#10B981',
@@ -56,10 +76,9 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { 
-            background-color: #06080F; 
-            color: #E2E8F0; 
             font-family: "Plus Jakarta Sans", sans-serif;
             overflow-x: hidden;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
         /* Ambient Top Glow */
@@ -70,33 +89,56 @@
             transform: translateX(-50%);
             width: 1000px;
             height: 400px;
-            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.10), rgba(14, 165, 233, 0.03), transparent 70%);
             pointer-events: none;
             z-index: 0;
+        }
+        .dark .ambient-glow {
+            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.10), rgba(14, 165, 233, 0.03), transparent 70%);
+        }
+        html:not(.dark) .ambient-glow {
+            background: radial-gradient(circle 400px at 50% -20%, rgba(16, 185, 129, 0.06), rgba(14, 165, 233, 0.02), transparent 70%);
         }
 
         /* Single-Surface Clean Card Design */
         .clean-card {
+            border-radius: 1rem;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .dark .clean-card {
             background: rgba(15, 21, 35, 0.85);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1rem;
+        }
+
+        html:not(.dark) .clean-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
         }
         
-        .clean-card-hover {
-            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-        }
         .clean-card-hover:hover {
-            border-color: rgba(16, 185, 129, 0.4);
             transform: translateY(-2px);
+        }
+        .dark .clean-card-hover:hover {
+            border-color: rgba(16, 185, 129, 0.4);
             box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 18px -4px rgba(16, 185, 129, 0.15);
+        }
+        html:not(.dark) .clean-card-hover:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.06), 0 0 16px -2px rgba(16, 185, 129, 0.12);
         }
 
         /* Sidebar Nav Link Active State */
-        .nav-item.active {
+        .dark .nav-item.active {
             background: rgba(16, 185, 129, 0.12);
             color: #34D399;
             border-color: rgba(16, 185, 129, 0.3);
+        }
+        html:not(.dark) .nav-item.active {
+            background: #ECFDF5;
+            color: #059669;
+            border-color: #A7F3D0;
         }
 
         /* Custom Tooltip Styling */
@@ -106,20 +148,30 @@
             margin-left: 0.75rem;
             top: 50%;
             transform: translateY(-50%) translateX(-6px);
-            background: #161F33;
-            color: #F8FAFC;
             font-size: 0.75rem;
             font-weight: 600;
             padding: 0.375rem 0.625rem;
             border-radius: 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.8), 0 0 15px -3px rgba(16, 185, 129, 0.2);
             white-space: nowrap;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
             transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.18s;
             z-index: 99999;
+        }
+
+        .dark .sidebar-tooltip {
+            background: #161F33;
+            color: #F8FAFC;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.8), 0 0 15px -3px rgba(16, 185, 129, 0.2);
+        }
+
+        html:not(.dark) .sidebar-tooltip {
+            background: #0F172A;
+            color: #FFFFFF;
+            border: 1px solid #334155;
+            box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.15);
         }
 
         .group:hover .sidebar-tooltip {
@@ -130,24 +182,28 @@
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #06080F; }
-        ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        .dark ::-webkit-scrollbar-track { background: #06080F; }
+        .dark ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        
+        html:not(.dark) ::-webkit-scrollbar-track { background: #F1F5F9; }
+        html:not(.dark) ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+        html:not(.dark) ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
     </style>
 </head>
-<body class="min-h-screen flex antialiased selection:bg-emerald-500/30 selection:text-emerald-300">
+<body class="min-h-screen flex antialiased bg-slate-50 text-slate-800 dark:bg-oled dark:text-slate-200 selection:bg-emerald-500/30 selection:text-emerald-400">
     <div class="ambient-glow"></div>
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- SIDEBAR NAVIGATION (Default Mini with Tooltips) -->
-    <aside id="sidebar" class="w-16 px-2 bg-surface-950/95 border-r border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex flex-col justify-between z-40 transition-all duration-300 select-none overflow-visible shrink-0">
+    <aside id="sidebar" class="w-16 px-2 bg-white/90 dark:bg-surface-950/95 border-r border-slate-200 dark:border-white/[0.07] backdrop-blur-xl h-screen sticky top-0 flex flex-col justify-between z-40 transition-all duration-300 select-none overflow-visible shrink-0">
         
         <!-- Sidebar Header (Aligned h-16) -->
-        <div class="h-16 border-b border-white/[0.07] flex items-center justify-center relative shrink-0">
-            <button onclick="toggleSidebar()" class="group relative text-gray-400 hover:text-white p-2 rounded-xl hover:bg-surface-800 transition flex items-center justify-center" title="Toggle Sidebar">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base shadow-inner shadow-emerald-500/30">
+        <div class="h-16 border-b border-slate-200 dark:border-white/[0.07] flex items-center justify-center relative shrink-0">
+            <button onclick="toggleSidebar()" class="group relative text-slate-500 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Toggle Sidebar">
+                <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/5 border border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 font-bold text-base shadow-inner">
                     ⚡
                 </div>
                 <div class="sidebar-tooltip">
@@ -156,10 +212,10 @@
                 <!-- Brand text if expanded -->
                 <div class="truncate transition-opacity duration-200 hidden ml-2 text-left" id="brand-text">
                     <div class="flex items-center gap-1.5">
-                        <span class="font-extrabold text-white text-base tracking-tight">AlphaSwing</span>
-                        <span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">IDX</span>
+                        <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">AlphaSwing</span>
+                        <span class="text-[9px] font-mono font-semibold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">IDX</span>
                     </div>
-                    <p class="text-[10px] font-mono text-gray-500 truncate">{{ domain }}</p>
+                    <p class="text-[10px] font-mono text-slate-500 dark:text-gray-500 truncate">{{ domain }}</p>
                 </div>
             </button>
         </div>
@@ -167,14 +223,14 @@
         <!-- Sidebar Menu Items (Icon-Centric with Tooltips) -->
         <nav class="py-3 space-y-2 flex-1 overflow-visible">
             
-            <div class="px-2 pt-1 pb-1 text-[9px] font-mono font-semibold text-gray-500 uppercase tracking-wider sidebar-label hidden text-center">
+            <div class="px-2 pt-1 pb-1 text-[9px] font-mono font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider sidebar-label hidden text-center">
                 Menu
             </div>
 
             <!-- Item 1: Screener -->
             <div class="relative group flex justify-center">
-                <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
-                    <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+                <button onclick="switchView('screener')" id="nav-screener" class="nav-item active w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Alpha Playbook</span>
                 </button>
                 <div class="sidebar-tooltip">
@@ -184,8 +240,8 @@
 
             <!-- Item 2: Terminal -->
             <div class="relative group flex justify-center">
-                <button onclick="switchView('terminal')" id="nav-terminal" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
-                    <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-400 shrink-0"></i>
+                <button onclick="switchView('terminal')" id="nav-terminal" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Chart Terminal</span>
                 </button>
                 <div class="sidebar-tooltip">
@@ -195,8 +251,8 @@
 
             <!-- Item 3: Journal -->
             <div class="relative group flex justify-center">
-                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
-                    <i data-lucide="book-open" class="w-5 h-5 text-cyan-400 shrink-0"></i>
+                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Jurnal & Tracker</span>
                 </button>
                 <div class="sidebar-tooltip">
@@ -206,8 +262,8 @@
 
             <!-- Item 4: Calculator -->
             <div class="relative group flex justify-center">
-                <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
-                    <i data-lucide="calculator" class="w-5 h-5 text-amber-400 shrink-0"></i>
+                <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <i data-lucide="calculator" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Kalkulator Lot</span>
                 </button>
                 <div class="sidebar-tooltip">
@@ -217,8 +273,8 @@
 
             <!-- Item 5: Settings -->
             <div class="relative group flex justify-center">
-                <button onclick="switchView('settings')" id="nav-settings" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-surface-900 border border-transparent transition">
-                    <i data-lucide="settings-2" class="w-5 h-5 text-purple-400 shrink-0"></i>
+                <button onclick="switchView('settings')" id="nav-settings" class="nav-item w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <i data-lucide="settings-2" class="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0"></i>
                     <span class="sidebar-text hidden ml-2.5">Settings & Alerts</span>
                 </button>
                 <div class="sidebar-tooltip">
@@ -226,15 +282,29 @@
                 </div>
             </div>
 
+            <!-- Theme Toggle Item in Sidebar -->
+            <div class="relative group flex justify-center pt-2 border-t border-slate-200 dark:border-white/[0.06]">
+                <button onclick="toggleTheme()" class="w-full flex items-center justify-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <span id="sidebar-theme-icon">
+                        <i data-lucide="sun" class="w-5 h-5 text-amber-500 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 text-slate-700 block dark:hidden"></i>
+                    </span>
+                    <span class="sidebar-text hidden ml-2.5" id="sidebar-theme-text">Mode Terang / Gelap</span>
+                </button>
+                <div class="sidebar-tooltip" id="sidebar-theme-tooltip">
+                    Ganti Tema (Dark / Light)
+                </div>
+            </div>
+
         </nav>
 
         <!-- Sidebar Footer Status -->
-        <div class="py-3 border-t border-white/[0.07] bg-oled/50 flex justify-center shrink-0">
+        <div class="py-3 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex justify-center shrink-0">
             <div class="relative group flex justify-center">
-                <div class="p-2 rounded-xl bg-surface-900/90 border border-white/[0.05] flex items-center justify-center cursor-pointer">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                <div class="p-2 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center justify-center cursor-pointer">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0"></span>
                     <div class="sidebar-text hidden ml-2 truncate">
-                        <div class="text-[11px] font-mono font-semibold text-white">Online</div>
+                        <div class="text-[11px] font-mono font-semibold text-slate-800 dark:text-white">Online</div>
                     </div>
                 </div>
                 <div class="sidebar-tooltip font-mono">
@@ -249,13 +319,13 @@
     <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
         
         <!-- Topbar Header (Aligned h-16) -->
-        <header class="h-16 sticky top-0 z-30 backdrop-blur-xl bg-oled/90 border-b border-white/[0.07] px-6 flex items-center justify-between shrink-0">
+        <header class="h-16 sticky top-0 z-30 backdrop-blur-xl bg-white/85 dark:bg-oled/90 border-b border-slate-200 dark:border-white/[0.07] px-6 flex items-center justify-between shrink-0 transition-colors">
             <div class="flex items-center gap-3">
-                <h1 class="font-extrabold text-white text-base sm:text-lg tracking-tight flex items-center gap-2.5 leading-none" id="page-title">
+                <h1 class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg tracking-tight flex items-center gap-2.5 leading-none" id="page-title">
                     Alpha Playbook
                 </h1>
-                <span id="scan-status" class="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-800/60 font-medium">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="scan-status" class="inline-flex items-center gap-1.5 text-[11px] font-mono text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-950/80 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/60 font-medium">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse"></span>
                     <span>Menyiapkan data...</span>
                 </span>
             </div>
@@ -263,11 +333,18 @@
             <div class="flex items-center gap-3">
                 <!-- Search Ticker Input -->
                 <div class="relative">
-                    <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (BBCA)..." class="bg-surface-900/90 border border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-36 sm:w-52 font-mono transition">
-                    <i data-lucide="search" class="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5"></i>
+                    <input type="text" id="search-ticker" oninput="handleSearch()" placeholder="Cari ticker (BBCA)..." class="bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-1.5 pl-8 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 w-36 sm:w-52 font-mono transition">
+                    <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 dark:text-gray-400 absolute left-2.5 top-2.5"></i>
                 </div>
 
-                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-lg shadow-emerald-950/60 active:scale-[0.98]">
+                <!-- Theme Toggle Button in Topbar -->
+                <button onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-200 transition active:scale-95" title="Ganti Tema">
+                    <i data-lucide="sun" class="w-4 h-4 text-amber-500 hidden dark:block"></i>
+                    <i data-lucide="moon" class="w-4 h-4 text-slate-700 block dark:hidden"></i>
+                </button>
+
+                <!-- Scan Button -->
+                <button onclick="runScan(true)" id="btn-scan" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-md shadow-emerald-600/20 active:scale-[0.98]">
                     <i data-lucide="refresh-cw" id="icon-scan" class="w-3.5 h-3.5"></i>
                     <span class="hidden sm:inline">Scan Market</span>
                 </button>
@@ -282,51 +359,51 @@
                 
                 <!-- KPI Banner -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                    <div class="clean-card p-4 flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-gray-400">
+                    <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-slate-500 dark:text-gray-400">
                             <span class="text-xs font-medium">Universe Likuid IDX</span>
-                            <i data-lucide="layers" class="w-4 h-4 text-emerald-400"></i>
+                            <i data-lucide="layers" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
                         </div>
-                        <div class="mt-2 flex items-baseline gap-1.5">
-                            <span class="text-2xl font-extrabold text-white font-mono">150+</span>
-                            <span class="text-[11px] text-gray-400">Saham</span>
+                        <div class="mt-2.5 flex items-baseline gap-1.5">
+                            <span class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight">150+</span>
+                            <span class="text-[11px] text-slate-500 dark:text-gray-400 font-medium">Saham</span>
                         </div>
-                        <p class="text-[10px] text-emerald-400 mt-1 font-mono">Kompas100 High Turnover</p>
+                        <p class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 font-mono">Kompas100 High Turnover</p>
                     </div>
 
-                    <div class="clean-card p-4 flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-gray-400">
+                    <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-slate-500 dark:text-gray-400">
                             <span class="text-xs font-medium">Strategi Utama</span>
-                            <i data-lucide="trending-up" class="w-4 h-4 text-blue-400"></i>
+                            <i data-lucide="trending-up" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
                         </div>
-                        <div class="mt-2">
-                            <span class="text-xl font-extrabold text-blue-400">VCP & Stage 2</span>
+                        <div class="mt-2.5">
+                            <span class="text-xl sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">VCP & Stage 2</span>
                         </div>
-                        <p class="text-[10px] text-blue-300 mt-1 font-mono">Pullback & Momentum</p>
+                        <p class="text-[10px] text-blue-500 dark:text-blue-300 mt-1 font-mono">Pullback & Momentum</p>
                     </div>
 
-                    <div class="clean-card p-4 flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-gray-400">
+                    <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-slate-500 dark:text-gray-400">
                             <span class="text-xs font-medium">Maksimal Risiko</span>
-                            <i data-lucide="shield-check" class="w-4 h-4 text-amber-400"></i>
+                            <i data-lucide="shield-check" class="w-4 h-4 text-amber-600 dark:text-amber-400"></i>
                         </div>
-                        <div class="mt-2 flex items-baseline gap-1.5">
-                            <span class="text-2xl font-extrabold text-amber-400 font-mono">{{ default_risk_pct }}%</span>
-                            <span class="text-[11px] text-gray-400">Per Trade</span>
+                        <div class="mt-2.5 flex items-baseline gap-1.5">
+                            <span class="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 font-mono tracking-tight">{{ default_risk_pct }}%</span>
+                            <span class="text-[11px] text-slate-500 dark:text-gray-400 font-medium">Per Trade</span>
                         </div>
-                        <p class="text-[10px] text-amber-300 mt-1 font-mono">Proteksi Modal Disiplin</p>
+                        <p class="text-[10px] text-amber-500 dark:text-amber-300 mt-1 font-mono">Proteksi Modal Disiplin</p>
                     </div>
 
-                    <div class="clean-card p-4 flex flex-col justify-between">
-                        <div class="flex items-center justify-between text-gray-400">
+                    <div class="clean-card p-4 sm:p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between text-slate-500 dark:text-gray-400">
                             <span class="text-xs font-medium">Risk to Reward</span>
-                            <i data-lucide="target" class="w-4 h-4 text-cyan-400"></i>
+                            <i data-lucide="target" class="w-4 h-4 text-cyan-600 dark:text-cyan-400"></i>
                         </div>
-                        <div class="mt-2 flex items-baseline gap-1.5">
-                            <span class="text-2xl font-extrabold text-cyan-400 font-mono">1 : 2.0+</span>
-                            <span class="text-[11px] text-gray-400">Asimetris</span>
+                        <div class="mt-2.5 flex items-baseline gap-1.5">
+                            <span class="text-2xl sm:text-3xl font-extrabold text-cyan-600 dark:text-cyan-400 font-mono tracking-tight">1 : 2.0+</span>
+                            <span class="text-[11px] text-slate-500 dark:text-gray-400 font-medium">Asimetris</span>
                         </div>
-                        <p class="text-[10px] text-cyan-300 mt-1 font-mono">Minimum 2R Target TP1</p>
+                        <p class="text-[10px] text-cyan-500 dark:text-cyan-300 mt-1 font-mono">Minimum 2R Target TP1</p>
                     </div>
                 </div>
 
@@ -335,45 +412,45 @@
                     <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm" data-filter="ALL">
                         Semua (<span id="count-all">0</span>)
                     </button>
-                    <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="VCP Breakout">
+                    <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="VCP Breakout">
                         VCP Breakout
                     </button>
-                    <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="EMA 20 Pullback">
+                    <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="EMA 20 Pullback">
                         EMA 20 Pullback
                     </button>
-                    <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="Volume Surge">
+                    <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="Volume Surge">
                         Volume Surge
                     </button>
-                    <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition" data-filter="Stage 2 Leader">
+                    <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="Stage 2 Leader">
                         Stage 2 Leader
                     </button>
                 </div>
 
                 <!-- Cards Grid -->
                 <div id="top-picks-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="col-span-full py-16 text-center text-gray-400 clean-card">
+                    <div class="col-span-full py-16 text-center text-slate-500 dark:text-gray-400 clean-card">
                         <div class="flex flex-col items-center">
-                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-emerald-400 mb-3"></i>
-                            <p class="text-sm font-semibold text-white">Memindai Saham Likuid BEI...</p>
-                            <p class="text-xs text-gray-400 mt-1 font-mono">Menghitung EMA, VCP, RVOL, & Volatilitas</p>
+                            <i data-lucide="loader-2" class="w-8 h-8 animate-spin text-emerald-600 dark:text-emerald-400 mb-3"></i>
+                            <p class="text-sm font-semibold text-slate-800 dark:text-white">Memindai Saham Likuid BEI...</p>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 font-mono">Menghitung EMA, VCP, RVOL, & Volatilitas</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Interactive Preview Chart -->
                 <div class="clean-card p-4 sm:p-5 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.06]">
                         <div class="flex items-center gap-2.5">
-                            <h3 class="font-extrabold text-white text-base tracking-tight" id="chart-title">TradingView Chart</h3>
-                            <span id="chart-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-400 border border-emerald-800"></span>
+                            <h3 class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight" id="chart-title">TradingView Chart</h3>
+                            <span id="chart-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400 dark:border-emerald-800 font-semibold"></span>
                         </div>
-                        <button onclick="switchView('terminal')" class="text-xs font-mono text-emerald-400 hover:underline flex items-center gap-1">
+                        <button onclick="switchView('terminal')" class="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
                             Buka di Terminal <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
-                    <div id="tv-chart" class="w-full h-[380px] rounded-xl overflow-hidden bg-oled border border-white/[0.06] relative">
-                        <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-oled/80 backdrop-blur-sm z-10 hidden">
-                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-400"></i>
+                    <div id="tv-chart" class="w-full h-[380px] rounded-xl overflow-hidden bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06] relative">
+                        <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-oled/80 backdrop-blur-sm z-10 hidden">
+                            <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-emerald-600 dark:text-emerald-400"></i>
                         </div>
                     </div>
                 </div>
@@ -385,28 +462,28 @@
                 
                 <div class="clean-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
                             📈
                         </div>
                         <div>
-                            <h2 class="text-base font-extrabold text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
-                            <p class="text-xs font-mono text-gray-400">Daily Candlestick + Volume Histogram Engine</p>
+                            <h2 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight" id="terminal-ticker-title">BBCA - Bank Central Asia</h2>
+                            <p class="text-xs font-mono text-slate-500 dark:text-gray-400">Daily Candlestick + Volume Histogram Engine</p>
                         </div>
                     </div>
 
                     <!-- Quick Switcher Pills -->
                     <div class="flex items-center gap-1.5 flex-wrap font-mono text-xs" id="quick-tickers">
-                        <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">BBCA</button>
-                        <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">BBRI</button>
-                        <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">BMRI</button>
-                        <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">ASII</button>
-                        <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">AUTO</button>
-                        <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-surface-900 hover:bg-surface-800 border border-white/10 text-gray-300">ADRO</button>
+                        <button onclick="loadChart('BBCA', 'Bank Central Asia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBCA</button>
+                        <button onclick="loadChart('BBRI', 'Bank Rakyat Indonesia', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BBRI</button>
+                        <button onclick="loadChart('BMRI', 'Bank Mandiri', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">BMRI</button>
+                        <button onclick="loadChart('ASII', 'Astra International', 'Liquid')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ASII</button>
+                        <button onclick="loadChart('AUTO', 'Astra Otoparts', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">AUTO</button>
+                        <button onclick="loadChart('ADRO', 'Adaro Energy', 'Setup')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-surface-900 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-gray-300">ADRO</button>
                     </div>
                 </div>
 
                 <div class="clean-card p-4 sm:p-5">
-                    <div id="tv-terminal-chart" class="w-full h-[580px] rounded-xl overflow-hidden bg-oled border border-white/[0.06]"></div>
+                    <div id="tv-terminal-chart" class="w-full h-[580px] rounded-xl overflow-hidden bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06]"></div>
                 </div>
 
             </div>
@@ -417,35 +494,35 @@
                 <!-- Journal Stats Row -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-mono">
                     <div class="clean-card p-4">
-                        <span class="text-gray-400 font-sans text-xs">Total Transaksi</span>
-                        <div class="text-white font-bold text-2xl mt-1" id="stat-total-trades">0</div>
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Transaksi</span>
+                        <div class="text-slate-900 dark:text-white font-bold text-2xl mt-1" id="stat-total-trades">0</div>
                     </div>
                     <div class="clean-card p-4">
-                        <span class="text-gray-400 font-sans text-xs">Posisi Terbuka (Open)</span>
-                        <div class="text-emerald-400 font-bold text-2xl mt-1" id="stat-open-trades">0</div>
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Posisi Terbuka (Open)</span>
+                        <div class="text-emerald-600 dark:text-emerald-400 font-bold text-2xl mt-1" id="stat-open-trades">0</div>
                     </div>
                     <div class="clean-card p-4">
-                        <span class="text-gray-400 font-sans text-xs">Win Rate</span>
-                        <div class="text-cyan-400 font-bold text-2xl mt-1" id="stat-win-rate">0%</div>
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Win Rate</span>
+                        <div class="text-cyan-600 dark:text-cyan-400 font-bold text-2xl mt-1" id="stat-win-rate">0%</div>
                     </div>
                     <div class="clean-card p-4">
-                        <span class="text-gray-400 font-sans text-xs">Total Realized PnL</span>
-                        <div class="text-white font-bold text-2xl mt-1" id="stat-total-pnl">Rp 0</div>
+                        <span class="text-slate-500 dark:text-gray-400 font-sans text-xs">Total Realized PnL</span>
+                        <div class="text-slate-900 dark:text-white font-bold text-2xl mt-1" id="stat-total-pnl">Rp 0</div>
                     </div>
                 </div>
 
                 <!-- Journal Table -->
                 <div class="clean-card p-5 space-y-4">
-                    <div class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                        <h3 class="font-extrabold text-white text-base">Riwayat Transaksi Jurnal</h3>
-                        <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-400 hover:underline flex items-center gap-1">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/[0.06]">
+                        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Riwayat Transaksi Jurnal</h3>
+                        <button onclick="loadJournalData()" class="text-xs font-mono text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1">
                             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh Data
                         </button>
                     </div>
 
-                    <div class="overflow-x-auto rounded-xl border border-white/[0.06] bg-oled">
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-50 dark:bg-oled">
                         <table class="w-full text-left text-xs border-collapse font-mono">
-                            <thead class="bg-surface-900 border-b border-white/10 text-gray-400 uppercase text-[10px] font-sans font-semibold">
+                            <thead class="bg-slate-100 dark:bg-surface-900 border-b border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-400 uppercase text-[10px] font-sans font-semibold">
                                 <tr>
                                     <th class="py-3 px-3.5">Tanggal</th>
                                     <th class="py-3 px-3.5">Ticker</th>
@@ -458,9 +535,9 @@
                                     <th class="py-3 px-3.5 text-right">Aksi / PnL</th>
                                 </tr>
                             </thead>
-                            <tbody id="journal-table-body" class="divide-y divide-white/[0.04]">
+                            <tbody id="journal-table-body" class="divide-y divide-slate-200 dark:divide-white/[0.04]">
                                 <tr>
-                                    <td colspan="9" class="py-8 text-center text-gray-500 font-sans">Memuat catatan transaksi...</td>
+                                    <td colspan="9" class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans">Memuat catatan transaksi...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -473,62 +550,62 @@
             <div id="view-calculator" class="view-panel hidden space-y-6">
                 
                 <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
-                    <div class="border-b border-white/[0.06] pb-4">
-                        <h3 class="text-lg font-black text-white flex items-center gap-2.5">
-                            <i data-lucide="calculator" class="w-5 h-5 text-emerald-400"></i>
+                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4">
+                        <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                            <i data-lucide="calculator" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
                             Kalkulator Position Sizing Saham IDX
                         </h3>
-                        <p class="text-xs text-gray-400 mt-1">Gunakan aturan batas risiko maksimal 1% per trade untuk menjaga modal portofolio jangka panjang.</p>
+                        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Gunakan aturan batas risiko maksimal 1% per trade untuk menjaga modal portofolio jangka panjang.</p>
                     </div>
 
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
-                            <input type="number" id="calc-capital" value="{{ default_capital }}" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
+                            <input type="number" id="calc-capital" value="{{ default_capital }}" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Maksimal Risiko (%)</label>
-                                <input type="number" id="calc-risk-pct" value="{{ default_risk_pct }}" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Maksimal Risiko (%)</label>
+                                <input type="number" id="calc-risk-pct" value="{{ default_risk_pct }}" step="0.1" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Ticker Saham</label>
-                                <input type="text" id="calc-ticker" placeholder="BBCA" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Ticker Saham</label>
+                                <input type="text" id="calc-ticker" placeholder="BBCA" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-emerald-500 transition">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Entry Price (Rp)</label>
-                                <input type="number" id="calc-entry" placeholder="8500" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Entry Price (Rp)</label>
+                                <input type="number" id="calc-entry" placeholder="8500" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Stop Loss (Rp)</label>
-                                <input type="number" id="calc-sl" placeholder="8200" oninput="calculateLotFromForm()" class="w-full bg-surface-950 border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                                <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Stop Loss (Rp)</label>
+                                <input type="number" id="calc-sl" placeholder="8200" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-emerald-500 transition">
                             </div>
                         </div>
 
                         <!-- Live Result Box -->
-                        <div id="calc-result" class="bg-oled p-4 rounded-xl border border-white/10 space-y-2.5 text-xs font-mono">
-                            <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
-                                <span class="text-gray-400 font-sans">Rekomendasi Jumlah:</span>
-                                <span class="text-emerald-400 font-bold text-base" id="res-lots">0 Lot (0 Lembar)</span>
+                        <div id="calc-result" class="bg-slate-100 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2.5 text-xs font-mono">
+                            <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-slate-500 dark:text-gray-400 font-sans">Rekomendasi Jumlah:</span>
+                                <span class="text-emerald-600 dark:text-emerald-400 font-bold text-base" id="res-lots">0 Lot (0 Lembar)</span>
                             </div>
-                            <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
-                                <span class="text-gray-400 font-sans">Total Modal Beli:</span>
-                                <span class="text-white font-semibold" id="res-cost">Rp 0</span>
+                            <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-slate-500 dark:text-gray-400 font-sans">Total Modal Beli:</span>
+                                <span class="text-slate-900 dark:text-white font-semibold" id="res-cost">Rp 0</span>
                             </div>
-                            <div class="flex justify-between items-center py-1 border-b border-white/[0.06]">
-                                <span class="text-gray-400 font-sans">Maksimal Risiko (Kena SL):</span>
-                                <span class="text-danger-400 font-semibold" id="res-risk">Rp 0</span>
+                            <div class="flex justify-between items-center py-1 border-b border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-slate-500 dark:text-gray-400 font-sans">Maksimal Risiko (Kena SL):</span>
+                                <span class="text-danger-500 dark:text-danger-400 font-semibold" id="res-risk">Rp 0</span>
                             </div>
                             <div class="flex justify-between items-center py-1">
-                                <span class="text-gray-400 font-sans">Alokasi Portofolio:</span>
-                                <span class="text-target-400 font-semibold" id="res-alloc">0%</span>
+                                <span class="text-slate-500 dark:text-gray-400 font-sans">Alokasi Portofolio:</span>
+                                <span class="text-target-500 dark:text-target-400 font-semibold" id="res-alloc">0%</span>
                             </div>
 
-                            <button onclick="logCalculatedTrade()" id="btn-log-journal" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-blue-950/50 font-sans active:scale-[0.98]">
+                            <button onclick="logCalculatedTrade()" id="btn-log-journal" class="w-full mt-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md shadow-blue-600/20 font-sans active:scale-[0.98]">
                                 <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal Trading
                             </button>
                         </div>
@@ -541,33 +618,33 @@
             <div id="view-settings" class="view-panel hidden space-y-6">
                 
                 <div class="clean-card max-w-2xl mx-auto p-6 space-y-6">
-                    <div class="border-b border-white/[0.06] pb-4">
-                        <h3 class="text-lg font-black text-white flex items-center gap-2.5">
-                            <i data-lucide="settings-2" class="w-5 h-5 text-purple-400"></i>
+                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4">
+                        <h3 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
+                            <i data-lucide="settings-2" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
                             Pengaturan Sistem & Bot Notifikasi
                         </h3>
-                        <p class="text-xs text-gray-400 mt-1">Konfigurasi notifikasi Telegram harian & monitoring server.</p>
+                        <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Konfigurasi notifikasi Telegram harian & monitoring server.</p>
                     </div>
 
                     <div class="space-y-4">
-                        <div class="bg-oled p-4 rounded-xl border border-white/10 space-y-3">
+                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <div class="text-xs font-semibold text-white">Bot Notifikasi Telegram</div>
-                                    <div class="text-[11px] text-gray-400">Mengirim Top 5 Alpha Picks setiap pukul 17:00 WIB</div>
+                                    <div class="text-xs font-semibold text-slate-900 dark:text-white">Bot Notifikasi Telegram</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400">Mengirim Top 5 Alpha Picks setiap pukul 17:00 WIB</div>
                                 </div>
-                                <button onclick="testTelegramAlert()" class="bg-surface-800 hover:bg-surface-700 text-emerald-400 border border-emerald-700/60 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition">
+                                <button onclick="testTelegramAlert()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700/60 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition">
                                     Test Notifikasi
                                 </button>
                             </div>
                         </div>
 
-                        <div class="bg-oled p-4 rounded-xl border border-white/10 space-y-2 font-mono text-xs text-gray-400">
-                            <div class="text-white font-sans font-semibold text-xs mb-1">Informasi Environment:</div>
-                            <div>• Domain: <b class="text-emerald-400">{{ domain }}</b></div>
-                            <div>• Database: <b class="text-blue-400">data/alpha.db</b> (SQLite)</div>
-                            <div>• Default Capital: <b class="text-amber-400">Rp {{ default_capital }}</b></div>
-                            <div>• Scheduler: <b class="text-purple-400">Setiap Hari 17:00 WIB (Asia/Jakarta)</b></div>
+                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2 font-mono text-xs text-slate-600 dark:text-gray-400">
+                            <div class="text-slate-900 dark:text-white font-sans font-semibold text-xs mb-1">Informasi Environment:</div>
+                            <div>• Domain: <b class="text-emerald-600 dark:text-emerald-400">{{ domain }}</b></div>
+                            <div>• Database: <b class="text-blue-600 dark:text-blue-400">data/alpha.db</b> (SQLite)</div>
+                            <div>• Default Capital: <b class="text-amber-600 dark:text-amber-400">Rp {{ default_capital }}</b></div>
+                            <div>• Scheduler: <b class="text-purple-600 dark:text-purple-400">Setiap Hari 17:00 WIB (Asia/Jakarta)</b></div>
                         </div>
                     </div>
                 </div>
@@ -597,16 +674,60 @@
             lucide.createIcons();
             initChart();
             initTerminalChart();
+            applyChartTheme(isCurrentDark());
             runScan(false);
             loadJournalData();
         });
+
+        function isCurrentDark() {
+            return document.documentElement.classList.contains('dark');
+        }
+
+        function toggleTheme() {
+            const isDark = isCurrentDark();
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+            lucide.createIcons();
+            applyChartTheme(!isDark);
+            showToast(`Beralih ke ${!isDark ? 'Dark Mode' : 'Light Mode'}`);
+        }
+
+        function applyChartTheme(isDark) {
+            const chartOptions = {
+                layout: { 
+                    background: { color: isDark ? '#06080F' : '#FFFFFF' }, 
+                    textColor: isDark ? '#94A3B8' : '#475569' 
+                },
+                grid: { 
+                    vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' }, 
+                    horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' } 
+                },
+                timeScale: { 
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' 
+                },
+                rightPriceScale: { 
+                    borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' 
+                },
+                crosshair: {
+                    vertLine: { color: isDark ? 'rgba(16, 185, 129, 0.4)' : 'rgba(16, 185, 129, 0.6)', width: 1, style: 2 },
+                    horzLine: { color: isDark ? 'rgba(16, 185, 129, 0.4)' : 'rgba(16, 185, 129, 0.6)', width: 1, style: 2 }
+                }
+            };
+
+            if (chartInstance) chartInstance.applyOptions(chartOptions);
+            if (terminalChartInstance) terminalChartInstance.applyOptions(chartOptions);
+        }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const brandText = document.getElementById('brand-text');
             const labels = document.querySelectorAll('.sidebar-label');
             const texts = document.querySelectorAll('.sidebar-text');
-            const tooltips = document.querySelectorAll('.sidebar-tooltip');
 
             isSidebarCollapsed = !isSidebarCollapsed;
 
@@ -616,7 +737,6 @@
                 brandText.classList.add('hidden');
                 labels.forEach(l => l.classList.add('hidden'));
                 texts.forEach(t => t.classList.add('hidden'));
-                tooltips.forEach(tp => tp.classList.remove('opacity-0-force'));
             } else {
                 sidebar.classList.remove('w-16', 'px-2');
                 sidebar.classList.add('w-64', 'px-3');
@@ -660,7 +780,14 @@
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            const bgClass = type === 'success' ? 'border-emerald-500/40 bg-surface-900 text-emerald-300' : 'border-red-500/40 bg-surface-900 text-red-300';
+            const isDark = isCurrentDark();
+            
+            let bgClass = '';
+            if (type === 'success') {
+                bgClass = isDark ? 'border-emerald-500/40 bg-surface-card text-emerald-300' : 'border-emerald-300 bg-white text-emerald-800 shadow-lg';
+            } else {
+                bgClass = isDark ? 'border-red-500/40 bg-surface-card text-red-300' : 'border-red-300 bg-white text-red-800 shadow-lg';
+            }
             
             toast.className = `p-3.5 rounded-xl border ${bgClass} shadow-2xl text-xs font-medium flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
             toast.innerHTML = `<span>${type === 'success' ? '⚡' : '⚠️'}</span> <span>${message}</span>`;
@@ -678,11 +805,12 @@
 
         function initChart() {
             const container = document.getElementById('tv-chart');
+            const isDark = isCurrentDark();
             chartInstance = LightweightCharts.createChart(container, {
-                layout: { background: { color: '#06080F' }, textColor: '#94A3B8' },
-                grid: { vertLines: { color: 'rgba(255, 255, 255, 0.03)' }, horzLines: { color: 'rgba(255, 255, 255, 0.03)' } },
-                timeScale: { borderColor: 'rgba(255, 255, 255, 0.08)' },
-                rightPriceScale: { borderColor: 'rgba(255, 255, 255, 0.08)' }
+                layout: { background: { color: isDark ? '#06080F' : '#FFFFFF' }, textColor: isDark ? '#94A3B8' : '#475569' },
+                grid: { vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' }, horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' } },
+                timeScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' },
+                rightPriceScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }
             });
 
             candleSeries = chartInstance.addCandlestickSeries({
@@ -706,11 +834,12 @@
 
         function initTerminalChart() {
             const container = document.getElementById('tv-terminal-chart');
+            const isDark = isCurrentDark();
             terminalChartInstance = LightweightCharts.createChart(container, {
-                layout: { background: { color: '#06080F' }, textColor: '#94A3B8' },
-                grid: { vertLines: { color: 'rgba(255, 255, 255, 0.03)' }, horzLines: { color: 'rgba(255, 255, 255, 0.03)' } },
-                timeScale: { borderColor: 'rgba(255, 255, 255, 0.08)' },
-                rightPriceScale: { borderColor: 'rgba(255, 255, 255, 0.08)' }
+                layout: { background: { color: isDark ? '#06080F' : '#FFFFFF' }, textColor: isDark ? '#94A3B8' : '#475569' },
+                grid: { vertLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' }, horzLines: { color: isDark ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.04)' } },
+                timeScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' },
+                rightPriceScale: { borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)' }
             });
 
             terminalCandleSeries = terminalChartInstance.addCandlestickSeries({
@@ -760,7 +889,7 @@
             } catch (err) {
                 console.error("Scan error", err);
                 status.innerText = 'Gagal memindai data.';
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-red-400 clean-card p-8">Gagal mengambil data pasar BEI. Silakan klik Scan lagi.</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-red-500 clean-card p-8">Gagal mengambil data pasar BEI. Silakan klik Scan lagi.</div>`;
             } finally {
                 icon.classList.remove('animate-spin');
             }
@@ -773,7 +902,7 @@
                 if (btn.getAttribute('data-filter') === category) {
                     btn.className = "filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm";
                 } else {
-                    btn.className = "filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-surface-900 text-gray-300 hover:bg-surface-800 border border-white/10 transition";
+                    btn.className = "filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition";
                 }
             });
 
@@ -803,10 +932,10 @@
 
             if (filtered.length === 0) {
                 container.innerHTML = `
-                    <div class="col-span-full text-center py-12 text-gray-400 clean-card p-8 flex flex-col items-center">
-                        <i data-lucide="shield-alert" class="w-7 h-7 text-amber-400 mb-2"></i>
-                        <p class="text-sm font-semibold text-gray-200">Tidak ada setup yang cocok saat ini.</p>
-                        <p class="text-xs text-gray-500 mt-1 font-mono">Disiplin dan sabar menunggu konfirmasi harga.</p>
+                    <div class="col-span-full text-center py-12 text-slate-500 dark:text-gray-400 clean-card p-8 flex flex-col items-center">
+                        <i data-lucide="shield-alert" class="w-7 h-7 text-amber-500 dark:text-amber-400 mb-2"></i>
+                        <p class="text-sm font-semibold text-slate-800 dark:text-gray-200">Tidak ada setup yang cocok saat ini.</p>
+                        <p class="text-xs text-slate-500 dark:text-gray-500 mt-1 font-mono">Disiplin dan sabar menunggu konfirmasi harga.</p>
                     </div>`;
                 lucide.createIcons();
                 return;
@@ -814,7 +943,7 @@
 
             container.innerHTML = filtered.map(item => {
                 const plan = item.plan;
-                const changeColor = item.change_pct >= 0 ? 'text-emerald-400' : 'text-danger-400';
+                const changeColor = item.change_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-danger-500 dark:text-danger-400';
                 const changeSign = item.change_pct >= 0 ? '+' : '';
 
                 return `
@@ -825,55 +954,55 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="text-xl font-black text-white tracking-wide font-mono">${item.symbol}</span>
+                                    <span class="text-xl font-black text-slate-900 dark:text-white tracking-wide font-mono">${item.symbol}</span>
                                     <span class="text-xs font-mono font-semibold ${changeColor}">${changeSign}${item.change_pct}%</span>
                                 </div>
-                                <div class="text-[11px] text-gray-400 truncate max-w-[180px]" title="${item.name}">${item.name}</div>
+                                <div class="text-[11px] text-slate-500 dark:text-gray-400 truncate max-w-[180px]" title="${item.name}">${item.name}</div>
                             </div>
-                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-700/60 shadow-sm">
+                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700/60 shadow-sm">
                                 ${item.score} PTS
                             </span>
                         </div>
 
                         <!-- Setup & Volume Badges -->
                         <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-mono">
-                            <span class="px-2 py-0.5 rounded-md bg-blue-950/80 text-blue-300 border border-blue-800/80 font-semibold">
+                            <span class="px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 font-semibold">
                                 ${item.primary_setup}
                             </span>
-                            <span class="px-2 py-0.5 rounded-md bg-surface-950 text-gray-400 border border-white/[0.06]">
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">
                                 Turnover: Rp ${item.turnover_bio}B
                             </span>
-                            <span class="px-2 py-0.5 rounded-md bg-surface-950 text-gray-400 border border-white/[0.06]">
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">
                                 RVOL: ${item.rvol}x
                             </span>
                         </div>
 
                         <!-- Price Levels Box -->
-                        <div class="grid grid-cols-2 gap-2 bg-oled/90 p-3 rounded-xl border border-white/[0.06] text-xs font-mono">
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-oled p-3 rounded-xl border border-slate-200 dark:border-white/[0.06] text-xs font-mono">
                             <div>
-                                <span class="text-gray-500 font-sans text-[10px] uppercase">Entry Zone</span>
-                                <div class="text-emerald-400 font-bold text-sm">Rp ${plan.entry_price.toLocaleString('id-ID')}</div>
+                                <span class="text-slate-500 dark:text-gray-500 font-sans text-[10px] uppercase">Entry Zone</span>
+                                <div class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Rp ${plan.entry_price.toLocaleString('id-ID')}</div>
                             </div>
                             <div>
-                                <span class="text-gray-500 font-sans text-[10px] uppercase">Stop Loss</span>
-                                <div class="text-danger-400 font-bold text-sm">Rp ${plan.stop_loss.toLocaleString('id-ID')} <span class="text-[10px] font-normal">(-${plan.risk_pct}%)</span></div>
+                                <span class="text-slate-500 dark:text-gray-500 font-sans text-[10px] uppercase">Stop Loss</span>
+                                <div class="text-danger-500 dark:text-danger-400 font-bold text-sm">Rp ${plan.stop_loss.toLocaleString('id-ID')} <span class="text-[10px] font-normal">(-${plan.risk_pct}%)</span></div>
                             </div>
                             <div class="mt-1">
-                                <span class="text-gray-500 font-sans text-[10px] uppercase">Target 1 (2R)</span>
-                                <div class="text-target-400 font-semibold text-xs">Rp ${plan.tp1.toLocaleString('id-ID')} <span class="text-[9px] font-normal">(+${plan.tp1_gain_pct}%)</span></div>
+                                <span class="text-slate-500 dark:text-gray-500 font-sans text-[10px] uppercase">Target 1 (2R)</span>
+                                <div class="text-target-500 dark:text-target-400 font-semibold text-xs">Rp ${plan.tp1.toLocaleString('id-ID')} <span class="text-[9px] font-normal">(+${plan.tp1_gain_pct}%)</span></div>
                             </div>
                             <div class="mt-1">
-                                <span class="text-gray-500 font-sans text-[10px] uppercase">Target 2 (Runner)</span>
-                                <div class="text-purple-400 font-semibold text-xs">Rp ${plan.tp2.toLocaleString('id-ID')} <span class="text-[9px] font-normal">(+${plan.tp2_gain_pct}%)</span></div>
+                                <span class="text-slate-500 dark:text-gray-500 font-sans text-[10px] uppercase">Target 2 (Runner)</span>
+                                <div class="text-purple-600 dark:text-purple-400 font-semibold text-xs">Rp ${plan.tp2.toLocaleString('id-ID')} <span class="text-[9px] font-normal">(+${plan.tp2_gain_pct}%)</span></div>
                             </div>
                         </div>
 
                     </div>
 
                     <!-- Card Footer Action -->
-                    <div class="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs">
-                        <span class="text-gray-400 font-mono text-[11px]">R:R <b class="text-white">${plan.rr_ratio}</b></span>
-                        <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-emerald-400 hover:text-emerald-300 font-semibold bg-emerald-950/60 hover:bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-800/80 transition flex items-center gap-1.5 active:scale-[0.98]">
+                    <div class="mt-4 pt-3 border-t border-slate-200 dark:border-white/[0.06] flex items-center justify-between text-xs">
+                        <span class="text-slate-500 dark:text-gray-400 font-mono text-[11px]">R:R <b class="text-slate-900 dark:text-white">${plan.rr_ratio}</b></span>
+                        <button onclick="event.stopPropagation(); quickCalculate('${item.symbol}', ${plan.entry_price}, ${plan.stop_loss}, ${plan.tp1}, '${item.primary_setup}')" class="text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-semibold bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-950 px-3 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800/80 transition flex items-center gap-1.5 active:scale-[0.98]">
                             <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
                             <span>Hitung Lot</span>
                         </button>
@@ -993,7 +1122,7 @@
 
         async function loadJournalData() {
             const tbody = document.getElementById('journal-table-body');
-            tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-gray-500 font-sans">Mengambil data jurnal...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-slate-500 dark:text-gray-500 font-sans">Mengambil data jurnal...</td></tr>';
 
             try {
                 const res = await fetch('/api/journal');
@@ -1007,36 +1136,40 @@
                 document.getElementById('stat-total-pnl').innerText = `Rp ${(stats.total_pnl_idr || 0).toLocaleString('id-ID')}`;
 
                 if (trades.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-gray-500 font-sans">Belum ada transaksi di jurnal. Anda dapat menambahkan trade dari kalkulator.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="9" class="py-8 text-center text-slate-500 dark:text-gray-500 font-sans">Belum ada transaksi di jurnal. Anda dapat menambahkan trade dari kalkulator.</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = trades.map(t => {
                     const statusBadge = t.status === 'OPEN' 
-                        ? '<span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-semibold">OPEN</span>'
-                        : '<span class="px-2 py-0.5 rounded bg-surface-800 text-gray-400 border border-white/10 text-[10px] font-semibold">CLOSED</span>';
+                        ? '<span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold">OPEN</span>'
+                        : '<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold">CLOSED</span>';
 
                     const actionCol = t.status === 'OPEN'
-                        ? `<button onclick="promptCloseTrade(${t.id}, ${t.entry_price})" class="text-blue-400 hover:text-blue-300 font-medium hover:underline">Tutup Trade</button>`
-                        : `<span class="${(t.pnl_amount || 0) >= 0 ? 'text-emerald-400 font-bold' : 'text-danger-400 font-bold'}">Rp ${(t.pnl_amount || 0).toLocaleString('id-ID')} (${(t.pnl_pct || 0)}%)</span>`;
+                        ? `<button onclick="promptCloseTrade(${t.id}, ${t.entry_price})" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Tutup Trade</button>`
+                        : `<span class="${(t.pnl_amount || 0) >= 0 ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-danger-500 dark:text-danger-400 font-bold'}">Rp ${(t.pnl_amount || 0).toLocaleString('id-ID')} (${(t.pnl_pct || 0)}%)</span>`;
 
                     return `
-                    <tr class="hover:bg-surface-800/40 transition">
-                        <td class="py-3 px-3.5 text-gray-400">${t.entry_date}</td>
-                        <td class="py-3 px-3.5 font-bold text-white">${t.ticker}</td>
-                        <td class="py-3 px-3.5 text-emerald-400">Rp ${t.entry_price.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-danger-400">Rp ${t.stop_loss.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 text-target-400">Rp ${t.target_price.toLocaleString('id-ID')}</td>
-                        <td class="py-3 px-3.5 font-bold text-white">${t.lots}</td>
-                        <td class="py-3 px-3.5 text-gray-400">${t.setup_name || '-'}</td>
+                    <tr class="hover:bg-slate-100 dark:hover:bg-surface-800/40 transition">
+                        <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.entry_date}</td>
+                        <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${t.ticker}</td>
+                        <td class="py-3 px-3.5 text-emerald-600 dark:text-emerald-400">Rp ${t.entry_price.toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-3.5 text-danger-500 dark:text-danger-400">Rp ${t.stop_loss.toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-3.5 text-target-500 dark:text-target-400">Rp ${t.target_price.toLocaleString('id-ID')}</td>
+                        <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white">${t.lots}</td>
+                        <td class="py-3 px-3.5 text-slate-500 dark:text-gray-400">${t.setup_name || '-'}</td>
                         <td class="py-3 px-3.5">${statusBadge}</td>
                         <td class="py-3 px-3.5 text-right">${actionCol}</td>
                     </tr>
                     `;
                 }).join('');
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-red-400 font-sans">Gagal memuat data jurnal.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="py-6 text-center text-red-500 font-sans">Gagal memuat data jurnal.</td></tr>';
             }
+        }
+
+        function closeJournalModal() {
+            document.getElementById('journal-modal').classList.add('hidden');
         }
 
         async function promptCloseTrade(tradeId, entryPrice) {
