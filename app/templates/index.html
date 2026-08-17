@@ -1151,10 +1151,10 @@
             <!-- VIEW 5: CALCULATOR -->
             <div id="view-calculator" class="view-panel hidden space-y-6">
                 
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-start">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
                     
                     <!-- LEFT COLUMN: INPUT FORM CARD -->
-                    <div class="lg:col-span-6 clean-card p-5 sm:p-6 space-y-5">
+                    <div class="lg:col-span-6 clean-card p-5 sm:p-6 flex flex-col justify-between space-y-5 h-full">
                         <!-- Header -->
                         <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4">
                             <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
@@ -1167,7 +1167,7 @@
                         </div>
 
                         <!-- Form Fields -->
-                        <div class="space-y-4 font-mono text-xs">
+                        <div class="space-y-4 font-mono text-xs flex-1 flex flex-col justify-center">
                             <!-- Modal & Preset Risk Row -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
@@ -1229,10 +1229,16 @@
                                 <span id="calc-notice-text">Lot dibatasi kapasitas modal.</span>
                             </div>
                         </div>
+
+                        <!-- Bottom Micro Tip -->
+                        <div class="pt-3 border-t border-slate-200 dark:border-white/[0.06] text-[11px] text-slate-500 dark:text-gray-400 flex items-center gap-1.5 font-sans">
+                            <i data-lucide="info" class="w-3.5 h-3.5 text-blue-500 shrink-0"></i>
+                            <span>Aturan Emas: Risiko modal maksimal <b>1.0%</b> per transaksi untuk kestabilan jangka panjang.</span>
+                        </div>
                     </div>
 
                     <!-- RIGHT COLUMN: SIZING RESULTS & ACTION DASHBOARD -->
-                    <div class="lg:col-span-6 clean-card p-5 sm:p-6 space-y-5">
+                    <div class="lg:col-span-6 clean-card p-5 sm:p-6 flex flex-col justify-between space-y-5 h-full">
                         
                         <!-- Header -->
                         <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4 flex items-center justify-between">
@@ -1246,7 +1252,7 @@
                         </div>
 
                         <!-- Live Result Content -->
-                        <div id="calc-result" class="space-y-4 font-mono text-xs">
+                        <div id="calc-result" class="space-y-4 font-mono text-xs flex-1 flex flex-col justify-between">
                             
                             <!-- Hero Recommendation Box -->
                             <div class="p-4 rounded-xl bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
