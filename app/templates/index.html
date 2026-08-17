@@ -180,6 +180,16 @@
             transform: translateY(-50%) translateX(0px);
         }
 
+        /* Shake Animation for Wrong PIN */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         .dark ::-webkit-scrollbar-track { background: #06080F; }
@@ -193,6 +203,41 @@
 </head>
 <body class="min-h-screen flex antialiased bg-slate-50 text-slate-800 dark:bg-oled dark:text-slate-200 selection:bg-emerald-500/30 selection:text-emerald-400">
     <div class="ambient-glow"></div>
+
+    <!-- PIN SECURITY OVERLAY (Default Unlocked Check) -->
+    <div id="pin-lock-overlay" class="fixed inset-0 z-[999999] bg-slate-950/85 backdrop-blur-2xl flex items-center justify-center p-4 transition-all duration-300">
+        <div id="pin-card" class="w-full max-w-sm bg-white dark:bg-surface-900 border border-slate-200 dark:border-white/10 rounded-2xl p-8 shadow-2xl text-center flex flex-col items-center relative">
+            
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-500 mb-4 shadow-inner">
+                <i data-lucide="shield-check" class="w-7 h-7 text-emerald-500"></i>
+            </div>
+
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">AlphaSwing Security</h2>
+            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 mb-6 font-mono">Masukkan PIN Akses untuk membuka terminal</p>
+
+            <!-- PIN Input form -->
+            <form id="pin-form" onsubmit="handlePinSubmit(event)" class="w-full space-y-4">
+                <div class="relative">
+                    <input type="password" id="pin-input" maxlength="8" autofocus placeholder="••••" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 text-center text-2xl font-mono tracking-widest text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                </div>
+
+                <div id="pin-error" class="text-xs text-danger-500 dark:text-danger-400 font-mono hidden flex items-center justify-center gap-1.5 py-1">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5 shrink-0"></i>
+                    <span id="pin-error-text">PIN salah. Silakan coba lagi.</span>
+                </div>
+
+                <button type="submit" id="pin-btn" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2 active:scale-95">
+                    <i data-lucide="key-round" class="w-4 h-4"></i>
+                    <span>Buka Kunci Terminal</span>
+                </button>
+            </form>
+
+            <div class="mt-6 pt-4 border-t border-slate-200 dark:border-white/10 w-full flex items-center justify-center gap-2 text-[11px] text-slate-400 dark:text-gray-500 font-mono">
+                <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                <span>Private Institutional Terminal</span>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -298,13 +343,23 @@
 
         </nav>
 
-        <!-- Sidebar Footer Status -->
-        <div class="py-3 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex justify-center shrink-0">
-            <div class="relative group flex justify-center">
-                <div class="p-2 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center justify-center cursor-pointer">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0"></span>
+        <!-- Sidebar Footer Status & Lock -->
+        <div class="py-2.5 px-1 border-t border-slate-200 dark:border-white/[0.07] bg-slate-50 dark:bg-oled/50 flex flex-col items-center gap-1.5 shrink-0">
+            <div class="relative group flex justify-center w-full">
+                <button onclick="lockTerminal()" class="w-full p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-800 transition flex items-center justify-center" title="Kunci Terminal (Lock PIN)">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    <span class="sidebar-text hidden ml-2 text-xs font-semibold">Kunci Layar</span>
+                </button>
+                <div class="sidebar-tooltip font-mono">
+                    Kunci Terminal (Lock PIN)
+                </div>
+            </div>
+            
+            <div class="relative group flex justify-center w-full">
+                <div class="p-1.5 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/[0.05] flex items-center justify-center cursor-pointer">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-emerald-400 animate-pulse shrink-0"></span>
                     <div class="sidebar-text hidden ml-2 truncate">
-                        <div class="text-[11px] font-mono font-semibold text-slate-800 dark:text-white">Online</div>
+                        <div class="text-[10px] font-mono font-semibold text-slate-800 dark:text-white">Online</div>
                     </div>
                 </div>
                 <div class="sidebar-tooltip font-mono">
@@ -1413,6 +1468,84 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 showToast("Gagal mengirim Super-Digest", "error");
             }
         }
+
+        // ==========================================
+        // PIN SECURITY SYSTEM (Simple PIN Lock)
+        // ==========================================
+        function checkPinAuth() {
+            const isUnlocked = localStorage.getItem('alpha_pin_unlocked') === 'true';
+            const overlay = document.getElementById('pin-lock-overlay');
+            if (isUnlocked) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+                setTimeout(() => {
+                    document.getElementById('pin-input')?.focus();
+                }, 150);
+            }
+        }
+
+        async function handlePinSubmit(e) {
+            e.preventDefault();
+            const pin = (document.getElementById('pin-input').value || '').trim();
+            const errEl = document.getElementById('pin-error');
+            const errText = document.getElementById('pin-error-text');
+            const pinCard = document.getElementById('pin-card');
+            const btn = document.getElementById('pin-btn');
+
+            if (!pin) return;
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> <span>Memverifikasi...</span>`;
+            lucide.createIcons();
+
+            try {
+                const formData = new FormData();
+                formData.append('pin', pin);
+                const res = await fetch('/api/auth/verify-pin', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (res.ok && data.status === 'success') {
+                    localStorage.setItem('alpha_pin_unlocked', 'true');
+                    document.getElementById('pin-lock-overlay').classList.add('opacity-0', 'pointer-events-none');
+                    setTimeout(() => {
+                        document.getElementById('pin-lock-overlay').classList.add('hidden');
+                    }, 300);
+                    showToast("Terminal berhasil dibuka!", "success");
+                } else {
+                    errEl.classList.remove('hidden');
+                    errText.textContent = data.message || "PIN Salah. Silakan coba lagi.";
+                    pinCard.classList.add('animate-shake');
+                    setTimeout(() => pinCard.classList.remove('animate-shake'), 450);
+                    document.getElementById('pin-input').value = '';
+                    document.getElementById('pin-input').focus();
+                }
+            } catch (err) {
+                errEl.classList.remove('hidden');
+                errText.textContent = "Gagal memverifikasi ke server.";
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="key-round" class="w-4 h-4"></i><span>Buka Kunci Terminal</span>`;
+                lucide.createIcons();
+            }
+        }
+
+        function lockTerminal() {
+            localStorage.removeItem('alpha_pin_unlocked');
+            fetch('/api/auth/logout', { method: 'POST' });
+            const overlay = document.getElementById('pin-lock-overlay');
+            overlay.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
+            document.getElementById('pin-input').value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+            document.getElementById('pin-input').focus();
+            showToast("Terminal berhasil dikunci.", "info");
+        }
+
+        // Jalankan pengecekan PIN saat aplikasi dibuka
+        checkPinAuth();
     </script>
 </body>
 </html>
