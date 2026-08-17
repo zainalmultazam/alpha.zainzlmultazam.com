@@ -39,12 +39,20 @@ def format_rupiah_short(amount: float) -> str:
     else:
         return f"Rp {amount:,.0f}"
 
+def format_id_date(dt: datetime) -> str:
+    """Format tanggal Indonesia (misal: Senin, 17 Agu 2026 • 17:00 WIB)."""
+    days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
+    months = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
+    day_name = days[dt.weekday()]
+    month_name = months[dt.month]
+    return f"{day_name}, {dt.day} {month_name} {dt.year} • {dt.strftime('%H:%M')} WIB"
+
 async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
     """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan format kartu rapi, emoji visual, dan tap-to-copy numbers."""
     if not picks:
         return False
 
-    now_str = datetime.now().strftime("%d %b %Y, %H:%M WIB")
+    now_str = format_id_date(datetime.now())
     
     # 1. Header & Market Climate Banner
     regime_title = html.escape(str(climate.get("title", "Risk-On") if climate else "Risk-On"))
@@ -60,8 +68,8 @@ async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dic
     else:
         climate_badge = "🔴 <b>DEFENSIVE (Cash is King)</b>"
 
-    msg = f"🚀 <b>ALPHASWING x STOCKBIT • TOP 3</b>\n"
-    msg += f"📅 <i>{now_str} • {settings.APP_DOMAIN}</i>\n"
+    msg = f"<b>TOP 3 PICKS</b>\n"
+    msg += f"<i>{now_str}</i>\n"
     msg += "────────────\n"
     
     # Status Operasional Bursa
