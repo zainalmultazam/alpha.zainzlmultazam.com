@@ -188,10 +188,15 @@
             box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.15);
         }
 
-        .group:hover .sidebar-tooltip {
+        /* Tooltips only appear when sidebar is in mini/collapsed state (w-16) */
+        #sidebar.w-16 .group:hover .sidebar-tooltip {
             opacity: 1;
             visibility: visible;
             transform: translateY(-50%) translateX(0px);
+        }
+
+        #sidebar.w-64 .sidebar-tooltip {
+            display: none !important;
         }
 
         /* Shake Animation for Wrong PIN */
