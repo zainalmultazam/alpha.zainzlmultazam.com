@@ -59,13 +59,17 @@ def format_rupiah_short(amount: float) -> str:
     else:
         return f"Rp {amount:,.0f}"
 
-def format_id_date(dt: datetime) -> str:
-    """Format tanggal Indonesia (misal: Senin, 17 Agu 2026 • 17:00 WIB)."""
+def format_id_date(dt: Optional[datetime] = None, include_time: bool = True, include_day: bool = True) -> str:
+    """Format tanggal Indonesia (misal: Selasa, 18 Agu 2026, 17:00 WIB atau 18 Agu 2026, 17:00)."""
+    if dt is None:
+        dt = datetime.now()
     days = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
     months = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
     day_name = days[dt.weekday()]
     month_name = months[dt.month]
-    return f"{day_name}, {dt.day} {month_name} {dt.year} • {dt.strftime('%H:%M')} WIB"
+    day_prefix = f"{day_name}, " if include_day else ""
+    time_suffix = f", {dt.strftime('%H:%M')} WIB" if include_time else ""
+    return f"{day_prefix}{dt.day} {month_name} {dt.year}{time_suffix}"
 
 async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None, macro: Optional[Dict[str, Any]] = None) -> bool:
     """Mengirimkan Morning Pre-Market Briefing (08:45 WIB) dengan Iklim IHSG, Radar Makro, dan Top 3 Picks."""

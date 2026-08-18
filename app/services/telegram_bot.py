@@ -6,7 +6,7 @@ import httpx
 from datetime import datetime
 
 from app.config import settings
-from app.services.telegram import send_telegram_message, answer_callback_query, notify_super_digest, format_rupiah_short
+from app.services.telegram import send_telegram_message, answer_callback_query, notify_super_digest, format_rupiah_short, format_id_date
 from app.services.market_data import fetch_stock_df, get_market_climate
 from app.engine.technical import calculate_indicators
 from app.engine.strategy import generate_trade_plan
@@ -48,7 +48,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
                 risk_str = format_rupiah_short(max_risk)
 
                 msg = f"<b>POSISI TERCATAT & DALAM PENGAWASAN</b>\n"
-                msg += f"<i>ID Trade: #{trade_id} • {datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
+                msg += f"<i>ID Trade: #{trade_id} • {format_id_date(datetime.now(), include_day=False)}</i>\n"
                 msg += "────────────\n"
                 msg += f"Saham      : <b>{ticker}</b> ({lots} Lot)\n"
                 msg += f"Harga Beli : Rp {entry:,.0f}\n"
@@ -130,7 +130,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         risk_str = format_rupiah_short(max_risk)
 
         msg = f"<b>POSISI TERCATAT & DALAM PENGAWASAN</b>\n"
-        msg += f"<i>ID Trade: #{trade_id} • {datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
+        msg += f"<i>ID Trade: #{trade_id} • {format_id_date(datetime.now(), include_day=False)}</i>\n"
         msg += "────────────\n"
         msg += f"Saham      : <b>{ticker}</b> ({lots} Lot)\n"
         msg += f"Harga Beli : Rp {entry_price:,.0f}\n"
@@ -191,7 +191,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         badge = "PROFIT" if pnl_amt >= 0 else "CUT LOSS"
 
         msg = f"<b>TRADE CLOSED: [{badge}]</b>\n"
-        msg += f"<i>{ticker} • {datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
+        msg += f"<i>{ticker} • {format_id_date(datetime.now(), include_day=False)}</i>\n"
         msg += "────────────\n"
         msg += f"Beli @ Rp {closed_trade['entry_price']:,.0f} ({closed_trade['lots']} Lot)\n"
         msg += f"Jual @ Rp {exit_price:,.0f}\n"
@@ -212,7 +212,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             return
 
         msg = f"<b>STATUS PORTOFOLIO AKTIF ({len(open_trades)} Saham)</b>\n"
-        msg += f"<i>{datetime.now().strftime('%d %b %Y %H:%M WIB')}</i>\n"
+        msg += f"<i>{format_id_date(datetime.now(), include_day=True)}</i>\n"
         msg += "────────────\n\n"
 
         inline_buttons = []
