@@ -17,8 +17,8 @@ from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clea
 from app.engine.scanner import scan_stock
 from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers, calculate_money_flow
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
-from app.engine.journal import log_trade, get_all_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
-from app.services.telegram import send_telegram_message, notify_super_digest
+from app.engine.journal import log_trade, get_all_trades, get_open_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
+from app.services.telegram import send_telegram_message, notify_super_digest, notify_morning_briefing, notify_evening_wrap
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
 
 app = FastAPI(title=settings.APP_NAME)
@@ -183,18 +183,45 @@ async def get_service_worker():
     return Response(content=SW_JS, media_type="application/javascript", headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"})
 
 
-# Scheduler untuk scan otomatis setiap sore pukul 17:00 WIB
+# Scheduler untuk automasi pasar (Morning Briefing, Evening Wrap, EOD Scan)
 scheduler = AsyncIOScheduler()
+
+async def run_scheduled_morning_briefing():
+    """Jadwal Otomatis 08:45 WIB: Kirim Morning Pre-Market Briefing & Top 3 Picks."""
+    global cached_scan_results
+    try:
+        if not cached_scan_results:
+            cached_scan_results = await execute_market_scan()
+        climate = get_market_climate()
+        macro = get_global_macro_data()
+        await notify_morning_briefing(cached_scan_results[:3], climate=climate, macro=macro)
+    except Exception as e:
+        print(f"Error in morning briefing cron: {e}")
+
+async def run_scheduled_evening_wrap():
+    """Jadwal Otomatis 16:15 WIB: Kirim Rekap Penutupan Pasar & Status Portofolio."""
+    try:
+        climate = get_market_climate()
+        open_trades = get_open_trades()
+        stats = get_journal_stats()
+        await notify_evening_wrap(climate=climate, open_trades=open_trades, stats=stats)
+    except Exception as e:
+        print(f"Error in evening wrap cron: {e}")
 
 @app.on_event("startup")
 async def startup_event():
     init_db()
-    # 1. Jadwalkan scan otomatis sore hari
+    # 1. Jadwalkan bot cron otomatis
     try:
-        scheduler.add_job(run_daily_scheduled_scan, "cron", hour=17, minute=0, timezone="Asia/Jakarta")
+        # Pukul 08:45 WIB: Morning Pre-Market Briefing (Senin-Jumat)
+        scheduler.add_job(run_scheduled_morning_briefing, "cron", day_of_week="mon-fri", hour=8, minute=45, timezone="Asia/Jakarta")
+        # Pukul 16:15 WIB: Evening Market & Portfolio Wrap (Senin-Jumat)
+        scheduler.add_job(run_scheduled_evening_wrap, "cron", day_of_week="mon-fri", hour=16, minute=15, timezone="Asia/Jakarta")
+        # Pukul 17:00 WIB: EOD Full Database Refresh Scan (Senin-Jumat)
+        scheduler.add_job(run_daily_scheduled_scan, "cron", day_of_week="mon-fri", hour=17, minute=0, timezone="Asia/Jakarta")
         scheduler.start()
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Scheduler start warning: {e}")
     
     # 2. Jalankan background worker Telegram Polling & Safety Sentinel
     asyncio.create_task(telegram_polling_worker())
@@ -565,14 +592,40 @@ async def api_delete_trade(trade_id: int):
     ok = delete_trade(trade_id)
     return {"status": "success" if ok else "error", "deleted": ok}
 
-@app.get("/api/journal/check-safety")
-async def api_check_safety():
-    await run_safety_sentinel_check()
-    return {"status": "success", "message": "Safety Sentinel check executed"}
+@app.get("/api/telegram/status")
+async def api_telegram_status():
+    open_trades = get_open_trades()
+    return {
+        "status": "success",
+        "bot_configured": bool(settings.TELEGRAM_BOT_TOKEN and settings.TELEGRAM_CHAT_ID),
+        "chat_id": str(settings.TELEGRAM_CHAT_ID)[:4] + "****" if settings.TELEGRAM_CHAT_ID else None,
+        "schedules": [
+            {"time": "08:45 WIB", "title": "Morning Pre-Market Briefing & Top 3 Picks", "active": True},
+            {"time": "Jam Bursa (3 Menit)", "title": "Safety Sentinel Live SL / TP Alerts", "active": True},
+            {"time": "16:15 WIB", "title": "Evening Market & Portfolio Wrap", "active": True},
+            {"time": "17:00 WIB", "title": "EOD Full Database Scan Refresh", "active": True}
+        ],
+        "open_trades_monitored": len(open_trades)
+    }
 
 @app.post("/api/telegram/test")
 async def api_telegram_test():
-    ok = await send_telegram_message(f"🔔 <b>AlphaSwing IDX Test Alert</b>\nKoneksi Telegram berhasil terhubung ke sistem {settings.APP_DOMAIN}!")
+    test_msg = f"🔔 <b>ALPHA IDX TELEGRAM BOT AKTIF</b>\n"
+    test_msg += f"━━━━━━━━━━━━━━━━━━\n"
+    test_msg += f"• Domain  : <code>{settings.APP_DOMAIN}</code>\n"
+    test_msg += f"• Status  : 🟢 <b>Terkoneksi Sempurna</b>\n"
+    test_msg += f"• Jadwal  : 🌅 08:45 Morning • 🛡️ Live 3m Sentinel • 🌆 16:15 Wrap\n"
+    test_msg += f"━━━━━━━━━━━━━━━━━━\n"
+    test_msg += f"<i>Robot siap mengirimkan sinyal & mengawal Stop Loss portofolio Anda!</i>"
+    
+    reply_markup = {
+        "inline_keyboard": [
+            [
+                {"text": "🌐 Buka Alpha Terminal", "url": f"https://{settings.APP_DOMAIN}"}
+            ]
+        ]
+    }
+    ok = await send_telegram_message(test_msg, reply_markup=reply_markup)
     return {"status": "success" if ok else "failed", "connected": ok}
 
 @app.post("/api/telegram/send-digest")
@@ -581,5 +634,20 @@ async def api_telegram_send_digest():
     if not cached_scan_results:
         cached_scan_results = await execute_market_scan()
     climate = get_market_climate()
-    ok = await notify_super_digest(cached_scan_results[:3], climate)
+    macro = get_global_macro_data()
+    ok = await notify_morning_briefing(cached_scan_results[:3], climate=climate, macro=macro)
     return {"status": "success" if ok else "failed", "sent": ok, "top_count": min(3, len(cached_scan_results))}
+
+@app.post("/api/telegram/send-evening-wrap")
+async def api_telegram_send_evening_wrap():
+    climate = get_market_climate()
+    open_trades = get_open_trades()
+    stats = get_journal_stats()
+    ok = await notify_evening_wrap(climate=climate, open_trades=open_trades, stats=stats)
+    return {"status": "success" if ok else "failed", "sent": ok, "open_trades_count": len(open_trades)}
+
+@app.post("/api/telegram/check-sentinel")
+@app.get("/api/journal/check-safety")
+async def api_check_safety():
+    res = await run_safety_sentinel_check()
+    return {"status": "success", "data": res, "message": "Safety Sentinel check executed"}

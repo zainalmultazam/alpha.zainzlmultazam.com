@@ -436,12 +436,13 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
         msg += "2. Geser Stop Loss sisa lot ke harga modal (Breakeven) agar menjadi trade bebas risiko!"
         await send_telegram_message(msg)
 
-async def run_safety_sentinel_check() -> None:
+async def run_safety_sentinel_check() -> Dict[str, Any]:
     """Memeriksa seluruh posisi OPEN untuk mengirimkan alert bahaya jika menembus SL atau alert TP1."""
     open_trades = get_open_trades()
     if not open_trades:
-        return
+        return {"checked_count": 0, "alerts_sent": 0, "status": "no_open_trades"}
 
+    alerts_sent = 0
     for t in open_trades:
         trade_id = t["id"]
         ticker = t["ticker"]
@@ -483,6 +484,7 @@ async def run_safety_sentinel_check() -> None:
                 ]
             }
             await send_telegram_message(msg, reply_markup=reply_markup)
+            alerts_sent += 1
 
         # 2. ALERT PROFIT: Harga menyentuh Target TP1
         elif current_price >= tp and (trade_id, "TP") not in _alerted_trades:
@@ -510,6 +512,9 @@ async def run_safety_sentinel_check() -> None:
                 ]
             }
             await send_telegram_message(msg, reply_markup=reply_markup)
+            alerts_sent += 1
+
+    return {"checked_count": len(open_trades), "alerts_sent": alerts_sent, "status": "completed"}
 
 async def telegram_polling_worker():
     """Background worker untuk mendengarkan pesan masuk dan klik tombol dari Telegram (Long Polling)."""
@@ -545,10 +550,19 @@ async def telegram_polling_worker():
         await asyncio.sleep(1)
 
 async def sentinel_scheduler_worker():
-    """Background worker untuk memantau keselamatan posisi setiap 15 menit."""
+    """Background worker untuk memantau keselamatan posisi (3 menit pada jam bursa, 15 menit di luar jam bursa)."""
     while True:
         try:
             await run_safety_sentinel_check()
         except Exception as e:
             pass
-        await asyncio.sleep(900)  # Cek setiap 15 menit
+        
+        now = datetime.now()
+        # Jika hari kerja (Senin-Jumat 0-4) dan jam bursa (09:00 - 16:05 WIB)
+        is_weekday = now.weekday() < 5
+        is_market_hours = 9 <= now.hour < 16 or (now.hour == 16 and now.minute <= 5)
+        
+        if is_weekday and is_market_hours:
+            await asyncio.sleep(180)  # Cek cepat setiap 3 menit selama jam trading
+        else:
+            await asyncio.sleep(900)  # Cek setiap 15 menit di luar jam trading

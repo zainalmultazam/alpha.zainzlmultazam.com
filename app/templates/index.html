@@ -1563,7 +1563,7 @@
                 
                 <div class="clean-card p-5 sm:p-6 space-y-6">
                     <!-- Header -->
-                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4 flex items-center justify-between">
+                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                             <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-500/10 flex items-center justify-center text-rose-600 dark:text-rose-400">
@@ -1571,77 +1571,111 @@
                                 </div>
                                 Telegram Bot &amp; Safety Sentinel
                             </h3>
-                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Pengawas otomatis pergerakan harga saham, peringatan Stop Loss, dan digest harian.</p>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1">Pengawas otomatis pergerakan harga saham, peringatan darurat Stop Loss, dan sinyal harian langsung ke smartphone.</p>
                         </div>
                         <!-- Status Badge -->
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Bot Online
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shrink-0 self-start sm:self-auto">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Bot Online &amp; Active
                         </span>
                     </div>
 
                     <div class="space-y-4 font-sans">
-                        <!-- Super Digest Card -->
+                        <!-- Quick Action Control Deck -->
                         <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div>
-                                    <div class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                        <i data-lucide="zap" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
-                                        <span>Super-Bot Digest (Top 3 Picks)</span>
-                                    </div>
-                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5">Kirim 3 sinyal terbaik dengan alokasi lot &amp; status IHSG harian (17:00 WIB)</div>
+                            <div class="flex items-center justify-between">
+                                <div class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="send" class="w-4 h-4 text-rose-500 dark:text-rose-400"></i>
+                                    <span>Kontrol Cepat Pengiriman Pesan</span>
                                 </div>
-                                <div class="flex items-center gap-2">
-                                    <button onclick="testTelegramAlert()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition active:scale-95">
-                                        Ping Bot
-                                    </button>
-                                    <button onclick="sendTelegramSuperDigest()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold shadow-sm transition active:scale-95 flex items-center gap-1">
-                                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                                        <span>Kirim Digest</span>
-                                    </button>
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-mono">Real-Time Webhook</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                                <button onclick="sendTelegramSuperDigest()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-3 rounded-xl text-left shadow-sm transition active:scale-98 flex flex-col justify-between gap-1 group">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span class="text-xs font-bold">🌅 Kirim Morning Digest</span>
+                                        <i data-lucide="zap" class="w-3.5 h-3.5 opacity-80 group-hover:scale-110 transition-transform"></i>
+                                    </div>
+                                    <span class="text-[10px] text-blue-100 font-sans">Top 3 Picks, Makro &amp; Iklim IHSG</span>
+                                </button>
+                                
+                                <button onclick="runManualSafetySentinel()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 border border-slate-200/80 dark:border-white/10 p-3 rounded-xl text-left shadow-sm transition active:scale-98 flex flex-col justify-between gap-1 group">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span class="text-xs font-bold">🛡️ Cek Safety Sentinel</span>
+                                        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform"></i>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans">Scan level SL / TP posisi terbuka</span>
+                                </button>
+
+                                <button onclick="testTelegramAlert()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 border border-slate-200/80 dark:border-white/10 p-3 rounded-xl text-left shadow-sm transition active:scale-98 flex flex-col justify-between gap-1 group">
+                                    <div class="flex items-center justify-between w-full">
+                                        <span class="text-xs font-bold">🔔 Test Ping Bot</span>
+                                        <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-rose-500 group-hover:scale-110 transition-transform"></i>
+                                    </div>
+                                    <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans">Uji sambungan API Telegram</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Schedules & Sentinel Info -->
+                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-amber-500"></i>
+                                <span>Jadwal Automasi Robot Alpha (WIB):</span>
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono">
+                                <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-blue-600 dark:text-blue-400 flex items-center justify-between">
+                                        <span>🌅 08:45 WIB</span>
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400">Pre-Market</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">Morning Briefing: Iklim IHSG, Radar Makro Global (Minyak, Emas, Kurs) &amp; Top 3 Rekomendasi Screener + Lot.</div>
+                                </div>
+                                <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+                                        <span>🛡️ Tiap 3 Menit</span>
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Jam Bursa</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">Safety Sentinel: Alarm bahaya jika harga menembus Stop Loss, dan panduan Take Profit 50% saat menyentuh TP1.</div>
+                                </div>
+                                <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
+                                        <span>🌆 16:15 WIB</span>
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400">Market Close</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">Evening Wrap: Rekap penutupan IHSG, evaluasi posisi portofolio terbuka, dan ringkasan PnL.</div>
+                                </div>
+                                <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
+                                    <div class="font-bold text-purple-600 dark:text-purple-400 flex items-center justify-between">
+                                        <span>📊 17:00 WIB</span>
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400">EOD Full</span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">EOD Scan: Pemindaian database penuh 800+ emiten bursa untuk persiapan trading hari esok.</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Telegram Interactive Bot Commands Cheat Sheet -->
                         <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
-                            <h4 class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="terminal" class="w-4 h-4 text-purple-600 dark:text-purple-400"></i>
-                                <span>Perintah Interaktif Bot Telegram:</span>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <i data-lucide="terminal" class="w-4 h-4 text-violet-600 dark:text-violet-400"></i>
+                                <span>Perintah Chat Interaktif di Bot Telegram:</span>
                             </h4>
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono">
                                 <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
-                                    <div class="font-bold text-blue-600 dark:text-blue-400">/scan</div>
-                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Jalankan live scanner pasar saham &amp; kirimkan rekomendasi sinyal teratas.</div>
+                                    <div class="font-bold text-blue-600 dark:text-blue-400">/scan atau /top3</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Jalankan live scanner pasar saham &amp; kirimkan 3 rekomendasi terbaik.</div>
                                 </div>
                                 <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
                                     <div class="font-bold text-blue-600 dark:text-blue-400">/posisi</div>
-                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Pantau semua posisi OPEN di jurnal beserta live price &amp; unrealized PnL.</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Pantau semua posisi OPEN di jurnal beserta harga live &amp; jarak aman ke SL.</div>
                                 </div>
                                 <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
                                     <div class="font-bold text-emerald-600 dark:text-emerald-400">/beli [TICKER] [LOT]</div>
-                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Contoh: <code>/beli AUTO 35</code> untuk catat beli &amp; aktifkan robot sentinel.</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Contoh: <code>/beli AUTO 35</code> untuk catat beli &amp; aktifkan radar pengawas.</div>
                                 </div>
                                 <div class="p-2.5 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
-                                    <div class="font-bold text-rose-600 dark:text-rose-400">/tutup [TICKER]</div>
-                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Tutup posisi terbuka dan realisasikan profit/loss ke jurnal.</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Schedules & Sentinel Info -->
-                        <div class="bg-slate-50 dark:bg-oled p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-3">
-                            <h4 class="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-                                <i data-lucide="shield-alert" class="w-4 h-4 text-blue-600 dark:text-blue-400"></i>
-                                <span>Jadwal Automasi &amp; Safety Sentinel:</span>
-                            </h4>
-                            <div class="space-y-2 font-mono text-xs text-slate-600 dark:text-gray-400">
-                                <div class="flex items-start gap-2">
-                                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">•</span>
-                                    <div><b>17:00 WIB Daily EOD Scan:</b> Memindai seluruh universe saham BEI setiap sore hari kerja dan mendistribusikan Top 3 rekomendasi.</div>
-                                </div>
-                                <div class="flex items-start gap-2">
-                                    <span class="text-amber-500 font-bold">•</span>
-                                    <div><b>15-Min Safety Sentinel:</b> Memantau pergerakan harga terhadap level Stop Loss &amp; Target TP1 setiap 15 menit selama jam perdagangan aktif.</div>
+                                    <div class="font-bold text-rose-600 dark:text-rose-400">/jual [TICKER] [HARGA]</div>
+                                    <div class="text-[11px] text-slate-500 dark:text-gray-400 font-sans">Contoh: <code>/jual AUTO 3100</code> untuk tutup posisi &amp; bukukan profit ke jurnal.</div>
                                 </div>
                             </div>
                         </div>
@@ -4459,9 +4493,9 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 const res = await fetch('/api/telegram/test', { method: 'POST' });
                 const json = await res.json();
                 if (json.connected) {
-                    showToast("Ping bot Telegram berhasil!");
+                    showToast("Ping bot Telegram berhasil! Cek chat Telegram Anda.");
                 } else {
-                    showToast("Token Telegram belum disetel di .env (Opsional)", "error");
+                    showToast("Token Telegram / Chat ID belum terpasang di server", "error");
                 }
             } catch (e) {
                 showToast("Gagal mengirim test Telegram", "error");
@@ -4469,17 +4503,40 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
         }
 
         async function sendTelegramSuperDigest() {
-            showToast("Mengirim Super-Digest (Top 3 Picks) ke Telegram...");
+            showToast("Menyiapkan & mengirim Morning Digest (Top 3 + Makro)...");
             try {
                 const res = await fetch('/api/telegram/send-digest', { method: 'POST' });
                 const json = await res.json();
                 if (json.sent) {
-                    showToast(`Super-Digest (${json.top_count} Saham) berhasil dikirim ke Telegram!`);
+                    showToast(`Morning Digest (${json.top_count} Saham) berhasil dikirim ke Telegram!`);
                 } else {
-                    showToast("Token Telegram belum disetel di .env", "error");
+                    showToast("Token Telegram belum disetel di server", "error");
                 }
             } catch (e) {
-                showToast("Gagal mengirim Super-Digest", "error");
+                showToast("Gagal mengirim Morning Digest", "error");
+            }
+        }
+
+        async function runManualSafetySentinel() {
+            showToast("Menjalankan scan Safety Sentinel pada posisi terbuka...");
+            try {
+                const res = await fetch('/api/telegram/check-sentinel', { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success') {
+                    const count = json.data ? json.data.checked_count : 0;
+                    const alerts = json.data ? json.data.alerts_sent : 0;
+                    if (count === 0) {
+                        showToast("Safety Sentinel: Tidak ada transaksi OPEN di jurnal (Kas RDN Aman).");
+                    } else if (alerts > 0) {
+                        showToast(`Safety Sentinel: Ditemukan ${alerts} peringatan darurat terkirim ke Telegram!`, "warning");
+                    } else {
+                        showToast(`Safety Sentinel: ${count} posisi terpantau aman terkendali.`);
+                    }
+                } else {
+                    showToast("Gagal menjalankan Safety Sentinel", "error");
+                }
+            } catch (e) {
+                showToast("Gagal menghubungi server", "error");
             }
         }
 

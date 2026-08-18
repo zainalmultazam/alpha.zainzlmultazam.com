@@ -67,88 +67,144 @@ def format_id_date(dt: datetime) -> str:
     month_name = months[dt.month]
     return f"{day_name}, {dt.day} {month_name} {dt.year} • {dt.strftime('%H:%M')} WIB"
 
-async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
-    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan tombol interaktif 1-Click Buy."""
-    if not picks:
-        return False
-
+async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None, macro: Optional[Dict[str, Any]] = None) -> bool:
+    """Mengirimkan Morning Pre-Market Briefing (08:45 WIB) dengan Iklim IHSG, Radar Makro, dan Top 3 Picks."""
     now_str = format_id_date(datetime.now())
     
     # 1. Header & Market Climate Banner
-    regime_title = html.escape(str(climate.get("title", "Risk-On") if climate else "Risk-On"))
     regime_status = climate.get("regime", "BULLISH") if climate else "BULLISH"
     ihsg_price = climate.get("price", 0) if climate else 0
     ihsg_change = climate.get("change_pct", 0) if climate else 0
     sign = "+" if ihsg_change >= 0 else ""
+    exposure = climate.get("exposure_pct", 50) if climate else 50
     
     if regime_status == "BULLISH":
-        climate_badge = "🟢 <b>BULLISH (Risk-On)</b>"
+        climate_badge = f"🟢 <b>BULLISH ({exposure}% Modal Aktif)</b>"
     elif regime_status == "NEUTRAL":
-        climate_badge = "🟡 <b>CAUTION (50% Lot)</b>"
+        climate_badge = f"🟡 <b>CAUTION ({exposure}% Modal Aktif)</b>"
     else:
-        climate_badge = "🔴 <b>DEFENSIVE (Cash is King)</b>"
+        climate_badge = f"🔴 <b>DEFENSIVE ({exposure}% Modal Aktif)</b>"
 
-    msg = f"<b>TOP 3 PICKS</b>\n"
+    msg = f"🌅 <b>MORNING PRE-MARKET BRIEFING</b>\n"
     msg += f"<i>{now_str}</i>\n"
-    msg += "────────────\n"
+    msg += "━━━━━━━━━━━━━━━━━━\n"
     
-    # Status Operasional Bursa
-    market_status = climate.get("market_status") if climate else None
-    if market_status:
-        status_title = html.escape(str(market_status.get("title", "")))
-        msg += f"🏛️ <b>Bursa:</b> {status_title}\n"
-    
-    msg += f"🌦️ <b>IHSG:</b> {ihsg_price:,.0f} ({sign}{ihsg_change}%) • {climate_badge}\n"
-    msg += "────────────\n\n"
+    msg += f"📊 <b>IHSG:</b> <code>{ihsg_price:,.2f}</code> ({sign}{ihsg_change}%)\n"
+    msg += f"🧭 <b>Rezim:</b> {climate_badge}\n"
+    if climate and climate.get("advice"):
+        msg += f"💡 <i>{climate['advice']}</i>\n"
+    msg += "━━━━━━━━━━━━━━━━━━\n"
 
-    # 2. Top 3 Picks Details (Format Kartu Bersih & Tap to Copy)
-    top_3 = picks[:3]
-    inline_keyboard = []
+    # 2. Global Macro Radar Highlights
+    if macro and macro.get("items"):
+        msg += "🌐 <b>RADAR MAKRO GLOBAL:</b>\n"
+        for item in macro["items"][:4]:
+            m_sign = "+" if item.get("is_positive") else ""
+            m_chg = item.get("change_pct", 0)
+            icon = "🟢" if item.get("is_positive") else "🔴"
+            rel = "/".join(item.get("related_tickers", [])[:2])
+            rel_str = f" → {rel}" if rel else ""
+            msg += f"• {icon} <b>{item.get('name')}:</b> {item.get('display_price')} (<code>{m_sign}{m_chg}%</code>){rel_str}\n"
+        msg += "━━━━━━━━━━━━━━━━━━\n\n"
 
-    for i, p in enumerate(top_3, 1):
-        plan = p["plan"]
-        entry = int(plan["entry_price"])
-        sl = int(plan["stop_loss"])
-        tp1 = int(plan["tp1"])
-        tp2 = int(plan["tp2"])
+    # 3. Top 3 Picks Details
+    if picks:
+        msg += "🎯 <b>TOP 3 REKOMENDASI HARI INI:</b>\n\n"
+        top_3 = picks[:3]
+        inline_keyboard = []
 
-        # Hitung alokasi lot otomatis berbasis 1% risk dari default capital
-        sizing = calculate_lot_size(settings.DEFAULT_CAPITAL, settings.DEFAULT_MAX_RISK_PCT, entry, sl)
-        lots = sizing["lots"]
-        half_lots = max(1, lots // 2)
-        runner_lots = lots - half_lots
-        cost_str = format_rupiah_short(sizing["total_cost"])
-        risk_str = format_rupiah_short(sizing["max_risk_idr"])
+        for i, p in enumerate(top_3, 1):
+            plan = p.get("plan", {})
+            entry = int(plan.get("entry_price", p.get("close", 0)))
+            sl = int(plan.get("stop_loss", entry * 0.96))
+            tp1 = int(plan.get("tp1", entry * 1.08))
+            tp2 = int(plan.get("tp2", entry * 1.15))
 
-        weekly_tag = "Weekly Confirmed" if p.get("weekly_confirmed") else "Daily Setup"
-        safe_name = html.escape(str(p.get("name", "")))
-        safe_setup = html.escape(str(p.get("primary_setup", "")))
+            # Hitung alokasi lot otomatis berbasis 1% risk dari default capital
+            sizing = calculate_lot_size(settings.DEFAULT_CAPITAL, settings.DEFAULT_MAX_RISK_PCT, entry, sl)
+            lots = sizing["lots"]
+            half_lots = max(1, lots // 2)
+            cost_str = format_rupiah_short(sizing["total_cost"])
+            risk_str = format_rupiah_short(sizing["max_risk_idr"])
 
-        msg += f"<b>#{i} {p['symbol']} - {safe_name}</b>\n"
-        msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p['score']} PTS</b>)\n"
-        msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p['turnover_bio']}B\n\n"
-        
-        # Angka kunci dengan format <code> agar bisa di-tap to copy di HP
-        msg += f"🟢 <b>BUY (GTC) :</b> <code>{entry}</code> → <b>{lots} Lot</b>\n"
-        msg += f"🔴 <b>CUT LOSS  :</b> <code>{sl}</code> (-{plan['risk_pct']}%)\n"
-        msg += f"🎯 <b>TARGET 1  :</b> <code>{tp1}</code> (+{plan['tp1_gain_pct']}% | Jual {half_lots} Lot)\n"
-        msg += f"🚀 <b>TARGET 2  :</b> <code>{tp2}</code> (+{plan['tp2_gain_pct']}% | Jual {runner_lots} Lot)\n\n"
-        
-        msg += f"• Modal: <b>{cost_str}</b> | Max Risiko: <b>{risk_str}</b> (1%)\n"
-        msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
-        if i < len(top_3):
-            msg += "────────────\n\n"
+            weekly_tag = "Weekly Confirmed" if p.get("weekly_confirmed") else "Daily Setup"
+            safe_name = html.escape(str(p.get("name", p.get("symbol", ""))))
+            safe_setup = html.escape(str(p.get("primary_setup", "Breakout")))
 
-        # Tombol Membuka Lot Picker Grid
-        inline_keyboard.append([
-            {
-                "text": f"🛒 Catat Beli {p['symbol']}",
-                "callback_data": f"picklot:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
-            }
-        ])
+            msg += f"<b>#{i} {p['symbol']} - {safe_name}</b>\n"
+            msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p.get('score', 90)} PTS</b>)\n"
+            msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p.get('turnover_bio', 0)}B\n\n"
+            
+            # Angka kunci format code agar tap-to-copy
+            msg += f"🟢 <b>BUY (GTC) :</b> <code>{entry}</code> → <b>{lots} Lot</b> ({cost_str})\n"
+            msg += f"🔴 <b>STOP LOSS :</b> <code>{sl}</code> (-{plan.get('risk_pct', 4.0)}% | Risk {risk_str})\n"
+            msg += f"🎯 <b>TARGET TP1:</b> <code>{tp1}</code> (+{plan.get('tp1_gain_pct', 8.0)}% | Jual {half_lots} Lot)\n"
+            msg += f"🚀 <b>TARGET TP2:</b> <code>{tp2}</code> (+{plan.get('tp2_gain_pct', 15.0)}%)\n\n"
+            msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
+            if i < len(top_3):
+                msg += "──────────────────\n\n"
 
-    reply_markup = {"inline_keyboard": inline_keyboard}
+            inline_keyboard.append([
+                {
+                    "text": f"🛒 Catat Beli {p['symbol']} ({lots} Lot)",
+                    "callback_data": f"picklot:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
+                }
+            ])
+
+        reply_markup = {"inline_keyboard": inline_keyboard} if inline_keyboard else None
+    else:
+        msg += "<i>Belum ada setup dengan skor tinggi yang lolos filter likuiditas pagi ini. Disiplin tunggu konfirmasi pasar!</i>\n"
+        reply_markup = None
+
     return await send_telegram_message(msg.strip(), reply_markup=reply_markup)
+
+async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
+    """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan tombol interaktif 1-Click Buy."""
+    return await notify_morning_briefing(picks, climate=climate)
+
+async def notify_evening_wrap(climate: Optional[Dict[str, Any]] = None, open_trades: Optional[List[Dict[str, Any]]] = None, stats: Optional[Dict[str, Any]] = None) -> bool:
+    """Mengirimkan Evening Market & Portfolio Wrap (16:15 WIB)."""
+    now_str = format_id_date(datetime.now())
+    
+    ihsg_price = climate.get("price", 0) if climate else 0
+    ihsg_change = climate.get("change_pct", 0) if climate else 0
+    sign = "+" if ihsg_change >= 0 else ""
+    regime = climate.get("regime", "BULLISH") if climate else "BULLISH"
+
+    msg = f"🌆 <b>MARKET CLOSE & PORTFOLIO WRAP</b>\n"
+    msg += f"<i>{now_str}</i>\n"
+    msg += "━━━━━━━━━━━━━━━━━━\n"
+    msg += f"📊 <b>IHSG Tutup:</b> <code>{ihsg_price:,.2f}</code> ({sign}{ihsg_change}%) • <b>{regime}</b>\n"
+    msg += "━━━━━━━━━━━━━━━━━━\n\n"
+
+    # Status Open Trades
+    if open_trades and len(open_trades) > 0:
+        msg += f"💼 <b>POSISI TERBUKA AKTIF ({len(open_trades)} Saham):</b>\n"
+        for t in open_trades:
+            ticker = t.get("ticker", "")
+            entry = float(t.get("entry_price", 0))
+            sl = float(t.get("stop_loss", 0))
+            lots = int(t.get("lots", 0))
+            msg += f"• <b>{ticker}</b> ({lots} Lot) — Entry: Rp {entry:,.0f} | SL: Rp {sl:,.0f}\n"
+        msg += "\n"
+    else:
+        msg += "💼 <b>Posisi Terbuka:</b> 0 Saham (100% Cash RDN Aman)\n\n"
+
+    # Performance Stats
+    if stats:
+        win_rate = stats.get("win_rate", 0.0)
+        pnl = stats.get("total_realized_pnl", 0.0)
+        pnl_sign = "+" if pnl >= 0 else ""
+        closed_count = stats.get("closed_trades_count", 0)
+        msg += "📈 <b>RINGKASAN KINERJA JURNAL:</b>\n"
+        msg += f"• Win Rate        : <b>{win_rate:.1f}%</b>\n"
+        msg += f"• Total Realized  : <b>{pnl_sign}Rp {pnl:,.0f}</b>\n"
+        msg += f"• Transaksi Selesai: <b>{closed_count} Trade</b>\n"
+    
+    msg += "\n────────────\n"
+    msg += f"🌐 <a href=\"https://{settings.APP_DOMAIN}\">Buka Alpha Terminal</a>"
+
+    return await send_telegram_message(msg.strip())
 
 # Alias for backward compatibility
 notify_top_picks = notify_super_digest
