@@ -273,25 +273,25 @@ def get_market_climate(force: bool = False) -> Dict[str, Any]:
     ema50 = float(last["ema50"])
     ema200 = float(last["ema200"])
 
-    # Penentuan Rezim Pasar
-    if price >= ema50 and ema50 >= ema200:
+    # Penentuan Rezim Pasar (Stan Weinstein & Minervini Stage Analysis)
+    if price >= ema50 and price >= ema200:
         regime = "BULLISH"
-        title = "Risk-On (Uptrend Kuat)"
+        title = "Risk-On (Stage 2 Uptrend Kuat)"
         color = "emerald"
         exposure_pct = 100
-        advice = "IHSG berada di atas EMA 50 & 200. Kondisi pasar optimal untuk full size swing trading (100% modal aktif)."
-    elif price >= ema200 and price < ema50:
+        advice = "IHSG berada di atas EMA 50 & EMA 200. Kondisi pasar optimal untuk full size swing trading (100% modal aktif)."
+    elif price >= ema50 or price >= ema200:
         regime = "NEUTRAL"
-        title = "Caution (Konsolidasi/Pullback)"
+        title = "Caution (Recovery / Rebound Selektif)"
         color = "amber"
         exposure_pct = 50
-        advice = "IHSG menguji support EMA 50. Batasi ukuran lot 50% dan utamakan saham leader bervolume tinggi."
+        advice = "IHSG berhasil memantul di atas EMA 50 menguji resistance EMA 200. Alokasikan 50% modal aktif & prioritaskan saham leader bervolume tinggi."
     else:
         regime = "BEARISH"
         title = "Risk-Off (Cash is King)"
         color = "rose"
         exposure_pct = 0
-        advice = "IHSG di bawah EMA 200. Tekanan jual tinggi, utamakan memegang Cash dan hindari beli agresif."
+        advice = "IHSG jebol di bawah EMA 50 & EMA 200. Tekanan jual tinggi, utamakan memegang Cash dan hindari beli agresif."
 
     result = {
         "regime": regime,
