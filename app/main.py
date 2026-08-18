@@ -592,10 +592,14 @@ async def api_close_trade(
     ok = close_trade(trade_id, exit_price, notes or "", exit_reason or "MANUAL")
     return {"status": "success" if ok else "error"}
 
+@app.post("/api/journal/delete")
 @app.post("/api/journal/delete/{trade_id}")
 @app.delete("/api/journal/{trade_id}")
-async def api_delete_trade(trade_id: int):
-    ok = delete_trade(trade_id)
+async def api_delete_trade(trade_id: Optional[int] = None, trade_id_form: Optional[int] = Form(None, alias="trade_id")):
+    tid = trade_id or trade_id_form
+    if not tid:
+        return {"status": "error", "message": "Missing trade_id"}
+    ok = delete_trade(tid)
     return {"status": "success" if ok else "error", "deleted": ok}
 
 @app.get("/api/telegram/status")
