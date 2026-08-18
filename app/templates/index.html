@@ -484,7 +484,7 @@
         </div>
 
         <!-- Sidebar Menu Items (Icon-Centric with Tooltips) -->
-        <nav class="py-3 space-y-1.5 flex-1 overflow-visible">
+        <nav class="p-2 space-y-1.5 flex-1 overflow-y-auto">
             
             <!-- Item 1: Screener -->
             <div class="relative group w-full">
@@ -499,20 +499,7 @@
                 </div>
             </div>
 
-            <!-- Item 2: Journal -->
-            <div class="relative group w-full">
-                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
-                    </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Journal</span>
-                </button>
-                <div class="sidebar-tooltip">
-                    Journal
-                </div>
-            </div>
-
-            <!-- Item 3: Charts -->
+            <!-- Item 2: Charts -->
             <div class="relative group w-full">
                 <button onclick="switchView('charts')" id="nav-charts" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
@@ -525,20 +512,7 @@
                 </div>
             </div>
 
-            <!-- Item 4: Performance -->
-            <div class="relative group w-full">
-                <button onclick="switchView('performance')" id="nav-performance" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
-                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
-                        <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
-                    </div>
-                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Performance</span>
-                </button>
-                <div class="sidebar-tooltip">
-                    Performance
-                </div>
-            </div>
-
-            <!-- Item 5: Calculator -->
+            <!-- Item 3: Calculator -->
             <div class="relative group w-full">
                 <button onclick="switchView('calculator')" id="nav-calculator" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
                     <div class="w-6 h-6 flex items-center justify-center shrink-0">
@@ -548,6 +522,32 @@
                 </button>
                 <div class="sidebar-tooltip">
                     Calculator
+                </div>
+            </div>
+
+            <!-- Item 4: Journal -->
+            <div class="relative group w-full">
+                <button onclick="switchView('journal')" id="nav-journal" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
+                    </div>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Journal</span>
+                </button>
+                <div class="sidebar-tooltip">
+                    Journal
+                </div>
+            </div>
+
+            <!-- Item 5: Performance -->
+            <div class="relative group w-full">
+                <button onclick="switchView('performance')" id="nav-performance" class="nav-item w-full flex items-center p-2.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-900 border border-transparent transition">
+                    <div class="w-6 h-6 flex items-center justify-center shrink-0">
+                        <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                    </div>
+                    <span class="sidebar-text hidden ml-3 text-left whitespace-nowrap">Performance</span>
+                </button>
+                <div class="sidebar-tooltip">
+                    Performance
                 </div>
             </div>
 
@@ -652,21 +652,21 @@
                 <i data-lucide="layout-grid" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                 <span class="text-[10px] font-semibold">Screener</span>
             </button>
-            <button onclick="switchView('journal'); closeMobileNav()" id="mobile-nav-journal" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
-                <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
-                <span class="text-[10px] font-semibold">Journal</span>
-            </button>
             <button onclick="switchView('charts'); closeMobileNav()" id="mobile-nav-charts" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
                 <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
                 <span class="text-[10px] font-semibold">Charts</span>
             </button>
-            <button onclick="switchView('performance'); closeMobileNav()" id="mobile-nav-performance" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
-                <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
-                <span class="text-[10px] font-semibold">Performance</span>
-            </button>
             <button onclick="switchView('calculator'); closeMobileNav()" id="mobile-nav-calculator" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
                 <i data-lucide="calculator" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
                 <span class="text-[10px] font-semibold">Calculator</span>
+            </button>
+            <button onclick="switchView('journal'); closeMobileNav()" id="mobile-nav-journal" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="book-open" class="w-5 h-5 text-cyan-600 dark:text-cyan-400"></i>
+                <span class="text-[10px] font-semibold">Journal</span>
+            </button>
+            <button onclick="switchView('performance'); closeMobileNav()" id="mobile-nav-performance" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
+                <i data-lucide="line-chart" class="w-5 h-5 text-indigo-600 dark:text-indigo-400"></i>
+                <span class="text-[10px] font-semibold">Performance</span>
             </button>
             <button onclick="switchView('alerts'); closeMobileNav()" id="mobile-nav-alerts" class="mobile-nav-item flex flex-col items-center gap-1.5 px-2 py-3 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-900 active:scale-95 transition">
                 <i data-lucide="bell" class="w-5 h-5 text-purple-600 dark:text-purple-400"></i>
