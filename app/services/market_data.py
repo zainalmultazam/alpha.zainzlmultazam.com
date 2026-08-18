@@ -324,11 +324,11 @@ _MACRO_CACHE: Dict[str, Any] = {}
 _MACRO_CACHE_TIME: Optional[datetime] = None
 _MACRO_CACHE_EXPIRY_SECONDS = 900  # Cache 15 menit
 
-def get_global_macro_data() -> Dict[str, Any]:
+def get_global_macro_data(force: bool = False) -> Dict[str, Any]:
     """Mengambil harga komoditas global, kurs valas, dan yield obligasi untuk korelasi sektoral saham BEI."""
     global _MACRO_CACHE, _MACRO_CACHE_TIME
     now = datetime.now()
-    if _MACRO_CACHE_TIME and (now - _MACRO_CACHE_TIME).total_seconds() < _MACRO_CACHE_EXPIRY_SECONDS and _MACRO_CACHE:
+    if not force and _MACRO_CACHE_TIME and (now - _MACRO_CACHE_TIME).total_seconds() < _MACRO_CACHE_EXPIRY_SECONDS and _MACRO_CACHE:
         return _MACRO_CACHE
 
     macro_items = [

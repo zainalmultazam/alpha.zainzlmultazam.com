@@ -373,10 +373,10 @@ async def api_calculate_size(
         return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
 
 @app.get("/api/macro")
-async def api_macro():
+async def api_macro(force: bool = False):
     """Mengembalikan data harga komoditas global, kurs USD/IDR, dan yield US 10Y dengan korelasi emiten BEI."""
     loop = asyncio.get_event_loop()
-    data = await loop.run_in_executor(None, get_global_macro_data)
+    data = await loop.run_in_executor(None, get_global_macro_data, force)
     return JSONResponse(content=data)
 
 @app.get("/api/chart/{ticker}")
