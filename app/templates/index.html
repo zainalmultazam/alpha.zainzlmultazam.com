@@ -1456,15 +1456,96 @@
                             </div>
 
                             <!-- Action Buttons -->
-                            <div class="grid grid-cols-2 gap-2.5 pt-1">
-                                <button onclick="copyCurrentCalcGTC()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 font-semibold py-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 font-sans active:scale-[0.98] border border-slate-200 dark:border-white/10 shadow-sm">
-                                    <i data-lucide="copy" class="w-4 h-4"></i> Copy Auto-Order GTC
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-sans">
+                                <button type="button" onclick="copyCurrentCalcGTC()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 active:scale-[0.98] border border-slate-200 dark:border-white/10 shadow-sm">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy GTC
                                 </button>
-                                <button onclick="logCalculatedTrade()" id="btn-log-journal" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 font-sans active:scale-[0.98]">
-                                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal
+                                <button type="button" onclick="addCurrentCalcToBasket()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 active:scale-[0.98]">
+                                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + Masukkan Keranjang
+                                </button>
+                                <button type="button" onclick="logCalculatedTrade()" id="btn-log-journal" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 px-3 rounded-xl text-xs transition flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 active:scale-[0.98]">
+                                    <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Catat Jurnal
                                 </button>
                             </div>
 
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- MULTI-SLOT PORTFOLIO BASKET PLANNER -->
+                <div class="clean-card p-5 sm:p-6 space-y-5 border border-slate-200 dark:border-white/[0.08] shadow-sm">
+                    
+                    <!-- Header -->
+                    <div class="border-b border-slate-200 dark:border-white/[0.06] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <i data-lucide="layers" class="w-4 h-4"></i>
+                                </div>
+                                <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white">Keranjang Rencana Portofolio Hari Ini</h3>
+                                <span id="basket-count-badge" class="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 dark:bg-indigo-950/80 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 font-bold">0 / 4 Slot Terisi</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 font-mono">Peta sebaran alokasi modal dan akumulasi risiko multi-saham untuk eksekusi hari ini.</p>
+                        </div>
+
+                        <!-- Right Actions -->
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="clearPortfolioBasket()" id="btn-clear-basket" class="hidden px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 transition flex items-center gap-1.5 active:scale-95 font-sans">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Reset Keranjang
+                            </button>
+                            <button type="button" onclick="saveBasketToJournal()" id="btn-save-basket-journal" class="hidden bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95 font-sans">
+                                <i data-lucide="check-check" class="w-4 h-4"></i> Simpan Semua ke Jurnal (<span id="btn-basket-count">0</span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4-Slot Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="basket-slots-container">
+                        <!-- Dynamic Slot Cards rendered via JavaScript -->
+                    </div>
+
+                    <!-- Portfolio Aggregate Allocation Summary Bar -->
+                    <div id="basket-summary-card" class="p-4 rounded-xl bg-slate-50 dark:bg-oled border border-slate-200 dark:border-white/[0.06] space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <span class="text-xs font-bold text-slate-800 dark:text-gray-200 font-sans flex items-center gap-1.5">
+                                <i data-lucide="pie-chart" class="w-4 h-4 text-blue-500"></i> Sebaran Modal &amp; Kas Portofolio:
+                            </span>
+                            <div class="flex items-center gap-3 text-xs font-mono">
+                                <span class="text-slate-600 dark:text-gray-300">Total Modal: <b id="summary-total-capital" class="text-slate-900 dark:text-white">Rp 25.000.000</b></span>
+                            </div>
+                        </div>
+
+                        <!-- Segmented Progress Bar -->
+                        <div class="w-full bg-slate-200 dark:bg-surface-800 rounded-full h-3 overflow-hidden flex" id="basket-progress-bar">
+                            <div class="bg-emerald-500 h-full w-full" title="100% Cash"></div>
+                        </div>
+
+                        <!-- 4 Stat Badges / Metrics -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-center text-xs font-mono border-t border-slate-200/60 dark:border-white/[0.04]">
+                            <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Total Rencana Beli</span>
+                                <span class="font-bold text-blue-600 dark:text-blue-400 text-sm block mt-0.5" id="summary-deployed-cost">Rp 0</span>
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400" id="summary-deployed-pct">0% Modal</span>
+                            </div>
+
+                            <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Sisa Kas RDN (Cash)</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm block mt-0.5" id="summary-cash-remaining">Rp 25.000.000</span>
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400" id="summary-cash-pct">100% Cash</span>
+                            </div>
+
+                            <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Akumulasi Risiko Max</span>
+                                <span class="font-bold text-rose-600 dark:text-rose-400 text-sm block mt-0.5" id="summary-total-risk-idr">Rp 0</span>
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400" id="summary-total-risk-pct">0.0% Portofolio</span>
+                            </div>
+
+                            <div class="bg-white dark:bg-surface-900 p-2.5 rounded-lg border border-slate-200 dark:border-white/[0.06]">
+                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans block">Potensi Profit (TP1)</span>
+                                <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm block mt-0.5" id="summary-total-reward-idr">Rp 0</span>
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold" id="summary-avg-rr">R:R 1 : 2.0</span>
+                            </div>
                         </div>
                     </div>
 
@@ -1855,6 +1936,7 @@
             updateSidebarLiveClock();
             setInterval(updateSidebarLiveClock, 1000);
             loadStoredCapital();
+            loadPortfolioBasket();
             lucide.createIcons();
             initChart();
             initTerminalChart();
@@ -3349,6 +3431,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 }, 350);
             }
             calculateLotFromForm();
+            renderPortfolioBasket();
         }
 
         // ==========================================
@@ -3533,6 +3616,14 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     stop_loss: sl,
                     target_price: d.target_price || (entry + (entry - sl) * 2),
                     lots: d.lots,
+                    shares: d.shares,
+                    total_cost: d.total_cost,
+                    max_risk_idr: d.max_risk_idr,
+                    risk_pct_price: d.risk_pct_price,
+                    tp_gain_idr: d.tp_gain_idr,
+                    tp_gain_pct: d.tp_gain_pct,
+                    rr_ratio: d.rr_ratio,
+                    capital_allocation_pct: d.capital_allocation_pct,
                     setup_name: 'Alpha Plan'
                 };
             } catch (err) {
@@ -3642,8 +3733,310 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             } catch (e) {
                 showToast("Gagal mencatat transaksi", "error");
             } finally {
-                btn.innerHTML = '<i data-lucide="plus-circle" class="w-4 h-4"></i> Catat ke Jurnal';
+                btn.innerHTML = '<i data-lucide="book-open" class="w-3.5 h-3.5"></i> Catat Jurnal';
                 lucide.createIcons();
+            }
+        }
+
+        // ==========================================
+        // MULTI-SLOT PORTFOLIO BASKET PLANNER
+        // ==========================================
+        const PORTFOLIO_BASKET_KEY = 'alpha_portfolio_basket_v1';
+        let portfolioBasket = [];
+
+        function loadPortfolioBasket() {
+            try {
+                const saved = localStorage.getItem(PORTFOLIO_BASKET_KEY);
+                if (saved) {
+                    portfolioBasket = JSON.parse(saved);
+                }
+            } catch (e) {
+                portfolioBasket = [];
+            }
+            renderPortfolioBasket();
+        }
+
+        function savePortfolioBasket() {
+            try {
+                localStorage.setItem(PORTFOLIO_BASKET_KEY, JSON.stringify(portfolioBasket));
+            } catch (e) {}
+        }
+
+        function addCurrentCalcToBasket() {
+            if (!currentCalculatedTrade || !currentCalculatedTrade.ticker || currentCalculatedTrade.lots <= 0) {
+                showToast("Lakukan kalkulasi saham terlebih dahulu sebelum menambahkan ke keranjang.", "warning");
+                return;
+            }
+
+            const ticker = currentCalculatedTrade.ticker.toUpperCase();
+            const existingIdx = portfolioBasket.findIndex(item => item.ticker === ticker);
+
+            const newItem = {
+                ticker: ticker,
+                lots: currentCalculatedTrade.lots,
+                shares: currentCalculatedTrade.shares || (currentCalculatedTrade.lots * 100),
+                entry_price: currentCalculatedTrade.entry_price,
+                stop_loss: currentCalculatedTrade.stop_loss,
+                target_price: currentCalculatedTrade.target_price,
+                total_cost: currentCalculatedTrade.total_cost || (currentCalculatedTrade.lots * 100 * currentCalculatedTrade.entry_price),
+                max_risk_idr: currentCalculatedTrade.max_risk_idr || (currentCalculatedTrade.lots * 100 * (currentCalculatedTrade.entry_price - currentCalculatedTrade.stop_loss)),
+                risk_pct_price: currentCalculatedTrade.risk_pct_price || round(((currentCalculatedTrade.entry_price - currentCalculatedTrade.stop_loss) / currentCalculatedTrade.entry_price) * 100, 2),
+                tp_gain_idr: currentCalculatedTrade.tp_gain_idr || (currentCalculatedTrade.lots * 100 * (currentCalculatedTrade.target_price - currentCalculatedTrade.entry_price)),
+                tp_gain_pct: currentCalculatedTrade.tp_gain_pct || 0,
+                rr_ratio: currentCalculatedTrade.rr_ratio || 2.0,
+                setup_name: currentCalculatedTrade.setup_name || 'Alpha Plan'
+            };
+
+            if (existingIdx >= 0) {
+                portfolioBasket[existingIdx] = newItem;
+                showToast(`Slot ${ticker} berhasil diperbarui di Keranjang!`, "success");
+            } else {
+                if (portfolioBasket.length >= 4) {
+                    showToast("Maksimal 4 slot rencana saham (sesuai aturan diversifikasi). Hapus 1 slot untuk mengganti.", "warning");
+                    return;
+                }
+                portfolioBasket.push(newItem);
+                showToast(`✅ ${ticker} (${newItem.lots} Lot) masuk ke Keranjang Rencana!`, "success");
+            }
+
+            savePortfolioBasket();
+            renderPortfolioBasket();
+        }
+
+        function removeBasketSlot(idx) {
+            if (idx >= 0 && idx < portfolioBasket.length) {
+                const removed = portfolioBasket.splice(idx, 1);
+                savePortfolioBasket();
+                renderPortfolioBasket();
+                if (removed.length > 0) {
+                    showToast(`Slot ${removed[0].ticker} dihapus dari keranjang.`, "info");
+                }
+            }
+        }
+
+        function clearPortfolioBasket() {
+            if (portfolioBasket.length === 0) return;
+            portfolioBasket = [];
+            savePortfolioBasket();
+            renderPortfolioBasket();
+            showToast("Keranjang rencana berhasil direset.", "info");
+        }
+
+        function editBasketSlot(idx) {
+            if (idx >= 0 && idx < portfolioBasket.length) {
+                const item = portfolioBasket[idx];
+                document.getElementById('calc-ticker').value = item.ticker;
+                document.getElementById('calc-entry').value = Number(item.entry_price).toLocaleString('id-ID');
+                document.getElementById('calc-sl').value = Number(item.stop_loss).toLocaleString('id-ID');
+                document.getElementById('calc-tp').value = item.target_price ? Number(item.target_price).toLocaleString('id-ID') : '';
+                calculateLotFromForm();
+                
+                // Scroll smoothly to calculator input
+                document.getElementById('view-calculator')?.scrollIntoView({ behavior: 'smooth' });
+                showToast(`Parameter ${item.ticker} dimuat ke form atas.`, "info");
+            }
+        }
+
+        function renderPortfolioBasket() {
+            const container = document.getElementById('basket-slots-container');
+            const badge = document.getElementById('basket-count-badge');
+            const btnSave = document.getElementById('btn-save-basket-journal');
+            const btnClear = document.getElementById('btn-clear-basket');
+            const btnCount = document.getElementById('btn-basket-count');
+            const capInput = document.getElementById('calc-capital');
+            const capital = parseRupiahInput(capInput ? capInput.value : 0) || 25000000;
+
+            if (badge) badge.innerText = `${portfolioBasket.length} / 4 Slot Terisi`;
+            if (btnCount) btnCount.innerText = portfolioBasket.length;
+            if (btnSave) {
+                if (portfolioBasket.length > 0) btnSave.classList.remove('hidden');
+                else btnSave.classList.add('hidden');
+            }
+            if (btnClear) {
+                if (portfolioBasket.length > 0) btnClear.classList.remove('hidden');
+                else btnClear.classList.add('hidden');
+            }
+
+            if (!container) return;
+
+            const slotColors = [
+                { border: 'border-blue-500/40', bg: 'bg-blue-500/5', tag: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border-blue-200 dark:border-blue-800', bar: 'bg-blue-600' },
+                { border: 'border-indigo-500/40', bg: 'bg-indigo-500/5', tag: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-950 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800', bar: 'bg-indigo-600' },
+                { border: 'border-amber-500/40', bg: 'bg-amber-500/5', tag: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border-amber-300 dark:border-amber-700', bar: 'bg-amber-500' },
+                { border: 'border-purple-500/40', bg: 'bg-purple-500/5', tag: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 border-purple-200 dark:border-purple-800', bar: 'bg-purple-600' }
+            ];
+
+            let html = '';
+            let totalDeployedCost = 0;
+            let totalRiskIdr = 0;
+            let totalRewardIdr = 0;
+            let progressSegments = '';
+
+            for (let i = 0; i < 4; i++) {
+                const color = slotColors[i];
+                if (i < portfolioBasket.length) {
+                    const item = portfolioBasket[i];
+                    const itemCost = item.total_cost || (item.lots * 100 * item.entry_price);
+                    const itemRisk = item.max_risk_idr || (item.lots * 100 * (item.entry_price - item.stop_loss));
+                    const itemReward = item.tp_gain_idr || (item.lots * 100 * (item.target_price - item.entry_price));
+                    const allocPct = ((itemCost / capital) * 100).toFixed(1);
+                    const riskPctOfCap = ((itemRisk / capital) * 100).toFixed(2);
+
+                    totalDeployedCost += itemCost;
+                    totalRiskIdr += itemRisk;
+                    totalRewardIdr += itemReward;
+
+                    progressSegments += `<div class="${color.bar} h-full transition-all duration-300" style="width: ${Math.min(100, (itemCost / capital) * 100)}%" title="${item.ticker}: ${allocPct}% (Rp ${itemCost.toLocaleString('id-ID')})"></div>`;
+
+                    html += `
+                        <div class="rounded-xl p-4 border ${color.border} ${color.bg} flex flex-col justify-between space-y-3 relative group transition hover:shadow-md">
+                            <!-- Slot Header -->
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-950 text-[10px] font-mono font-bold flex items-center justify-center">${i + 1}</span>
+                                    <div>
+                                        <h4 class="font-extrabold text-base text-slate-900 dark:text-white font-mono tracking-tight">${item.ticker}</h4>
+                                        <span class="text-[9px] px-1.5 py-0.2 rounded border font-mono font-semibold ${color.tag}">${allocPct}% Modal</span>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="removeBasketSlot(${i})" class="w-6 h-6 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center justify-center transition" title="Hapus slot ini">
+                                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                                </button>
+                            </div>
+
+                            <!-- Lot & Nominal -->
+                            <div class="py-1.5 border-y border-slate-200/50 dark:border-white/[0.06] font-mono">
+                                <div class="text-xs font-bold text-slate-900 dark:text-white">${item.lots} Lot <span class="text-[10px] text-slate-500 dark:text-gray-400 font-normal">(${item.shares.toLocaleString('id-ID')} Lembar)</span></div>
+                                <div class="text-sm font-black text-blue-600 dark:text-blue-400 mt-0.5">Rp ${itemCost.toLocaleString('id-ID')}</div>
+                            </div>
+
+                            <!-- Levels & Risk -->
+                            <div class="grid grid-cols-2 gap-1.5 text-[10px] font-mono">
+                                <div>
+                                    <span class="text-slate-500 dark:text-gray-400 block">Entry:</span>
+                                    <span class="font-semibold text-slate-800 dark:text-gray-200">${item.entry_price.toLocaleString('id-ID')}</span>
+                                </div>
+                                <div>
+                                    <span class="text-rose-500 dark:text-rose-400 block">Stop Loss:</span>
+                                    <span class="font-semibold text-rose-600 dark:text-rose-400">${item.stop_loss.toLocaleString('id-ID')} (-${item.risk_pct_price}%)</span>
+                                </div>
+                                <div>
+                                    <span class="text-emerald-500 dark:text-emerald-400 block">Target TP:</span>
+                                    <span class="font-semibold text-emerald-600 dark:text-emerald-400">${item.target_price.toLocaleString('id-ID')}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-500 dark:text-gray-400 block">Risiko Max:</span>
+                                    <span class="font-bold text-rose-600 dark:text-rose-400">Rp ${itemRisk.toLocaleString('id-ID')} (${riskPctOfCap}%)</span>
+                                </div>
+                            </div>
+
+                            <!-- Action -->
+                            <button type="button" onclick="editBasketSlot(${i})" class="w-full py-1.5 rounded-lg bg-white dark:bg-surface-800 hover:bg-slate-100 dark:hover:bg-surface-700 text-slate-700 dark:text-gray-300 border border-slate-200 dark:border-white/10 text-[10px] font-sans font-semibold transition flex items-center justify-center gap-1">
+                                <i data-lucide="edit-2" class="w-3 h-3"></i> Edit Parameter
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    html += `
+                        <div class="rounded-xl p-5 border-2 border-dashed border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-surface-950/40 flex flex-col items-center justify-center text-center space-y-2.5 min-h-[210px] transition hover:border-slate-300 dark:hover:border-white/20">
+                            <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-surface-800 flex items-center justify-center text-slate-400 dark:text-gray-500 text-xs font-mono font-bold">
+                                Slot ${i + 1}
+                            </div>
+                            <div>
+                                <span class="font-sans font-semibold text-xs text-slate-700 dark:text-gray-300 block">Slot Kosong</span>
+                                <span class="text-[10px] text-slate-400 dark:text-gray-500 font-mono">Kapasitas Ideal ~25%</span>
+                            </div>
+                            <button type="button" onclick="document.getElementById('calc-ticker')?.focus()" class="text-[10px] px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-sans font-semibold transition hover:bg-blue-100">
+                                + Masukkan Saham
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+
+            container.innerHTML = html;
+
+            // Summary metrics
+            const deployedPct = (totalDeployedCost / capital) * 100;
+            const remainingCash = Math.max(0, capital - totalDeployedCost);
+            const cashPct = Math.max(0, 100 - deployedPct);
+            const totalRiskPct = (totalRiskIdr / capital) * 100;
+
+            const sumCapEl = document.getElementById('summary-total-capital');
+            const sumCostEl = document.getElementById('summary-deployed-cost');
+            const sumCostPctEl = document.getElementById('summary-deployed-pct');
+            const sumCashEl = document.getElementById('summary-cash-remaining');
+            const sumCashPctEl = document.getElementById('summary-cash-pct');
+            const sumRiskIdrEl = document.getElementById('summary-total-risk-idr');
+            const sumRiskPctEl = document.getElementById('summary-total-risk-pct');
+            const sumRewardEl = document.getElementById('summary-total-reward-idr');
+            const sumRrEl = document.getElementById('summary-avg-rr');
+            const progBar = document.getElementById('basket-progress-bar');
+
+            if (sumCapEl) sumCapEl.innerText = `Rp ${capital.toLocaleString('id-ID')}`;
+            if (sumCostEl) sumCostEl.innerText = `Rp ${totalDeployedCost.toLocaleString('id-ID')}`;
+            if (sumCostPctEl) sumCostPctEl.innerText = `${deployedPct.toFixed(1)}% Modal (${portfolioBasket.length} Saham)`;
+            if (sumCashEl) sumCashEl.innerText = `Rp ${remainingCash.toLocaleString('id-ID')}`;
+            if (sumCashPctEl) sumCashPctEl.innerText = `${cashPct.toFixed(1)}% Cash Buffer`;
+            if (sumRiskIdrEl) sumRiskIdrEl.innerText = `Rp ${totalRiskIdr.toLocaleString('id-ID')}`;
+            if (sumRiskPctEl) {
+                sumRiskPctEl.innerText = `${totalRiskPct.toFixed(2)}% Portofolio`;
+                sumRiskPctEl.className = totalRiskPct <= 2.5 ? 'text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-[10px] text-amber-600 dark:text-amber-400 font-semibold';
+            }
+            if (sumRewardEl) sumRewardEl.innerText = `Rp ${totalRewardIdr.toLocaleString('id-ID')}`;
+            if (sumRrEl) {
+                const rr = totalRiskIdr > 0 ? (totalRewardIdr / totalRiskIdr).toFixed(1) : '2.0';
+                sumRrEl.innerText = `R:R Agregat 1 : ${rr}`;
+            }
+
+            if (progBar) {
+                if (cashPct > 0) {
+                    progressSegments += `<div class="bg-emerald-500/80 h-full transition-all duration-300" style="width: ${cashPct}%" title="Sisa Cash: ${cashPct.toFixed(1)}% (Rp ${remainingCash.toLocaleString('id-ID')})"></div>`;
+                }
+                progBar.innerHTML = progressSegments || '<div class="bg-emerald-500 h-full w-full"></div>';
+            }
+
+            lucide.createIcons();
+        }
+
+        async function saveBasketToJournal() {
+            if (portfolioBasket.length === 0) {
+                showToast("Keranjang rencana masih kosong.", "warning");
+                return;
+            }
+
+            const btn = document.getElementById('btn-save-basket-journal');
+            if (btn) btn.innerText = 'Menyimpan...';
+
+            let savedCount = 0;
+            for (const item of portfolioBasket) {
+                const formData = new FormData();
+                formData.append('ticker', item.ticker);
+                formData.append('entry_price', item.entry_price);
+                formData.append('stop_loss', item.stop_loss);
+                formData.append('target_price', item.target_price);
+                formData.append('lots', item.lots);
+                formData.append('setup_name', item.setup_name || 'Alpha Plan');
+
+                try {
+                    const res = await fetch('/api/journal/log', { method: 'POST', body: formData });
+                    if (res.ok) savedCount++;
+                } catch (e) {}
+            }
+
+            if (savedCount > 0) {
+                showToast(`🎉 ${savedCount} saham rencana berhasil dicatat ke Jurnal Trading!`, "success");
+                portfolioBasket = [];
+                savePortfolioBasket();
+                renderPortfolioBasket();
+                loadJournalData();
+                switchView('journal');
+            } else {
+                showToast("Gagal menyimpan transaksi ke jurnal.", "error");
+                if (btn) {
+                    btn.innerHTML = `<i data-lucide="check-check" class="w-4 h-4"></i> Simpan Semua ke Jurnal (<span id="btn-basket-count">${portfolioBasket.length}</span>)`;
+                    lucide.createIcons();
+                }
             }
         }
 
