@@ -4426,27 +4426,22 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         let statusBadge = '';
                         if (t.status === 'OPEN') {
                             if (t.is_stagnant) {
-                                statusBadge = `<div class="flex flex-col gap-1">
-                                    <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold w-fit">OPEN</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[9px] font-bold inline-flex items-center gap-1 animate-pulse" title="Saham Stagnan (>7 Hari) — Pertimbangkan Time-Stop / Geser SL ke BEP">⚠️ ${t.holding_days}h Stagnan</span>
-                                </div>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-mono font-bold tracking-tight animate-pulse" title="Saham Stagnan (>7 Hari) — Disarankan Time-Stop / Geser SL ke BEP"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>⚠️ STAGNANT · ${t.holding_days}h</span>`;
                             } else if (t.holding_days >= 5) {
-                                statusBadge = `<div class="flex flex-col gap-1">
-                                    <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold w-fit">OPEN</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-[9px] font-semibold inline-flex items-center gap-1" title="Mendekati Batas Waktu Evaluasi">⏱️ ${t.holding_days} Hari</span>
-                                </div>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-mono font-bold tracking-tight" title="Mendekati Batas Waktu Evaluasi"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>OPEN · ${t.holding_days}h</span>`;
                             } else {
-                                statusBadge = `<div class="flex flex-col gap-1">
-                                    <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold w-fit">OPEN</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 dark:bg-surface-800 dark:text-gray-300 border border-slate-200 dark:border-white/10 text-[9px] font-medium inline-flex items-center gap-1" title="Momentum Aktif">⏱️ ${t.holding_days} Hari</span>
-                                </div>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-bold tracking-tight" title="Momentum Aktif"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>OPEN · ${t.holding_days}h</span>`;
                             }
                         } else {
-                            const rTag = t.exit_reason === 'TIME_STOP' ? '⏱️ Time-Stop' : (t.exit_reason === 'TP' ? '🎯 TP' : (t.exit_reason === 'SL' ? '🛑 Cut Loss' : 'CLOSED'));
-                            statusBadge = `<div class="flex flex-col gap-1">
-                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold w-fit">CLOSED</span>
-                                <span class="text-[10px] text-slate-500 dark:text-gray-400 font-mono">${t.holding_days}h · ${rTag}</span>
-                            </div>`;
+                            if (t.exit_reason === 'TP') {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[11px] font-mono font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>CLOSED · ${t.holding_days}h · TP</span>`;
+                            } else if (t.exit_reason === 'SL') {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-mono font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>CLOSED · ${t.holding_days}h · SL</span>`;
+                            } else if (t.exit_reason === 'TIME_STOP') {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-mono font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>CLOSED · ${t.holding_days}h · TS</span>`;
+                            } else {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-surface-800 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[11px] font-mono font-medium"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>CLOSED · ${t.holding_days}h</span>`;
+                            }
                         }
 
                         const actionCol = t.status === 'OPEN'
@@ -4488,12 +4483,22 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         let statusBadge = '';
                         if (isOpen) {
                             if (t.is_stagnant) {
-                                statusBadge = `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-[10px] font-bold animate-pulse">⚠️ ${t.holding_days}h Stagnan</span>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-mono font-bold tracking-tight animate-pulse"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>⚠️ STAGNANT · ${t.holding_days}h</span>`;
+                            } else if (t.holding_days >= 5) {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-mono font-bold tracking-tight"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>OPEN · ${t.holding_days}h</span>`;
                             } else {
-                                statusBadge = `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 text-[10px] font-semibold">OPEN (${t.holding_days}h)</span>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-bold tracking-tight"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>OPEN · ${t.holding_days}h</span>`;
                             }
                         } else {
-                            statusBadge = `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-semibold">CLOSED (${t.holding_days}h)</span>`;
+                            if (t.exit_reason === 'TP') {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>CLOSED · ${t.holding_days}h · TP</span>`;
+                            } else if (t.exit_reason === 'SL') {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-mono font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>CLOSED · ${t.holding_days}h · SL</span>`;
+                            } else if (t.exit_reason === 'TIME_STOP') {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-mono font-semibold"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>CLOSED · ${t.holding_days}h · TS</span>`;
+                            } else {
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-surface-800 text-slate-600 dark:text-gray-400 border border-slate-200 dark:border-white/10 text-[10px] font-mono font-medium"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>CLOSED · ${t.holding_days}h</span>`;
+                            }
                         }
 
                         const pnlVal = t.pnl_amount || 0;
