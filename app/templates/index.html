@@ -1930,6 +1930,60 @@
             if (tooltipEl) tooltipEl.innerText = fullText;
         }
 
+        // ==========================================
+        // AUTO-SYNC / LIVE BACKGROUND REFRESH
+        // ==========================================
+        let autoSyncInterval = null;
+        let lastScanTimestamp = Date.now();
+
+        async function syncLiveMarketData() {
+            try {
+                // 1. Fetch live market climate (IHSG price, regime & session status)
+                const resClimate = await fetch('/api/market-climate');
+                const jsonClimate = await resClimate.json();
+                if (jsonClimate.status === 'success' && jsonClimate.data) {
+                    currentClimate = jsonClimate.data;
+                    updateClimateUI(jsonClimate.data);
+                }
+
+                // 2. Fetch global macro data
+                loadGlobalMacro();
+
+                // 3. Auto-refresh screener silently every 3 minutes
+                const now = Date.now();
+                if (now - lastScanTimestamp > 180000) {
+                    lastScanTimestamp = now;
+                    fetch('/api/scan')
+                        .then(r => r.json())
+                        .then(json => {
+                            if (json.data && json.data.length > 0) {
+                                allScanResults = json.data;
+                                const countEl = document.getElementById('count-all');
+                                if (countEl) countEl.innerText = allScanResults.length;
+                                renderPicks();
+                                updateQuickTickersFromScan(allScanResults);
+                            }
+                        })
+                        .catch(() => {});
+                }
+            } catch (e) {
+                console.error("Auto-sync error", e);
+            }
+        }
+
+        function initAutoSync() {
+            if (autoSyncInterval) clearInterval(autoSyncInterval);
+            // Polling otomatis setiap 60 detik di background
+            autoSyncInterval = setInterval(syncLiveMarketData, 60000);
+
+            // Re-sync seketika saat user membuka kembali tab browser ini
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    syncLiveMarketData();
+                }
+            });
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initSidebarState();
             updateHeaderDate();
@@ -1937,6 +1991,7 @@
             setInterval(updateSidebarLiveClock, 1000);
             loadStoredCapital();
             loadPortfolioBasket();
+            initAutoSync();
             lucide.createIcons();
             initChart();
             initTerminalChart();
