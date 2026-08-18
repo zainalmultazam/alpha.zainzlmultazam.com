@@ -1308,13 +1308,21 @@
                             <!-- Modal & Preset Risk Row -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label class="block font-sans font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Total Modal Portofolio (Rp)</label>
-                                    <input type="text" inputmode="numeric" id="calc-capital" value="50.000.000" oninput="formatRupiahInput(this); calculateLotFromForm();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <label class="font-sans font-semibold text-slate-700 dark:text-gray-300">Total Modal Portofolio (Rp)</label>
+                                        <span id="calc-capital-saved-badge" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium opacity-0 transition-opacity duration-300 flex items-center gap-1">
+                                            <i data-lucide="check" class="w-2.5 h-2.5"></i> Tersimpan
+                                        </span>
+                                    </div>
+                                    <input type="text" inputmode="numeric" id="calc-capital" value="25.000.000" oninput="formatRupiahInput(this); handleCapitalChange();" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
                                 </div>
 
                                 <div>
                                     <div class="flex items-center justify-between mb-1.5">
-                                        <label class="font-sans font-semibold text-slate-700 dark:text-gray-300">Maksimal Risiko (%)</label>
+                                        <div class="flex items-center gap-1.5">
+                                            <label class="font-sans font-semibold text-slate-700 dark:text-gray-300">Maksimal Risiko (%)</label>
+                                            <span id="calc-risk-market-hint" class="hidden text-[9px] px-1.5 py-0.5 rounded font-mono font-medium"></span>
+                                        </div>
                                         <!-- Quick Presets -->
                                         <div class="flex items-center gap-1 font-mono text-[10px]">
                                             <button type="button" onclick="setRiskPreset(0.5)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="0.5">0.5%</button>
@@ -1364,6 +1372,12 @@
                             <div id="calc-notice-banner" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-mono flex items-start gap-2">
                                 <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
                                 <span id="calc-notice-text">Lot dibatasi kapasitas modal.</span>
+                            </div>
+
+                            <!-- Over-Allocation Guard Banner (>25%) -->
+                            <div id="calc-allocation-guard" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-mono flex items-start gap-2">
+                                <i data-lucide="shield-alert" class="w-4 h-4 shrink-0 mt-0.5 text-amber-500"></i>
+                                <span id="calc-allocation-guard-text">Alokasi posisi melebihi batas ideal 25%.</span>
                             </div>
                         </div>
 
@@ -1831,6 +1845,7 @@
             updateHeaderDate();
             updateSidebarLiveClock();
             setInterval(updateSidebarLiveClock, 1000);
+            loadStoredCapital();
             lucide.createIcons();
             initChart();
             initTerminalChart();
@@ -2421,6 +2436,23 @@
 
             climateAdvice.innerHTML = climate.advice;
             climateExposure.innerText = `${climate.exposure_pct}% Modal Aktif`;
+
+            const riskHintEl = document.getElementById('calc-risk-market-hint');
+            if (riskHintEl) {
+                if (isBullish) {
+                    riskHintEl.innerText = "Saran: 1.0% (IHSG Uptrend)";
+                    riskHintEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-mono font-medium";
+                    riskHintEl.classList.remove('hidden');
+                } else if (isNeutral) {
+                    riskHintEl.innerText = "Saran: 0.75% (IHSG Netral)";
+                    riskHintEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-mono font-medium";
+                    riskHintEl.classList.remove('hidden');
+                } else {
+                    riskHintEl.innerText = "Saran: 0.5% (IHSG Defensif)";
+                    riskHintEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 font-mono font-medium";
+                    riskHintEl.classList.remove('hidden');
+                }
+            }
 
             lucide.createIcons();
         }
@@ -3248,6 +3280,39 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
         }
 
         // ==========================================
+        // SMART CAPITAL MEMORY (localStorage)
+        // ==========================================
+        const USER_CAPITAL_STORAGE_KEY = 'alpha_user_portfolio_capital';
+        let capitalSaveDebounce = null;
+
+        function loadStoredCapital() {
+            const saved = localStorage.getItem(USER_CAPITAL_STORAGE_KEY);
+            const input = document.getElementById('calc-capital');
+            if (!input) return;
+            if (saved) {
+                input.value = saved;
+            } else if (input.value === '50.000.000' || !input.value) {
+                input.value = '23.000.000';
+            }
+        }
+
+        function handleCapitalChange() {
+            const input = document.getElementById('calc-capital');
+            const badge = document.getElementById('calc-capital-saved-badge');
+            if (input && input.value) {
+                if (capitalSaveDebounce) clearTimeout(capitalSaveDebounce);
+                capitalSaveDebounce = setTimeout(() => {
+                    localStorage.setItem(USER_CAPITAL_STORAGE_KEY, input.value);
+                    if (badge) {
+                        badge.classList.remove('opacity-0');
+                        setTimeout(() => badge.classList.add('opacity-0'), 2200);
+                    }
+                }, 350);
+            }
+            calculateLotFromForm();
+        }
+
+        // ==========================================
         // NUMBER FORMATTER (Thousand Separator Dot '.')
         // ==========================================
         function formatRupiahInput(input) {
@@ -3299,10 +3364,13 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             const errorText = document.getElementById('calc-error-text');
             const noticeBanner = document.getElementById('calc-notice-banner');
             const noticeText = document.getElementById('calc-notice-text');
+            const allocGuard = document.getElementById('calc-allocation-guard');
+            const allocGuardText = document.getElementById('calc-allocation-guard-text');
             const tpHint = document.getElementById('calc-tp-hint');
 
             if (errorBanner) errorBanner.classList.add('hidden');
             if (noticeBanner) noticeBanner.classList.add('hidden');
+            if (allocGuard) allocGuard.classList.add('hidden');
 
             if (!capital || !entry || !sl) {
                 return;
@@ -3395,6 +3463,15 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         allocBar.className = 'bg-amber-500 h-2 rounded-full transition-all duration-300';
                     } else {
                         allocBar.className = 'bg-rose-500 h-2 rounded-full transition-all duration-300';
+                    }
+                }
+
+                if (allocGuard && allocGuardText) {
+                    if (allocPct > 25 && !d.capped_by_capital) {
+                        allocGuardText.innerHTML = `⚠️ <b>Konsentrasi Tinggi (${allocPct}% modal)</b>: Posisi ini memakan lebih dari 25% modal portofoliomu. Disarankan batasi alokasi maksimal 20%–25% per saham agar risiko tetap terbagi rata.`;
+                        allocGuard.classList.remove('hidden');
+                    } else {
+                        allocGuard.classList.add('hidden');
                     }
                 }
 
