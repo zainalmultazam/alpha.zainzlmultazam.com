@@ -5201,11 +5201,14 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
         // Jalankan pengecekan PIN saat aplikasi dibuka
         checkPinAuth();
 
-        // Register PWA Service Worker
+        // Register PWA Service Worker with auto-update
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('Alpha PWA Service Worker Registered', reg.scope))
+                    .then(reg => {
+                        reg.update();
+                        console.log('Alpha PWA Service Worker Active & Updated', reg.scope);
+                    })
                     .catch(err => console.log('Alpha PWA SW registration failed:', err));
             });
         }

@@ -108,7 +108,7 @@ PWA_MANIFEST = {
 async def get_manifest():
     return JSONResponse(content=PWA_MANIFEST, media_type="application/manifest+json", headers={"Cache-Control": "no-cache"})
 
-SW_JS = """const CACHE_NAME = 'alpha-pwa-v1';
+SW_JS = """const CACHE_NAME = 'alpha-pwa-v5';
 const PRECACHE_URLS = [
   '/',
   '/manifest.json',
@@ -290,6 +290,11 @@ async def home(request: Request):
             "app_name": settings.APP_NAME,
             "climate": climate,
             "initial_view": initial_view
+        },
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
         }
     )
 
