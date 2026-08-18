@@ -1,9 +1,33 @@
 import sqlite3
 import os
-from datetime import datetime
+from datetime import datetime, date, timedelta
 from typing import List, Dict, Any, Optional
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/alpha.db"))
+
+def calculate_trading_days(start_date_str: str, end_date_str: Optional[str] = None) -> int:
+    """Menghitung jumlah hari bursa (Senin-Jumat) antara tanggal mulai dan tanggal selesai/hari ini."""
+    if not start_date_str:
+        return 1
+    try:
+        s_date = datetime.strptime(start_date_str[:10], "%Y-%m-%d").date()
+        if end_date_str:
+            e_date = datetime.strptime(end_date_str[:10], "%Y-%m-%d").date()
+        else:
+            e_date = datetime.now().date()
+        
+        if s_date > e_date:
+            return 1
+            
+        cur = s_date
+        weekdays = 0
+        while cur <= e_date:
+            if cur.weekday() < 5:  # 0=Senin, 4=Jumat (abaikan Sabtu & Minggu)
+                weekdays += 1
+            cur += timedelta(days=1)
+        return max(1, weekdays)
+    except Exception:
+        return 1
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
@@ -24,9 +48,18 @@ def init_db():
             exit_price REAL,
             pnl_amount REAL,
             pnl_pct REAL,
-            notes TEXT
+            notes TEXT,
+            exit_reason TEXT DEFAULT 'MANUAL'
         )
     """)
+    # Check if exit_reason exists
+    cursor.execute("PRAGMA table_info(trades)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "exit_reason" not in columns:
+        try:
+            cursor.execute("ALTER TABLE trades ADD COLUMN exit_reason TEXT DEFAULT 'MANUAL'")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -36,13 +69,39 @@ def log_trade(ticker: str, entry_price: float, stop_loss: float, target_price: f
     cursor = conn.cursor()
     clean_ticker = ticker.upper().replace(".JK", "").strip()
     cursor.execute("""
-        INSERT INTO trades (ticker, entry_date, entry_price, stop_loss, target_price, lots, setup_name, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'OPEN')
+        INSERT INTO trades (ticker, entry_date, entry_price, stop_loss, target_price, lots, setup_name, status, exit_reason)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'OPEN', 'MANUAL')
     """, (clean_ticker, datetime.now().strftime("%Y-%m-%d %H:%M"), float(entry_price), float(stop_loss), float(target_price), int(lots), setup_name))
     trade_id = cursor.lastrowid
     conn.commit()
     conn.close()
     return trade_id
+
+def _enrich_trade(t: Dict[str, Any]) -> Dict[str, Any]:
+    """Menambahkan kalkulasi hari bursa, status holding, dan time-stop flag."""
+    entry_date = t.get("entry_date") or ""
+    exit_date = t.get("exit_date")
+    holding_days = calculate_trading_days(entry_date, exit_date)
+    t["holding_days"] = holding_days
+
+    # Floating PnL for open trades if available or rough estimate
+    pnl_pct = float(t.get("pnl_pct") or 0.0)
+    
+    # Stagnant criteria: > 7 trading days and floating between -2.0% and +3.0%
+    is_open = (t.get("status") == "OPEN")
+    is_stagnant = is_open and (holding_days > 7) and (-2.0 <= pnl_pct <= 3.0)
+    t["is_stagnant"] = is_stagnant
+
+    if is_stagnant:
+        t["holding_status"] = "stagnant"
+    elif holding_days >= 5:
+        t["holding_status"] = "evaluating"
+    else:
+        t["holding_status"] = "active"
+        
+    if not t.get("exit_reason"):
+        t["exit_reason"] = "MANUAL"
+    return t
 
 def get_all_trades() -> List[Dict[str, Any]]:
     init_db()
@@ -51,7 +110,7 @@ def get_all_trades() -> List[Dict[str, Any]]:
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM trades ORDER BY id DESC")
     rows = cursor.fetchall()
-    trades = [dict(row) for row in rows]
+    trades = [_enrich_trade(dict(row)) for row in rows]
     conn.close()
     return trades
 
@@ -62,11 +121,11 @@ def get_open_trades() -> List[Dict[str, Any]]:
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM trades WHERE status = 'OPEN' ORDER BY id DESC")
     rows = cursor.fetchall()
-    trades = [dict(row) for row in rows]
+    trades = [_enrich_trade(dict(row)) for row in rows]
     conn.close()
     return trades
 
-def close_trade(trade_id: int, exit_price: float, notes: str = "") -> bool:
+def close_trade(trade_id: int, exit_price: float, notes: str = "", exit_reason: str = "MANUAL") -> bool:
     init_db()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -85,14 +144,14 @@ def close_trade(trade_id: int, exit_price: float, notes: str = "") -> bool:
 
     cursor.execute("""
         UPDATE trades 
-        SET status = 'CLOSED', exit_date = ?, exit_price = ?, pnl_amount = ?, pnl_pct = ?, notes = ?
+        SET status = 'CLOSED', exit_date = ?, exit_price = ?, pnl_amount = ?, pnl_pct = ?, notes = ?, exit_reason = ?
         WHERE id = ?
-    """, (datetime.now().strftime("%Y-%m-%d %H:%M"), float(exit_price), round(pnl_amount, 2), round(pnl_pct, 2), notes, trade_id))
+    """, (datetime.now().strftime("%Y-%m-%d %H:%M"), float(exit_price), round(pnl_amount, 2), round(pnl_pct, 2), notes, exit_reason, trade_id))
     conn.commit()
     conn.close()
     return True
 
-def close_open_trade_by_ticker(ticker: str, exit_price: float, notes: str = "") -> Optional[Dict[str, Any]]:
+def close_open_trade_by_ticker(ticker: str, exit_price: float, notes: str = "", exit_reason: str = "MANUAL") -> Optional[Dict[str, Any]]:
     """Menutup posisi OPEN terakhir berdasarkan simbol ticker."""
     init_db()
     conn = sqlite3.connect(DB_PATH)
@@ -114,9 +173,9 @@ def close_open_trade_by_ticker(ticker: str, exit_price: float, notes: str = "") 
 
     cursor.execute("""
         UPDATE trades 
-        SET status = 'CLOSED', exit_date = ?, exit_price = ?, pnl_amount = ?, pnl_pct = ?, notes = ?
+        SET status = 'CLOSED', exit_date = ?, exit_price = ?, pnl_amount = ?, pnl_pct = ?, notes = ?, exit_reason = ?
         WHERE id = ?
-    """, (datetime.now().strftime("%Y-%m-%d %H:%M"), float(exit_price), round(pnl_amount, 2), round(pnl_pct, 2), notes, trade_id))
+    """, (datetime.now().strftime("%Y-%m-%d %H:%M"), float(exit_price), round(pnl_amount, 2), round(pnl_pct, 2), notes, exit_reason, trade_id))
     conn.commit()
     conn.close()
     
@@ -124,7 +183,8 @@ def close_open_trade_by_ticker(ticker: str, exit_price: float, notes: str = "") 
     trade["pnl_amount"] = round(pnl_amount, 2)
     trade["pnl_pct"] = round(pnl_pct, 2)
     trade["exit_date"] = datetime.now().strftime("%Y-%m-%d %H:%M")
-    return trade
+    trade["exit_reason"] = exit_reason
+    return _enrich_trade(trade)
 
 def get_journal_stats() -> Dict[str, Any]:
     trades = get_all_trades()
@@ -137,6 +197,7 @@ def get_journal_stats() -> Dict[str, Any]:
     
     total_pnl = sum((t.get("pnl_amount") or 0) for t in closed_trades)
     win_rate = round((len(winning_trades) / len(closed_trades)) * 100, 1) if closed_trades else 0.0
+    stagnant_count = sum(1 for t in open_trades if t.get("is_stagnant"))
 
     return {
         "total_trades": total_trades,
@@ -145,7 +206,8 @@ def get_journal_stats() -> Dict[str, Any]:
         "winning_trades": len(winning_trades),
         "losing_trades": len(losing_trades),
         "win_rate": win_rate,
-        "total_pnl": round(total_pnl, 2)
+        "total_pnl": round(total_pnl, 2),
+        "stagnant_count": stagnant_count
     }
 
 def delete_trade(trade_id: int) -> bool:
@@ -295,6 +357,27 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
     # Sort by total trades descending
     setup_stats.sort(key=lambda x: x["total"], reverse=True)
 
+    # ── Holding Duration & Exit Reason Breakdown ────────────────────────────
+    winner_holding_days = [t.get("holding_days", 1) for t in winning_trades]
+    loser_holding_days = [t.get("holding_days", 1) for t in losing_trades]
+    all_holding_days = [t.get("holding_days", 1) for t in closed_trades]
+
+    avg_holding_winners = round(sum(winner_holding_days) / len(winner_holding_days), 1) if winner_holding_days else 0.0
+    avg_holding_losers = round(sum(loser_holding_days) / len(loser_holding_days), 1) if loser_holding_days else 0.0
+    avg_holding_overall = round(sum(all_holding_days) / len(all_holding_days), 1) if all_holding_days else 0.0
+
+    exit_counts = {"TP": 0, "SL": 0, "TIME_STOP": 0, "MANUAL": 0}
+    for t in closed_trades:
+        reason = (t.get("exit_reason") or "MANUAL").upper()
+        if "TIME" in reason:
+            exit_counts["TIME_STOP"] += 1
+        elif "TP" in reason or "PROFIT" in reason:
+            exit_counts["TP"] += 1
+        elif "SL" in reason or "LOSS" in reason:
+            exit_counts["SL"] += 1
+        else:
+            exit_counts["MANUAL"] += 1
+
     return {
         "total_trades": total_trades,
         "open_trades": len(open_trades),
@@ -306,6 +389,10 @@ def get_performance_metrics(base_capital: float = 50000000.0) -> Dict[str, Any]:
         "avg_r": avg_r,
         "profit_factor": profit_factor,
         "max_drawdown": round(max_dd_pct, 2),
+        "avg_holding_winners": avg_holding_winners,
+        "avg_holding_losers": avg_holding_losers,
+        "avg_holding_overall": avg_holding_overall,
+        "exit_counts": exit_counts,
         "equity_curve": equity_curve,
         "setup_breakdown": setup_stats
     }

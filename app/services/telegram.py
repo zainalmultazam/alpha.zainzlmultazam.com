@@ -107,6 +107,23 @@ async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional
             msg += f"• {icon} <b>{item.get('name')}:</b> {item.get('display_price')} (<code>{m_sign}{m_chg}%</code>){rel_str}\n"
         msg += "━━━━━━━━━━━━━━━━━━\n\n"
 
+    # Check for stagnant trades in Journal (Time-Stop Evaluation)
+    try:
+        from app.engine.journal import get_open_trades
+        open_trades = get_open_trades()
+        stagnant_trades = [t for t in open_trades if t.get("is_stagnant")]
+        if stagnant_trades:
+            msg += "⏱️ <b>EVALUASI TIME-STOP (SAHAM STAGNAN):</b>\n"
+            for st in stagnant_trades[:3]:
+                pnl = float(st.get("pnl_pct") or 0.0)
+                pnl_str = f"+{pnl:.1f}%" if pnl >= 0 else f"{pnl:.1f}%"
+                days = st.get("holding_days", 8)
+                msg += f"• ⚠️ <b>{st['ticker']}:</b> Sudah {days} hari bursa (Floating: <code>{pnl_str}</code>)\n"
+                msg += f"  <i>Saran: Pertimbangkan geser SL ke BEP (impas) atau evaluasi rotasi modal.</i>\n"
+            msg += "━━━━━━━━━━━━━━━━━━\n\n"
+    except Exception as e:
+        logger.warning(f"Error checking stagnant trades in morning briefing: {e}")
+
     # 3. Top 3 Picks Details
     if picks:
         msg += "🎯 <b>TOP 3 REKOMENDASI HARI INI:</b>\n\n"

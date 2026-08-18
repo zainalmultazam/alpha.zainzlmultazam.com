@@ -514,6 +514,28 @@ async def run_safety_sentinel_check() -> Dict[str, Any]:
             await send_telegram_message(msg, reply_markup=reply_markup)
             alerts_sent += 1
 
+        # 3. ALERT EDUKASI TIME-STOP: Saham dipegang > 7 hari bursa dengan pergerakan stagnan
+        days = t.get("holding_days", 1)
+        pnl_pct = ((current_price - entry) / entry) * 100
+        if days > 7 and (-2.0 <= pnl_pct <= 3.0) and (trade_id, "TIMESTOP") not in _alerted_trades:
+            _alerted_trades.add((trade_id, "TIMESTOP"))
+            pnl_sign = "+" if pnl_pct >= 0 else ""
+            msg = f"⏱️ <b>EVALUASI TIME-STOP: {ticker}</b>\n"
+            msg += f"<i>Posisi sudah dipegang selama {days} hari bursa tanpa momentum yang kuat.</i>\n"
+            msg += "────────────\n"
+            msg += f"Saham        : <b>{ticker}</b> ({lots} Lot)\n"
+            msg += f"Harga Beli   : Rp {entry:,.0f}\n"
+            msg += f"Harga Live   : <b>Rp {current_price:,.0f} ({pnl_sign}{pnl_pct:.2f}%)</b>\n"
+            msg += f"Durasi Hold  : <b>{days} Hari Bursa</b>\n"
+            msg += "────────────\n"
+            msg += "<b>SARAN TINDAKAN SWING:</b>\n"
+            msg += "• Geser Stop Loss ke harga modal (BEP) agar bebas risiko rugi, ATAU\n"
+            msg += "• Evaluasi tutup posisi di harga impas untuk membebaskan kas slot modal ke saham Screener yang baru breakout!\n"
+            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+            
+            await send_telegram_message(msg)
+            alerts_sent += 1
+
     return {"checked_count": len(open_trades), "alerts_sent": alerts_sent, "status": "completed"}
 
 async def telegram_polling_worker():

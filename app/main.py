@@ -581,9 +581,10 @@ async def api_log_trade(
 async def api_close_trade(
     trade_id: int = Form(...),
     exit_price: float = Form(...),
-    notes: Optional[str] = Form("")
+    notes: Optional[str] = Form(""),
+    exit_reason: Optional[str] = Form("MANUAL")
 ):
-    ok = close_trade(trade_id, exit_price, notes or "")
+    ok = close_trade(trade_id, exit_price, notes or "", exit_reason or "MANUAL")
     return {"status": "success" if ok else "error"}
 
 @app.post("/api/journal/delete/{trade_id}")
