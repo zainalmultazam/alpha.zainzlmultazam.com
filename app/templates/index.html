@@ -448,18 +448,21 @@
                 <!-- Exit Reason Selector -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 dark:text-gray-300 mb-1.5">Alasan Keluar (Exit Reason)</label>
-                    <div class="grid grid-cols-3 gap-1.5 text-xs font-mono">
-                        <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-surface-800 transition">
-                            <input type="radio" name="close-exit-reason" value="TP" class="text-emerald-600 focus:ring-0" checked>
-                            <span class="text-slate-800 dark:text-gray-200 font-sans font-semibold text-[11px]">🎯 TP</span>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <label class="group relative flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer transition select-none has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10 has-[:checked]:text-emerald-600 dark:has-[:checked]:text-emerald-400 text-slate-600 dark:text-gray-400 hover:border-slate-300 dark:hover:border-white/20">
+                            <input type="radio" name="close-exit-reason" value="TP" class="sr-only" checked>
+                            <i data-lucide="target" class="w-3.5 h-3.5 shrink-0 text-emerald-500"></i>
+                            <span class="font-bold text-[11px] tracking-tight">Take Profit</span>
                         </label>
-                        <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-surface-800 transition">
-                            <input type="radio" name="close-exit-reason" value="SL" class="text-rose-600 focus:ring-0">
-                            <span class="text-slate-800 dark:text-gray-200 font-sans font-semibold text-[11px]">🛑 Cut Loss</span>
+                        <label class="group relative flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer transition select-none has-[:checked]:border-rose-500 has-[:checked]:bg-rose-500/10 has-[:checked]:text-rose-600 dark:has-[:checked]:text-rose-400 text-slate-600 dark:text-gray-400 hover:border-slate-300 dark:hover:border-white/20">
+                            <input type="radio" name="close-exit-reason" value="SL" class="sr-only">
+                            <i data-lucide="shield-alert" class="w-3.5 h-3.5 shrink-0 text-rose-500"></i>
+                            <span class="font-bold text-[11px] tracking-tight">Cut Loss</span>
                         </label>
-                        <label class="flex items-center justify-center gap-1.5 p-2 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-50 dark:hover:bg-surface-800 transition">
-                            <input type="radio" name="close-exit-reason" value="TIME_STOP" class="text-amber-600 focus:ring-0">
-                            <span class="text-slate-800 dark:text-gray-200 font-sans font-semibold text-[11px]">⏱️ Time Stop</span>
+                        <label class="group relative flex items-center justify-center gap-1.5 py-2.5 px-2 rounded-xl border border-slate-200 dark:border-white/10 cursor-pointer transition select-none has-[:checked]:border-amber-500 has-[:checked]:bg-amber-500/10 has-[:checked]:text-amber-600 dark:has-[:checked]:text-amber-400 text-slate-600 dark:text-gray-400 hover:border-slate-300 dark:hover:border-white/20">
+                            <input type="radio" name="close-exit-reason" value="TIME_STOP" class="sr-only">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 shrink-0 text-amber-500"></i>
+                            <span class="font-bold text-[11px] tracking-tight">Time Stop</span>
                         </label>
                     </div>
                 </div>
