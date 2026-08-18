@@ -1308,15 +1308,15 @@
                             <!-- Modal & Preset Risk Row -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <label class="font-sans font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                                            <i data-lucide="wallet" class="w-3.5 h-3.5 text-amber-500"></i> Total Modal Portofolio (Rp)
+                                    <div class="flex items-center justify-between mb-1.5 min-h-[22px]">
+                                        <label class="font-sans font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 whitespace-nowrap text-xs">
+                                            <i data-lucide="wallet" class="w-3.5 h-3.5 text-amber-500 shrink-0"></i> Total Modal (Rp)
                                         </label>
-                                        <div class="flex items-center gap-1.5">
-                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100/80 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700/80 font-mono font-bold flex items-center gap-1 shadow-sm" title="Perbarui angka ini berkala seiring bertumbuhnya portofoliomu">
+                                        <div class="flex items-center gap-1.5 shrink-0">
+                                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-100/90 dark:bg-amber-950/80 text-amber-800 dark:text-amber-300 border border-amber-300/80 dark:border-amber-700/80 font-mono font-bold flex items-center gap-1 shadow-sm whitespace-nowrap" title="Perbarui berkala seiring pertumbuhan modal">
                                                 <i data-lucide="refresh-cw" class="w-2.5 h-2.5"></i> Update Berkala
                                             </span>
-                                            <span id="calc-capital-saved-badge" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium opacity-0 transition-opacity duration-300 flex items-center gap-1">
+                                            <span id="calc-capital-saved-badge" class="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono font-medium opacity-0 transition-opacity duration-300 flex items-center gap-0.5 whitespace-nowrap">
                                                 <i data-lucide="check" class="w-2.5 h-2.5"></i> Tersimpan
                                             </span>
                                         </div>
@@ -1325,20 +1325,21 @@
                                 </div>
 
                                 <div>
-                                    <div class="flex items-center justify-between mb-1.5">
-                                        <div class="flex items-center gap-1.5">
-                                            <label class="font-sans font-semibold text-slate-700 dark:text-gray-300">Maksimal Risiko (%)</label>
-                                            <span id="calc-risk-market-hint" class="hidden text-[9px] px-1.5 py-0.5 rounded font-mono font-medium"></span>
-                                        </div>
+                                    <div class="flex items-center justify-between mb-1.5 min-h-[22px]">
+                                        <label class="font-sans font-semibold text-slate-700 dark:text-gray-300 whitespace-nowrap text-xs">Maksimal Risiko (%)</label>
                                         <!-- Quick Presets -->
-                                        <div class="flex items-center gap-1 font-mono text-[10px]">
+                                        <div class="flex items-center gap-1 font-mono text-[10px] shrink-0">
                                             <button type="button" onclick="setRiskPreset(0.5)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="0.5">0.5%</button>
                                             <button type="button" onclick="setRiskPreset(1.0)" class="risk-preset-btn active px-1.5 py-0.5 rounded bg-blue-600 text-white font-semibold transition" data-preset="1.0">1.0%</button>
                                             <button type="button" onclick="setRiskPreset(1.5)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="1.5">1.5%</button>
                                             <button type="button" onclick="setRiskPreset(2.0)" class="risk-preset-btn px-1.5 py-0.5 rounded bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition" data-preset="2.0">2.0%</button>
                                         </div>
                                     </div>
-                                    <input type="number" id="calc-risk-pct" value="1.0" step="0.1" min="0.1" max="10" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition">
+                                    <div class="relative">
+                                        <input type="number" id="calc-risk-pct" value="1.0" step="0.1" min="0.1" max="10" oninput="calculateLotFromForm()" class="w-full bg-slate-50 dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white font-mono focus:outline-none focus:border-blue-500 transition pr-32">
+                                        <button type="button" id="calc-risk-market-hint" onclick="applyMarketRiskSuggestion()" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded-lg font-mono font-semibold transition cursor-pointer flex items-center gap-1 shadow-sm" title="Klik untuk pasang saran pasar">
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -2475,16 +2476,19 @@
             const riskHintEl = document.getElementById('calc-risk-market-hint');
             if (riskHintEl) {
                 if (isBullish) {
-                    riskHintEl.innerText = "Saran: 1.0% (IHSG Uptrend)";
-                    riskHintEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 font-mono font-medium";
+                    currentSuggestedRisk = 1.0;
+                    riskHintEl.innerHTML = `<i data-lucide="sparkles" class="w-2.5 h-2.5"></i> Saran: 1.0%`;
+                    riskHintEl.className = "absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700 font-mono font-semibold transition cursor-pointer hover:bg-emerald-200 flex items-center gap-1";
                     riskHintEl.classList.remove('hidden');
                 } else if (isNeutral) {
-                    riskHintEl.innerText = "Saran: 0.75% (IHSG Netral)";
-                    riskHintEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-amber-50 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 font-mono font-medium";
+                    currentSuggestedRisk = 0.75;
+                    riskHintEl.innerHTML = `<i data-lucide="sparkles" class="w-2.5 h-2.5"></i> Saran: 0.75%`;
+                    riskHintEl.className = "absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700 font-mono font-semibold transition cursor-pointer hover:bg-amber-200 flex items-center gap-1";
                     riskHintEl.classList.remove('hidden');
                 } else {
-                    riskHintEl.innerText = "Saran: 0.5% (IHSG Defensif)";
-                    riskHintEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/70 text-rose-700 dark:text-rose-400 border border-rose-200 dark:border-rose-800 font-mono font-medium";
+                    currentSuggestedRisk = 0.5;
+                    riskHintEl.innerHTML = `<i data-lucide="sparkles" class="w-2.5 h-2.5"></i> Saran: 0.5%`;
+                    riskHintEl.className = "absolute right-2 top-1/2 -translate-y-1/2 text-[10px] px-2 py-0.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-300 border border-rose-300 dark:border-rose-700 font-mono font-semibold transition cursor-pointer hover:bg-rose-200 flex items-center gap-1";
                     riskHintEl.classList.remove('hidden');
                 }
             }
@@ -3364,6 +3368,12 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             if (!val) return 0;
             const clean = String(val).replace(/\./g, '').replace(/,/g, '.').replace(/\D/g, '');
             return parseFloat(clean) || 0;
+        }
+
+        let currentSuggestedRisk = 1.0;
+
+        function applyMarketRiskSuggestion() {
+            setRiskPreset(currentSuggestedRisk);
         }
 
         function setRiskPreset(pct) {
