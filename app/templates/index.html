@@ -1953,6 +1953,7 @@
         let volumeSeries = null;
         let chartEma20 = null, chartEma50 = null, chartEma200 = null, chartVolMa = null;
         let chartAvwap = null;
+        let chartPlanBoundarySeries = null;
         let chartPriceLines = [];
         let chartPocLines = [];
         
@@ -1961,6 +1962,7 @@
         let terminalVolumeSeries = null;
         let termEma20 = null, termEma50 = null, termEma200 = null, termVolMa = null;
         let termAvwap = null;
+        let termPlanBoundarySeries = null;
         let termPriceLines = [];
         let termPocLines = [];
 
@@ -2425,6 +2427,15 @@
                 priceFormat: { type: 'volume' }
             });
 
+            chartPlanBoundarySeries = chartInstance.addLineSeries({
+                color: 'rgba(0,0,0,0)',
+                lineWidth: 0,
+                priceScaleId: 'right',
+                lastValueVisible: false,
+                priceLineVisible: false,
+                crosshairMarkerVisible: false
+            });
+
             new ResizeObserver(entries => {
                 if (entries[0] && entries[0].contentRect) {
                     chartInstance.applyOptions({ width: entries[0].contentRect.width, height: 380 });
@@ -2489,6 +2500,15 @@
                 lineWidth: 1,
                 priceScaleId: 'overlay_vol_term',
                 priceFormat: { type: 'volume' }
+            });
+
+            termPlanBoundarySeries = terminalChartInstance.addLineSeries({
+                color: 'rgba(0,0,0,0)',
+                lineWidth: 0,
+                priceScaleId: 'right',
+                lastValueVisible: false,
+                priceLineVisible: false,
+                crosshairMarkerVisible: false
             });
 
             new ResizeObserver(entries => {
@@ -2977,6 +2997,8 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
 
             if (!tradePlan || !indicatorVisibility.plan) {
                 if (planBanner) planBanner.classList.add('hidden');
+                if (termPlanBoundarySeries) termPlanBoundarySeries.setData([]);
+                if (chartPlanBoundarySeries) chartPlanBoundarySeries.setData([]);
                 return;
             }
 
@@ -3057,6 +3079,21 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     termPriceLines.push(terminalCandleSeries.createPriceLine(slOpt));
                     termPriceLines.push(terminalCandleSeries.createPriceLine(tp1Opt));
                     termPriceLines.push(terminalCandleSeries.createPriceLine(tp2Opt));
+                }
+
+                // Feed boundary series to guarantee vertical zoom covers TP1, TP2, and SL on screen
+                if (lastLoadedChartData && lastLoadedChartData.candles && lastLoadedChartData.candles.length > 0) {
+                    const candles = lastLoadedChartData.candles;
+                    const firstTime = candles[0].time;
+                    const lastTime = candles[candles.length - 1].time;
+                    const topBoundary = Math.max(tp2Val, tp1Val, entryVal) * 1.03;
+                    const botBoundary = Math.min(slVal, entryVal) * 0.97;
+                    const boundaryData = [
+                        { time: firstTime, value: topBoundary },
+                        { time: lastTime, value: botBoundary }
+                    ];
+                    if (termPlanBoundarySeries) termPlanBoundarySeries.setData(boundaryData);
+                    if (chartPlanBoundarySeries) chartPlanBoundarySeries.setData(boundaryData);
                 }
             } catch(e) {
                 console.error("Error creating trade plan price lines", e);
