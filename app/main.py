@@ -292,8 +292,8 @@ async def api_auth_logout():
     return response
 
 @app.get("/api/market-climate")
-async def api_market_climate():
-    return {"status": "success", "data": get_market_climate()}
+async def api_market_climate(force: bool = False):
+    return {"status": "success", "data": get_market_climate(force=force)}
 
 @app.get("/api/market-status")
 async def api_market_status():

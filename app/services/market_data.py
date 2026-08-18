@@ -220,20 +220,40 @@ def batch_fetch_stock_dfs(tickers: list, batch_size: int = 30) -> Dict[str, pd.D
 
     return results
 
-def get_market_climate() -> Dict[str, Any]:
-    """Menganalisis rezim pasar IHSG (^JKSE) untuk menentukan iklim risiko pasar (Risk-On / Caution / Risk-Off) serta status operasional bursa."""
+_IHSG_CLIMATE_CACHE: Dict[str, Any] = {}
+_IHSG_CLIMATE_CACHE_TIME: Optional[datetime] = None
+
+def get_market_climate(force: bool = False) -> Dict[str, Any]:
+    """Menganalisis rezim pasar IHSG (^JKSE) secara real-time untuk menentukan iklim risiko pasar (Risk-On / Caution / Risk-Off) serta status operasional bursa."""
+    global _IHSG_CLIMATE_CACHE, _IHSG_CLIMATE_CACHE_TIME
     market_status = get_idx_market_status()
-    df_ihsg = fetch_stock_df("^JKSE")
+    now = datetime.now()
+
+    # Cache pendek 2 menit saat jam bursa aktif/istirahat, 15 menit saat tutup
+    is_open_or_break = market_status.get("is_open") or market_status.get("status") == "BREAK"
+    cache_ttl = 120 if is_open_or_break else 900
+
+    if not force and _IHSG_CLIMATE_CACHE_TIME and (now - _IHSG_CLIMATE_CACHE_TIME).total_seconds() < cache_ttl and _IHSG_CLIMATE_CACHE:
+        _IHSG_CLIMATE_CACHE["market_status"] = market_status
+        return _IHSG_CLIMATE_CACHE
+
+    df_ihsg = None
+    try:
+        t = yf.Ticker("^JKSE")
+        df_ihsg = t.history(period="1y", interval="1d")
+    except Exception as e:
+        print(f"Error fetching direct ^JKSE: {e}")
+        df_ihsg = fetch_stock_df("^JKSE")
     
     if df_ihsg is None or len(df_ihsg) < 50:
         return {
             "regime": "BULLISH",
             "title": "Risk-On",
             "color": "emerald",
-            "price": 7800.0,
+            "price": 6480.0,
             "change_pct": 0.0,
             "exposure_pct": 100,
-            "advice": "Kondisi pasar kondusif untuk swing trading agresif.",
+            "advice": "Kondisi pasar kondusif untuk swing trading.",
             "market_status": market_status
         }
 
@@ -273,7 +293,7 @@ def get_market_climate() -> Dict[str, Any]:
         exposure_pct = 0
         advice = "IHSG di bawah EMA 200. Tekanan jual tinggi, utamakan memegang Cash dan hindari beli agresif."
 
-    return {
+    result = {
         "regime": regime,
         "title": title,
         "color": color,
@@ -287,12 +307,18 @@ def get_market_climate() -> Dict[str, Any]:
         "last_updated": datetime.now().strftime("%H:%M:%S")
     }
 
+    _IHSG_CLIMATE_CACHE = result
+    _IHSG_CLIMATE_CACHE_TIME = now
+    return result
+
 def clear_cache():
     """Mengosongkan cache memory."""
-    global _CACHE, _MACRO_CACHE, _MACRO_CACHE_TIME
+    global _CACHE, _MACRO_CACHE, _MACRO_CACHE_TIME, _IHSG_CLIMATE_CACHE, _IHSG_CLIMATE_CACHE_TIME
     _CACHE = {}
     _MACRO_CACHE = {}
     _MACRO_CACHE_TIME = None
+    _IHSG_CLIMATE_CACHE = {}
+    _IHSG_CLIMATE_CACHE_TIME = None
 
 _MACRO_CACHE: Dict[str, Any] = {}
 _MACRO_CACHE_TIME: Optional[datetime] = None
