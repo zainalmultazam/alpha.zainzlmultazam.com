@@ -1849,6 +1849,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            initSidebarState();
             updateHeaderDate();
             updateSidebarLiveClock();
             setInterval(updateSidebarLiveClock, 1000);
@@ -1962,13 +1963,19 @@
             if (terminalChartInstance) terminalChartInstance.applyOptions(chartOptions);
         }
 
-        function toggleSidebar() {
+        // ==========================================
+        // SIDEBAR STATE & PERSISTENCE (localStorage)
+        // ==========================================
+        const SIDEBAR_STORAGE_KEY = 'alpha_sidebar_collapsed';
+
+        function applySidebarState(collapsed, save = true) {
+            isSidebarCollapsed = collapsed;
             const sidebar = document.getElementById('sidebar');
             const brandText = document.getElementById('brand-text');
             const labels = document.querySelectorAll('.sidebar-label');
             const texts = document.querySelectorAll('.sidebar-text');
 
-            isSidebarCollapsed = !isSidebarCollapsed;
+            if (!sidebar || !brandText) return;
 
             if (isSidebarCollapsed) {
                 sidebar.classList.remove('w-64', 'px-3');
@@ -1982,6 +1989,27 @@
                 brandText.classList.remove('hidden');
                 labels.forEach(l => l.classList.remove('hidden'));
                 texts.forEach(t => t.classList.remove('hidden'));
+            }
+
+            if (save) {
+                try {
+                    localStorage.setItem(SIDEBAR_STORAGE_KEY, isSidebarCollapsed ? 'true' : 'false');
+                } catch (e) {}
+            }
+        }
+
+        function toggleSidebar() {
+            applySidebarState(!isSidebarCollapsed, true);
+        }
+
+        function initSidebarState() {
+            try {
+                const saved = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+                // If saved is 'false', expand sidebar; otherwise default to collapsed
+                const collapsed = saved !== null ? saved === 'true' : true;
+                applySidebarState(collapsed, false);
+            } catch (e) {
+                applySidebarState(true, false);
             }
         }
 
