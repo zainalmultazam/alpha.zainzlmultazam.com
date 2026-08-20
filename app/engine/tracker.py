@@ -162,16 +162,27 @@ def update_tracked_signals() -> Dict[str, Any]:
             p_t10 = float(closes[10]) if len(closes) > 10 else None
             
             # Tentukan Status
-            if max_high >= tp2:
-                status = "HIT_TP2"
-            elif max_high >= tp1:
-                status = "HIT_TP1"
-            elif min_low <= sl:
-                status = "HIT_SL"
-            elif days_held >= 10:
-                status = "EXPIRED_STAGNANT"
+            if days_held <= 1:
+                # Pada hari pertama sinyal terbit (T+1 awal), evaluasi terhadap harga penutupan/terkini
+                if curr_price >= tp2:
+                    status = "HIT_TP2"
+                elif curr_price >= tp1:
+                    status = "HIT_TP1"
+                elif curr_price <= sl:
+                    status = "HIT_SL"
+                else:
+                    status = "ACTIVE"
             else:
-                status = "ACTIVE"
+                if max_high >= tp2:
+                    status = "HIT_TP2"
+                elif max_high >= tp1:
+                    status = "HIT_TP1"
+                elif min_low <= sl:
+                    status = "HIT_SL"
+                elif days_held >= 10:
+                    status = "EXPIRED_STAGNANT"
+                else:
+                    status = "ACTIVE"
                 
             cursor.execute("""
                 UPDATE signal_tracker 
