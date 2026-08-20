@@ -150,7 +150,7 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "big_money_status": big_money_status,
             "is_sector_leader": is_sector_leader,
             "volatility_profile": trade_plan.get("volatility_profile", "BALANCED_GROWTH"),
-            "volatility_badge": trade_plan.get("volatility_badge", "⚖️ Balanced"),
+            "volatility_badge": trade_plan.get("volatility_badge", "Balanced"),
             "flow_score": flow_score,
             "cmf_val": cmf_val,
             "plan": trade_plan

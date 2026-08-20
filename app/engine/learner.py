@@ -200,16 +200,16 @@ def calibrate_and_learn() -> Dict[str, Any]:
         avg_j_loss = round(sum(j_losses) / len(j_losses), 1) if j_losses else 0.0
         
         journal_insights.append(
-            f"📓 <b>Integrasi Jurnal Trading ({journal_count} Transaksi Riil)</b>: Realized Win Rate kamu tercatat <b>{j_win_rate}%</b> (Rata-rata Cuan: <b>+{avg_j_gain}%</b>, Rata-rata Rugi: <b>{avg_j_loss}%</b>)."
+            f"<b>Integrasi Jurnal Trading ({journal_count} Transaksi Riil)</b>: Realized Win Rate kamu tercatat <b>{j_win_rate}%</b> (Rata-rata Cuan: <b>+{avg_j_gain}%</b>, Rata-rata Rugi: <b>{avg_j_loss}%</b>)."
         )
         if j_win_rate >= 65:
-            journal_insights.append("🏆 <b>Disiplin Eksekusi Sangat Baik</b>: Eksekusi riil kamu konsisten mengikuti batas risiko dan rencana trading.")
+            journal_insights.append("<b>Disiplin Eksekusi Sangat Baik</b>: Eksekusi riil kamu konsisten mengikuti batas risiko dan rencana trading.")
 
     # 5. Narasi Pembelajaran AI Gabungan (Tracker + Journal)
     insights = [
-        f"🤖 <b>AI Memory Calibrated ({sample_size} Sinyal Tracker + {journal_count} Jurnal)</b>: Sistem berhasil mempelajari pergerakan seluruh sinyal rekomendasi dan riwayat eksekusi riil.",
-        f"⭐ <b>Setup Prioritas Terpilih</b>: Pola <b>'{favored_setup}'</b> diidentifikasi sebagai setup paling konsisten menghasilkan gain positif.",
-        f"⏱️ <b>Kalibrasi Siklus Keluar Optimal</b>: Saham rata-rata mencapai puncak gain pada <b>Hari ke-{optimal_day} Bursa (T+{optimal_day})</b>. Parameter ini otomatis disinkronkan ke radar kalkulator dan sentinel."
+        f"<b>AI Memory Calibrated ({sample_size} Sinyal Tracker + {journal_count} Jurnal)</b>: Sistem berhasil mempelajari pergerakan seluruh sinyal rekomendasi dan riwayat eksekusi riil.",
+        f"<b>Setup Prioritas Terpilih</b>: Pola <b>'{favored_setup}'</b> diidentifikasi sebagai setup paling konsisten menghasilkan gain positif.",
+        f"<b>Kalibrasi Siklus Keluar Optimal</b>: Saham rata-rata mencapai puncak gain pada <b>Hari ke-{optimal_day} Bursa (T+{optimal_day})</b>. Parameter ini otomatis disinkronkan ke radar kalkulator dan sentinel."
     ] + journal_insights
 
     notes = f"AI Kalibrasi v{sample_size} dengan {sample_size} sampel empiris & {journal_count} transaksi jurnal."

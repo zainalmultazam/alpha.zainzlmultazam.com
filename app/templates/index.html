@@ -1439,20 +1439,20 @@
                                 <i data-lucide="crosshair" class="w-3.5 h-3.5 text-blue-500"></i> Plan:
                             </span>
                             <!-- Entry Badge -->
-                            <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800 font-bold" id="plan-badge-entry">
-                                🟢 Entry: Rp 0
+                            <span class="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800 font-bold flex items-center gap-1" id="plan-badge-entry">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Entry: Rp 0
                             </span>
                             <!-- Stop Loss Badge -->
-                            <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-bold" id="plan-badge-sl">
-                                🔴 SL: Rp 0 (-0.0%)
+                            <span class="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-bold flex items-center gap-1" id="plan-badge-sl">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> SL: Rp 0 (-0.0%)
                             </span>
                             <!-- TP1 Badge -->
-                            <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold" id="plan-badge-tp1">
-                                🎯 TP1 (2R): Rp 0 (+0.0%)
+                            <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold flex items-center gap-1" id="plan-badge-tp1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> TP1 (2R): Rp 0 (+0.0%)
                             </span>
                             <!-- TP2 Badge -->
-                            <span class="px-2 py-0.5 rounded-md bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-bold" id="plan-badge-tp2">
-                                🚀 TP2 (3R): Rp 0 (+0.0%)
+                            <span class="px-2 py-0.5 rounded-md bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300 border border-violet-200 dark:border-violet-800 font-bold flex items-center gap-1" id="plan-badge-tp2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span> TP2 (3R): Rp 0 (+0.0%)
                             </span>
                         </div>
                         <!-- Risk/Reward Ratio & Quick Sizing Button -->
@@ -1971,7 +1971,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
                                 <button onclick="sendTelegramSuperDigest()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white p-3 rounded-xl text-left shadow-sm transition active:scale-98 flex flex-col justify-between gap-1 group">
                                     <div class="flex items-center justify-between w-full">
-                                        <span class="text-xs font-bold">🌅 Kirim Morning Digest</span>
+                                        <span class="text-xs font-bold flex items-center gap-1.5"><i data-lucide="sun" class="w-3.5 h-3.5 text-amber-300"></i> Kirim Morning Digest</span>
                                         <i data-lucide="zap" class="w-3.5 h-3.5 opacity-80 group-hover:scale-110 transition-transform"></i>
                                     </div>
                                     <span class="text-[10px] text-blue-100 font-sans">Top 3 Picks, Makro &amp; Iklim IHSG</span>
@@ -1979,7 +1979,7 @@
                                 
                                 <button onclick="runManualSafetySentinel()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 border border-slate-200/80 dark:border-white/10 p-3 rounded-xl text-left shadow-sm transition active:scale-98 flex flex-col justify-between gap-1 group">
                                     <div class="flex items-center justify-between w-full">
-                                        <span class="text-xs font-bold">🛡️ Cek Safety Sentinel</span>
+                                        <span class="text-xs font-bold flex items-center gap-1.5"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> Cek Safety Sentinel</span>
                                         <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500 group-hover:scale-110 transition-transform"></i>
                                     </div>
                                     <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans">Scan level SL / TP posisi terbuka</span>
@@ -1987,7 +1987,7 @@
 
                                 <button onclick="testTelegramAlert()" class="bg-slate-100 hover:bg-slate-200 dark:bg-surface-800 dark:hover:bg-surface-700 text-slate-800 dark:text-gray-200 border border-slate-200/80 dark:border-white/10 p-3 rounded-xl text-left shadow-sm transition active:scale-98 flex flex-col justify-between gap-1 group">
                                     <div class="flex items-center justify-between w-full">
-                                        <span class="text-xs font-bold">🔔 Test Ping Bot</span>
+                                        <span class="text-xs font-bold flex items-center gap-1.5"><i data-lucide="bell" class="w-3.5 h-3.5 text-rose-500"></i> Test Ping Bot</span>
                                         <i data-lucide="bell-ring" class="w-3.5 h-3.5 text-rose-500 group-hover:scale-110 transition-transform"></i>
                                     </div>
                                     <span class="text-[10px] text-slate-500 dark:text-gray-400 font-sans">Uji sambungan API Telegram</span>
@@ -2004,28 +2004,28 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-mono">
                                 <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
                                     <div class="font-bold text-blue-600 dark:text-blue-400 flex items-center justify-between">
-                                        <span>🌅 08:45 WIB</span>
+                                        <span class="flex items-center gap-1.5"><i data-lucide="sun" class="w-3.5 h-3.5"></i> 08:45 WIB</span>
                                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-400">Pre-Market</span>
                                     </div>
                                     <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">Morning Briefing: Iklim IHSG, Radar Makro Global (Minyak, Emas, Kurs) &amp; Top 3 Rekomendasi Screener + Lot.</div>
                                 </div>
                                 <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
                                     <div class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
-                                        <span>🛡️ Tiap 3 Menit</span>
+                                        <span class="flex items-center gap-1.5"><i data-lucide="shield" class="w-3.5 h-3.5"></i> Tiap 3 Menit</span>
                                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">Jam Bursa</span>
                                     </div>
                                     <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">Safety Sentinel: Alarm bahaya jika harga menembus Stop Loss, dan panduan Take Profit 50% saat menyentuh TP1.</div>
                                 </div>
                                 <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
                                     <div class="font-bold text-indigo-600 dark:text-indigo-400 flex items-center justify-between">
-                                        <span>🌆 16:15 WIB</span>
+                                        <span class="flex items-center gap-1.5"><i data-lucide="moon" class="w-3.5 h-3.5"></i> 16:15 WIB</span>
                                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-400">Market Close</span>
                                     </div>
                                     <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">Evening Wrap: Rekap penutupan IHSG, evaluasi posisi portofolio terbuka, dan ringkasan PnL.</div>
                                 </div>
                                 <div class="p-3 rounded-lg bg-white dark:bg-surface-900 border border-slate-200/80 dark:border-white/[0.06] space-y-1">
                                     <div class="font-bold text-purple-600 dark:text-purple-400 flex items-center justify-between">
-                                        <span>📊 17:00 WIB</span>
+                                        <span class="flex items-center gap-1.5"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> 17:00 WIB</span>
                                         <span class="text-[9px] px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-400">EOD Full</span>
                                     </div>
                                     <div class="text-[11px] text-slate-600 dark:text-gray-400 font-sans">EOD Scan: Pemindaian database penuh 800+ emiten bursa untuk persiapan trading hari esok.</div>
@@ -3195,11 +3195,11 @@
             if (mode === 'AI') {
                 if (btnAi) btnAi.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm transition flex items-center gap-1";
                 if (btnClassic) btnClassic.className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center gap-1";
-                showToast("Mode Scoring: 🧠 AI Adaptive (Dikalibrasi Data Pasar)");
+                showToast("Mode Scoring: AI Adaptive (Dikalibrasi Data Pasar)");
             } else {
                 if (btnClassic) btnClassic.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition flex items-center gap-1";
                 if (btnAi) btnAi.className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center gap-1";
-                showToast("Mode Scoring: 📐 Teori Klasik (Rumus Baku Minervini)");
+                showToast("Mode Scoring: Teori Klasik (Rumus Baku Minervini)");
             }
 
             renderPicks();
@@ -3298,9 +3298,9 @@
                             </span>
                             ${weeklyBadge}
                             ${bigMoneyBadge}
-                            ${item.is_sector_leader ? `<span class="px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/80 font-semibold">🌊 ${item.sector}</span>` : `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">${item.sector}</span>`}
-                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 font-semibold">
-                                ${item.volatility_badge || '⚖️ Balanced'}
+                            ${item.is_sector_leader ? `<span class="px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/80 font-semibold flex items-center gap-1"><i data-lucide="layers" class="w-3 h-3"></i> ${item.sector}</span>` : `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">${item.sector}</span>`}
+                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 font-semibold flex items-center gap-1">
+                                <i data-lucide="shield" class="w-3 h-3 text-amber-600"></i> ${item.volatility_badge || 'Balanced'}
                             </span>
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]" title="Rata-rata turnover 20 hari">
                                 ${turnoverText}
@@ -3485,10 +3485,10 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 const bTp2 = document.getElementById('plan-badge-tp2');
                 const bRr = document.getElementById('plan-badge-rr');
 
-                if (bEntry) bEntry.innerText = `🟢 Entry: Rp ${entryVal.toLocaleString('id-ID')}`;
-                if (bSl) bSl.innerText = `🔴 SL: Rp ${slVal.toLocaleString('id-ID')} (-${riskPct}%)`;
-                if (bTp1) bTp1.innerText = `🎯 TP1 (2R): Rp ${tp1Val.toLocaleString('id-ID')} (+${tp1GainPct}%)`;
-                if (bTp2) bTp2.innerText = `🚀 TP2 (3R): Rp ${tp2Val.toLocaleString('id-ID')} (+${tp2GainPct}%)`;
+                if (bEntry) bEntry.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block mr-1"></span>Entry: Rp ${entryVal.toLocaleString('id-ID')}`;
+                if (bSl) bSl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block mr-1"></span>SL: Rp ${slVal.toLocaleString('id-ID')} (-${riskPct}%)`;
+                if (bTp1) bTp1.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1"></span>TP1 (2R): Rp ${tp1Val.toLocaleString('id-ID')} (+${tp1GainPct}%)`;
+                if (bTp2) bTp2.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-violet-500 inline-block mr-1"></span>TP2 (3R): Rp ${tp2Val.toLocaleString('id-ID')} (+${tp2GainPct}%)`;
                 if (bRr) bRr.innerText = `R:R = 1 : ${rrRatio}`;
 
                 planBanner.classList.remove('hidden');
@@ -3954,7 +3954,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                                 <span class="text-[11px] text-slate-400 group-hover:text-white font-sans font-semibold transition">${item.name}</span>
                                 <span class="font-bold text-white font-mono">${item.display_price}</span>
                                 <span class="${chgColor} text-[11px] font-bold font-mono">${chgSign}${item.change_pct}%</span>
-                                <span class="text-[9px] px-1 rounded bg-white/[0.06] text-slate-400 group-hover:text-blue-300 font-sans hidden sm:inline">➔ ${item.related_tickers.slice(0, 2).join('/')}</span>
+                                <span class="text-[9px] px-1 rounded bg-white/[0.06] text-slate-400 group-hover:text-blue-300 font-sans hidden sm:inline">&rarr; ${item.related_tickers.slice(0, 2).join('/')}</span>
                             </div>
                         `;
                     }).join('');
@@ -4292,8 +4292,9 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
 
                 if (allocGuard && allocGuardText) {
                     if (allocPct > 25 && !d.capped_by_capital) {
-                        allocGuardText.innerHTML = `⚠️ <b>Konsentrasi Tinggi (${allocPct}% modal)</b>: Posisi ini memakan lebih dari 25% modal portofoliomu. Disarankan batasi alokasi maksimal 20%–25% per saham agar risiko tetap terbagi rata.`;
+                        allocGuardText.innerHTML = `<span class="flex items-center gap-1.5"><i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500 shrink-0"></i> <b>Konsentrasi Tinggi (${allocPct}% modal)</b>: Posisi ini memakan lebih dari 25% modal portofoliomu. Disarankan batasi alokasi maksimal 20%–25% per saham agar risiko tetap terbagi rata.</span>`;
                         allocGuard.classList.remove('hidden');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
                     } else {
                         allocGuard.classList.add('hidden');
                     }
@@ -4492,7 +4493,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                     return;
                 }
                 portfolioBasket.push(newItem);
-                showToast(`✅ ${ticker} (${newItem.lots} Lot) masuk ke Keranjang Rencana!`, "success");
+                showToast(`${ticker} (${newItem.lots} Lot) berhasil masuk ke Keranjang Rencana!`, "success");
             }
 
             savePortfolioBasket();
@@ -4721,7 +4722,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
 
             if (savedCount > 0) {
-                showToast(`🎉 ${savedCount} saham rencana berhasil dicatat ke Jurnal Trading!`, "success");
+                showToast(`${savedCount} saham rencana berhasil dicatat ke Jurnal Trading!`, "success");
                 portfolioBasket = [];
                 savePortfolioBasket();
                 renderPortfolioBasket();
@@ -4812,7 +4813,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         let statusBadge = '';
                         if (t.status === 'OPEN') {
                             if (t.is_stagnant) {
-                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-mono font-bold tracking-tight animate-pulse" title="Saham Stagnan (>7 Hari) — Disarankan Time-Stop / Geser SL ke BEP"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>⚠️ STAGNANT · ${t.holding_days}h</span>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-mono font-bold tracking-tight animate-pulse" title="Saham Stagnan (>7 Hari) — Disarankan Time-Stop / Geser SL ke BEP"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>STAGNANT · ${t.holding_days}h</span>`;
                             } else if (t.holding_days >= 5) {
                                 statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[11px] font-mono font-bold tracking-tight" title="Mendekati Batas Waktu Evaluasi"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>OPEN · ${t.holding_days}h</span>`;
                             } else {
@@ -4869,7 +4870,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                         let statusBadge = '';
                         if (isOpen) {
                             if (t.is_stagnant) {
-                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-mono font-bold tracking-tight animate-pulse"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>⚠️ STAGNANT · ${t.holding_days}h</span>`;
+                                statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[10px] font-mono font-bold tracking-tight animate-pulse"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>STAGNANT · ${t.holding_days}h</span>`;
                             } else if (t.holding_days >= 5) {
                                 statusBadge = `<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 text-[10px] font-mono font-bold tracking-tight"><span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>OPEN · ${t.holding_days}h</span>`;
                             } else {
@@ -5934,11 +5935,11 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 const matched = postMortems.find(p => p.ticker === ticker) || postMortems[0];
                 
                 if (matched) {
-                    alert(`🔍 HASIL OTOPSI TEKNIKAL AI (${matched.ticker}):\n\n` +
-                          `📌 Diagnosa: ${matched.cause_title}\n` +
-                          `📝 Detail: ${matched.diagnosis}\n\n` +
-                          `💡 Pelajaran AI: ${matched.lesson}\n` +
-                          `🛡️ Aturan Penalti: ${matched.penalty_rule?.rule_type || 'Negative Constraint'}`);
+                    alert(`HASIL OTOPSI TEKNIKAL AI (${matched.ticker}):\n\n` +
+                          `• Diagnosa: ${matched.cause_title}\n` +
+                          `• Detail: ${matched.diagnosis}\n\n` +
+                          `• Pelajaran AI: ${matched.lesson}\n` +
+                          `• Aturan Penalti: ${matched.penalty_rule?.rule_type || 'Negative Constraint'}`);
                 } else {
                     alert(`Belum ada catatan otopsi untuk sinyal ${ticker}.`);
                 }

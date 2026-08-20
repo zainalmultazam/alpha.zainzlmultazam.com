@@ -24,21 +24,21 @@ def generate_trade_plan(price: float, atr: float, setup_type: str, sector: str =
     
     if sec in ["Energy", "Materials", "Technology"]:
         vol_profile = "EXPLOSIVE_BETA"
-        vol_badge = "⚡ High Beta"
+        vol_badge = "High Beta"
         base_sl_pct = 0.042
         atr_mult = 1.3
         tp1_mult = 2.0
         tp2_mult = 4.2
     elif sec in ["Finance", "Consumer Non-Cyclical", "Healthcare"]:
         vol_profile = "DEFENSIVE_STALWART"
-        vol_badge = "🛡️ Defensive"
+        vol_badge = "Defensive"
         base_sl_pct = 0.028
         atr_mult = 1.0
         tp1_mult = 1.8
         tp2_mult = 3.0
     else:
         vol_profile = "BALANCED_GROWTH"
-        vol_badge = "⚖️ Balanced"
+        vol_badge = "Balanced"
         base_sl_pct = 0.035
         atr_mult = 1.1
         tp1_mult = 2.0

@@ -343,26 +343,26 @@ def get_tracker_dashboard_data() -> Dict[str, Any]:
         if tier_85_89["avg_max_gain"] > tier_95_100["avg_max_gain"]:
             diff = round(tier_85_89["avg_max_gain"] - tier_95_100["avg_max_gain"], 1)
             ai_insights.append(
-                f"🎯 <b>PTS 85–89 Mengungguli PTS 95–100</b>: Saham di tier 85–89 rata-rata menghasilkan Max Gain <b>+{tier_85_89['avg_max_gain']}%</b> (lebih tinggi +{diff}% dibanding tier 95–100). Ini membuktikan bahwa saham yang baru breakout dari base segar memiliki ruang lari lebih leluasa dibanding saham yang sudah hyper-extended."
+                f"<b>PTS 85–89 Mengungguli PTS 95–100</b>: Saham di tier 85–89 rata-rata menghasilkan Max Gain <b>+{tier_85_89['avg_max_gain']}%</b> (lebih tinggi +{diff}% dibanding tier 95–100). Ini membuktikan bahwa saham yang baru breakout dari base segar memiliki ruang lari lebih leluasa dibanding saham yang sudah hyper-extended."
             )
         elif tier_95_100["win_rate"] >= tier_85_89["win_rate"]:
             ai_insights.append(
-                f"🚀 <b>Momentum Ultra-Elite PTS 95–100 Paling Konsisten</b>: Memiliki Win Rate tertinggi sebesar <b>{tier_95_100['win_rate']}%</b> dengan rata-rata kenaikan puncak <b>+{tier_95_100['avg_max_gain']}%</b>."
+                f"<b>Momentum Ultra-Elite PTS 95–100 Paling Konsisten</b>: Memiliki Win Rate tertinggi sebesar <b>{tier_95_100['win_rate']}%</b> dengan rata-rata kenaikan puncak <b>+{tier_95_100['avg_max_gain']}%</b>."
             )
     else:
         ai_insights.append(
-            f"📊 <b>Karakteristik Sinyal Aktif</b>: Rata-rata potensi kenaikan puncak (*Max Gain*) seluruh sinyal mencapai <b>+{avg_max_gain}%</b> dengan risiko penurunan terburuk (*Max Drawdown*) rata-rata <b>{avg_max_dd}%</b>."
+            f"<b>Karakteristik Sinyal Aktif</b>: Rata-rata potensi kenaikan puncak (*Max Gain*) seluruh sinyal mencapai <b>+{avg_max_gain}%</b> dengan risiko penurunan terburuk (*Max Drawdown*) rata-rata <b>{avg_max_dd}%</b>."
         )
         
     if avg_peak_day > 0:
         ai_insights.append(
-            f"⏱️ <b>Waktu Puncak Keuntungan (*Peak Day*)</b>: Rata-rata puncak gain saham tercapai pada <b>Hari ke-{int(round(avg_peak_day))} Bursa (T+{int(round(avg_peak_day))})</b> sejak sinyal terbit. Disarankan mengamankan TP1 parsial di hari ke-3 s.d ke-4 bursa."
+            f"<b>Waktu Puncak Keuntungan (Peak Day)</b>: Rata-rata puncak gain saham tercapai pada <b>Hari ke-{int(round(avg_peak_day))} Bursa (T+{int(round(avg_peak_day))})</b> sejak sinyal terbit. Disarankan mengamankan TP1 parsial di hari ke-3 s.d ke-4 bursa."
         )
         
     if setup_breakdown and setup_breakdown[0]["count"] >= 1:
         best_setup = setup_breakdown[0]
         ai_insights.append(
-            f"⭐ <b>Pola Setup Terbaik</b>: Pola <b>'{best_setup['setup_name']}'</b> mencatatkan Win Rate tertinggi <b>{best_setup['win_rate']}%</b> dengan rata-rata Max Gain <b>+{best_setup['avg_max_gain']}%</b>."
+            f"<b>Pola Setup Terbaik</b>: Pola <b>'{best_setup['setup_name']}'</b> mencatatkan Win Rate tertinggi <b>{best_setup['win_rate']}%</b> dengan rata-rata Max Gain <b>+{best_setup['avg_max_gain']}%</b>."
         )
 
     return {
