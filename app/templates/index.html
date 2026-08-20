@@ -959,20 +959,20 @@
 
                 <!-- Category Filters -->
                 <div class="flex items-center gap-2 overflow-x-auto pb-1" id="filter-tabs">
-                    <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm" data-filter="ALL">
+                    <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm whitespace-nowrap" data-filter="ALL">
                         Semua (<span id="count-all">0</span>)
                     </button>
-                    <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="VCP Breakout">
-                        VCP Breakout
+                    <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="VCP Breakout">
+                        VCP Breakout (<span id="count-vcp">0</span>)
                     </button>
-                    <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="EMA 20 Pullback">
-                        EMA 20 Pullback
+                    <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="EMA 20 Pullback">
+                        EMA 20 Pullback (<span id="count-pullback">0</span>)
                     </button>
-                    <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="Volume Surge">
-                        Volume Surge
+                    <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="Volume Surge">
+                        Volume Surge (<span id="count-volume">0</span>)
                     </button>
-                    <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition" data-filter="Stage 2 Leader">
-                        Stage 2 Leader
+                    <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="Stage 2 Leader">
+                        Stage 2 Leader (<span id="count-stage2">0</span>)
                     </button>
                 </div>
 
@@ -3068,14 +3068,35 @@
             lucide.createIcons();
         }
 
+        function updateFilterCounts(results) {
+            const list = results || [];
+            const countAll = list.length;
+            const countVcp = list.filter(i => i.primary_setup === 'VCP Breakout' || (i.setups && i.setups.includes('VCP Breakout'))).length;
+            const countPullback = list.filter(i => i.primary_setup === 'EMA 20 Pullback' || (i.setups && i.setups.includes('EMA 20 Pullback'))).length;
+            const countVolume = list.filter(i => i.primary_setup === 'Volume Surge' || (i.setups && i.setups.includes('Volume Surge'))).length;
+            const countStage2 = list.filter(i => i.primary_setup === 'Stage 2 Leader' || (i.setups && i.setups.includes('Stage 2 Leader'))).length;
+
+            const elAll = document.getElementById('count-all');
+            const elVcp = document.getElementById('count-vcp');
+            const elPullback = document.getElementById('count-pullback');
+            const elVolume = document.getElementById('count-volume');
+            const elStage2 = document.getElementById('count-stage2');
+
+            if (elAll) elAll.innerText = countAll;
+            if (elVcp) elVcp.innerText = countVcp;
+            if (elPullback) elPullback.innerText = countPullback;
+            if (elVolume) elVolume.innerText = countVolume;
+            if (elStage2) elStage2.innerText = countStage2;
+        }
+
         function filterPicks(category) {
             currentFilter = category;
             
             document.querySelectorAll('.filter-btn').forEach(btn => {
                 if (btn.getAttribute('data-filter') === category) {
-                    btn.className = "filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm";
+                    btn.className = "filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm whitespace-nowrap";
                 } else {
-                    btn.className = "filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition";
+                    btn.className = "filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap";
                 }
             });
 
@@ -3103,6 +3124,7 @@
             const searchVal = (document.getElementById('search-ticker').value || '').trim().toUpperCase();
             
             updateCalculatorQuickPills(allScanResults);
+            updateFilterCounts(allScanResults);
             
             let filtered = allScanResults;
             if (currentFilter !== 'ALL') {
