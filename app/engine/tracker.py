@@ -74,13 +74,13 @@ def record_signal_snapshot(scan_results: List[Dict[str, Any]], climate: str = "B
             continue
             
         # Trading plan levels
-        plan = item.get("trading_plan") or {}
+        plan = item.get("trading_plan") or item.get("plan") or {}
         sl = float(plan.get("stop_loss") or item.get("stop_loss") or (entry_price * 0.96))
-        tp1 = float(plan.get("tp1") or item.get("tp1") or (entry_price + 2 * (entry_price - sl)))
-        tp2 = float(plan.get("tp2") or item.get("tp2") or (entry_price + 3.5 * (entry_price - sl)))
-        pts = float(item.get("power_trend_score") or item.get("pts") or 70.0)
-        setup_name = item.get("setup_type") or item.get("setup_name") or item.get("primary_setup") or "Breakout Raider"
-        vol_ratio = float(item.get("volume_ratio") or item.get("vol_surge_ratio") or 1.0)
+        tp1 = float(plan.get("target_1") or plan.get("tp1") or item.get("tp1") or (entry_price + 2 * (entry_price - sl)))
+        tp2 = float(plan.get("target_2") or plan.get("tp2") or item.get("tp2") or (entry_price + 3.5 * (entry_price - sl)))
+        pts = float(item.get("score") or item.get("power_trend_score") or item.get("pts") or 70.0)
+        setup_name = item.get("primary_setup") or item.get("setup_type") or item.get("setup_name") or "Breakout Raider"
+        vol_ratio = float(item.get("rvol") or item.get("volume_ratio") or item.get("vol_surge_ratio") or 1.0)
         
         cursor.execute("""
             INSERT INTO signal_tracker (
