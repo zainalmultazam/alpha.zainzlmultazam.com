@@ -44,6 +44,9 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             (ema200 == 0 or price > ema200)
         )
 
+        # Multi-Timeframe Weekly Trend Confirmation
+        weekly_confirmed = bool(last.get("weekly_uptrend", True))
+
         # Deteksi Setup Khusus
         setups = []
         rvol = float(last["rvol"]) if pd.notnull(last["rvol"]) else 1.0
