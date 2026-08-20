@@ -119,11 +119,11 @@ def calibrate_and_learn() -> Dict[str, Any]:
             if "VCP" in setup_name:
                 weights["vcp_breakout"] = min(25, max(15, round(20 + (avg_gain - 2.5) * 1.5)))
             elif "Pullback" in setup_name:
-                weights["ema20_pullback"] = min(25, max(12, round(15 + (avg_gain - 2.5) * 1.5)))
+                weights["ema20_pullback"] = min(25, max(15, round(15 + (avg_gain - 2.5) * 1.5)))
             elif "Volume" in setup_name:
-                weights["volume_surge"] = min(25, max(12, round(15 + (avg_gain - 2.5) * 1.5)))
+                weights["volume_surge"] = min(25, max(15, round(15 + (avg_gain - 2.5) * 1.5)))
             elif "Stage 2" in setup_name:
-                weights["stage2_leader"] = min(20, max(8, round(10 + (avg_gain - 2.5) * 1.2)))
+                weights["stage2_leader"] = min(25, max(15, round(15 + (avg_gain - 2.5) * 1.2)))
 
     # 3. Analisis Peak Day (Hari Puncak Rata-rata)
     peak_days = [int(s.get("peak_day") or 1) for s in signals if s.get("peak_day")]
