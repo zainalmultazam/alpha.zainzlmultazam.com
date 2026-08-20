@@ -308,13 +308,25 @@ async def home(request: Request):
 @app.get("/api/tracker")
 async def api_get_tracker():
     data = get_tracker_dashboard_data()
+    from app.engine.learner import get_active_learned_weights
+    data["ai_memory"] = get_active_learned_weights()
     return {"status": "success", "data": data}
 
 @app.post("/api/tracker/sync")
 async def api_sync_tracker():
     res = update_tracked_signals()
     data = get_tracker_dashboard_data()
+    from app.engine.learner import get_active_learned_weights
+    data["ai_memory"] = get_active_learned_weights()
     return {"status": "success", "sync_result": res, "data": data}
+
+@app.post("/api/tracker/calibrate")
+async def api_calibrate_tracker():
+    from app.engine.learner import calibrate_and_learn
+    calib = calibrate_and_learn()
+    data = get_tracker_dashboard_data()
+    data["ai_memory"] = calib
+    return {"status": "success", "calibration": calib, "data": data}
 
 @app.get("/api/performance")
 async def api_performance(capital: Optional[float] = None):

@@ -957,23 +957,38 @@
                     <span class="text-slate-500 dark:text-gray-400 text-[11px]">Filter Universe: Kompas100 / LQ45 (Turnover MA20 ≥ Rp 1 Miliar)</span>
                 </div>
 
-                <!-- Category Filters -->
-                <div class="flex items-center gap-2 overflow-x-auto pb-1" id="filter-tabs">
-                    <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm whitespace-nowrap" data-filter="ALL">
-                        Semua (<span id="count-all">0</span>)
-                    </button>
-                    <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="VCP Breakout">
-                        VCP Breakout (<span id="count-vcp">0</span>)
-                    </button>
-                    <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="EMA 20 Pullback">
-                        EMA 20 Pullback (<span id="count-pullback">0</span>)
-                    </button>
-                    <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="Volume Surge">
-                        Volume Surge (<span id="count-volume">0</span>)
-                    </button>
-                    <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="Stage 2 Leader">
-                        Stage 2 Leader (<span id="count-stage2">0</span>)
-                    </button>
+                <!-- Category Filters & Scoring Engine Mode Toggle -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+                    <div class="flex items-center gap-2 overflow-x-auto" id="filter-tabs">
+                        <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm whitespace-nowrap" data-filter="ALL">
+                            Semua (<span id="count-all">0</span>)
+                        </button>
+                        <button onclick="filterPicks('VCP Breakout')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="VCP Breakout">
+                            VCP Breakout (<span id="count-vcp">0</span>)
+                        </button>
+                        <button onclick="filterPicks('EMA 20 Pullback')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="EMA 20 Pullback">
+                            EMA 20 Pullback (<span id="count-pullback">0</span>)
+                        </button>
+                        <button onclick="filterPicks('Volume Surge')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="Volume Surge">
+                            Volume Surge (<span id="count-volume">0</span>)
+                        </button>
+                        <button onclick="filterPicks('Stage 2 Leader')" class="filter-btn text-xs font-medium px-3.5 py-1.5 rounded-xl bg-white dark:bg-surface-900 text-slate-700 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-surface-800 border border-slate-200 dark:border-white/10 transition whitespace-nowrap" data-filter="Stage 2 Leader">
+                            Stage 2 Leader (<span id="count-stage2">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Scoring Mode Selector -->
+                    <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-surface-900 p-1 rounded-xl border border-slate-200 dark:border-white/10 shrink-0 self-start sm:self-auto text-xs font-mono">
+                        <span class="text-[10px] text-slate-500 dark:text-gray-400 pl-1 font-sans">Mode:</span>
+                        <button onclick="setScoringMode('AI')" id="btn-mode-ai" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm transition flex items-center gap-1">
+                            <i data-lucide="brain" class="w-3 h-3"></i>
+                            <span>AI Adaptive</span>
+                        </button>
+                        <button onclick="setScoringMode('CLASSIC')" id="btn-mode-classic" class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center gap-1">
+                            <i data-lucide="book-open" class="w-3 h-3"></i>
+                            <span>Teori Klasik</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Cards Grid (3 Columns on Tablet & Desktop) -->
@@ -1021,6 +1036,10 @@
                         <p class="text-xs text-slate-500 dark:text-gray-400 mt-1 font-mono">Pelacakan forward 10 hari bursa rekomendasi sistem & analitik efektivitas pola teknikal.</p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
+                        <button onclick="calibrateAiEngine()" id="btn-calibrate-ai" class="px-3.5 py-2 rounded-xl bg-amber-50 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-semibold hover:bg-amber-100 dark:hover:bg-amber-900/80 transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                            <i data-lucide="brain-circuit" class="w-3.5 h-3.5" id="icon-calibrate-ai"></i>
+                            <span>Latih AI (Kalibrasi Bobot)</span>
+                        </button>
                         <button onclick="syncTrackerData()" id="btn-sync-tracker" class="px-3.5 py-2 rounded-xl bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200 dark:border-teal-800 text-xs font-semibold hover:bg-teal-100 dark:hover:bg-teal-900/80 transition flex items-center gap-1.5 shadow-sm active:scale-95">
                             <i data-lucide="refresh-cw" class="w-3.5 h-3.5" id="icon-sync-tracker"></i>
                             <span>Sync Harga Terkini</span>
@@ -1076,6 +1095,37 @@
                         <div class="text-[10px] text-slate-400 dark:text-gray-500 font-mono">
                             Horizon Track: <b>10 Hari Bursa</b>
                         </div>
+                    </div>
+                </div>
+
+                <!-- AI Reinforcement Memory & Dynamic Calibration Banner -->
+                <div class="clean-card p-4 sm:p-5 bg-gradient-to-r from-amber-500/5 via-blue-500/5 to-emerald-500/5 border border-amber-500/20 dark:border-amber-500/10 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1.5">
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1 font-mono">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                <span id="ai-memory-version-badge">AI Memory v1</span>
+                            </span>
+                            <span class="text-xs text-slate-400 dark:text-gray-500 font-mono" id="ai-memory-sample-text">12 Sampel Sinyal Dipelajari</span>
+                        </div>
+                        <h3 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <span>Bobot Skor Terkalibrasi Aktif:</span>
+                            <span id="ai-memory-favored-setup" class="text-xs font-mono px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">EMA 20 Pullback (+15)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500 dark:text-gray-400 font-sans" id="ai-memory-summary-notes">
+                            Sistem secara dinamis mengoptimalkan skor prioritas Screener berdasarkan Win Rate riil di bursa.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2 self-start md:self-auto shrink-0 font-mono text-xs">
+                        <div class="text-right hidden sm:block">
+                            <span class="text-[10px] text-slate-400 block font-sans">Kalibrasi Terakhir:</span>
+                            <span class="font-bold text-slate-700 dark:text-gray-300" id="ai-memory-last-calibrated">20 Agu 2026</span>
+                        </div>
+                        <button onclick="calibrateAiEngine()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold transition shadow-sm flex items-center gap-1.5 active:scale-95 text-xs font-sans">
+                            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                            <span>Kalibrasi Sekarang</span>
+                        </button>
                     </div>
                 </div>
 
@@ -3119,6 +3169,26 @@
             }
         }
 
+        let currentScoringMode = 'AI'; // 'AI' or 'CLASSIC'
+
+        function setScoringMode(mode) {
+            currentScoringMode = mode;
+            const btnAi = document.getElementById('btn-mode-ai');
+            const btnClassic = document.getElementById('btn-mode-classic');
+
+            if (mode === 'AI') {
+                if (btnAi) btnAi.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white shadow-sm transition flex items-center gap-1";
+                if (btnClassic) btnClassic.className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center gap-1";
+                showToast("Mode Scoring: 🧠 AI Adaptive (Dikalibrasi Data Pasar)");
+            } else {
+                if (btnClassic) btnClassic.className = "px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-600 text-white shadow-sm transition flex items-center gap-1";
+                if (btnAi) btnAi.className = "px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-600 dark:text-gray-400 hover:bg-slate-200 dark:hover:bg-surface-800 transition flex items-center gap-1";
+                showToast("Mode Scoring: 📐 Teori Klasik (Rumus Baku Minervini)");
+            }
+
+            renderPicks();
+        }
+
         function renderPicks() {
             const container = document.getElementById('top-picks-container');
             const searchVal = (document.getElementById('search-ticker').value || '').trim().toUpperCase();
@@ -3139,6 +3209,13 @@
                 );
             }
 
+            // Urutkan berdasarkan mode yang dipilih
+            filtered = [...filtered].sort((a, b) => {
+                const scoreA = currentScoringMode === 'AI' ? (a.ai_score || a.score) : (a.classic_score || a.score);
+                const scoreB = currentScoringMode === 'AI' ? (b.ai_score || b.score) : (b.classic_score || b.score);
+                return scoreB - scoreA;
+            });
+
             if (filtered.length === 0) {
                 container.innerHTML = `
                     <div class="col-span-full text-center py-12 text-slate-500 dark:text-gray-400 clean-card p-8 flex flex-col items-center">
@@ -3154,6 +3231,10 @@
                 const plan = item.plan;
                 const changeColor = item.change_pct >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-danger-500 dark:text-danger-400';
                 const changeSign = item.change_pct >= 0 ? '+' : '';
+                const activeScore = currentScoringMode === 'AI' ? (item.ai_score || item.score) : (item.classic_score || item.score);
+                const modeBadge = currentScoringMode === 'AI' 
+                    ? `<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold border border-amber-500/20">AI</span>`
+                    : `<span class="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20">Klasik</span>`;
 
                 const weeklyBadge = item.weekly_confirmed 
                     ? `<span class="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/80 font-semibold flex items-center gap-1">
@@ -3186,9 +3267,12 @@
                                 </div>
                                 <div class="text-[11px] text-slate-500 dark:text-gray-400 truncate max-w-[180px]" title="${item.name}">${item.name}</div>
                             </div>
-                            <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700/60 shadow-sm">
-                                ${item.score} PTS
-                            </span>
+                            <div class="flex items-center gap-1.5">
+                                ${modeBadge}
+                                <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700/60 shadow-sm">
+                                    ${activeScore} PTS
+                                </span>
+                            </div>
                         </div>
 
                         <!-- Setup, Weekly & Volume Badges -->
@@ -5460,6 +5544,37 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
+        async function calibrateAiEngine() {
+            const btn = document.getElementById('btn-calibrate-ai');
+            const icon = document.getElementById('icon-calibrate-ai');
+            if (btn) btn.disabled = true;
+            if (icon) icon.classList.add('animate-spin');
+
+            try {
+                showToast('Melatih AI: Menganalisis seluruh histori sinyal & mengkalibrasi bobot...');
+                const res = await fetch('/api/tracker/calibrate', { method: 'POST' });
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    trackerDataCache = json.data;
+                    allTrackerSignals = json.data.signals || [];
+                    renderTrackerDashboard(json.data);
+                    
+                    // Re-run scanner/renderPicks to apply new weights
+                    if (typeof fetchScanResults === 'function') {
+                        fetchScanResults();
+                    } else {
+                        renderPicks();
+                    }
+                    showToast(`Pelatihan AI Sukses! Memori ditingkatkan ke Versi ${json.calibration?.version || 1}`);
+                }
+            } catch (err) {
+                showToast('Gagal melakukan kalibrasi AI', 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+                if (icon) icon.classList.remove('animate-spin');
+            }
+        }
+
         async function syncTrackerData() {
             const btn = document.getElementById('btn-sync-tracker');
             const icon = document.getElementById('icon-sync-tracker');
@@ -5524,6 +5639,24 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             if (elAvgDd) elAvgDd.innerText = `${summary.avg_max_dd || 0}%`;
             if (elPeakDay) elPeakDay.innerText = `Hari ke-${Math.max(1, Math.round(summary.avg_days_to_peak || 1))}`;
             if (elCountBadge) elCountBadge.innerText = `${summary.total_signals || 0} Sinyal`;
+
+            // 1.5. AI Memory Status
+            const aiMem = data.ai_memory || {};
+            const elAiVersion = document.getElementById('ai-memory-version-badge');
+            const elAiSamples = document.getElementById('ai-memory-sample-text');
+            const elAiFavored = document.getElementById('ai-memory-favored-setup');
+            const elAiNotes = document.getElementById('ai-memory-summary-notes');
+            const elAiLastCalib = document.getElementById('ai-memory-last-calibrated');
+
+            if (elAiVersion) elAiVersion.innerText = `AI Memory v${aiMem.version || 1}`;
+            if (elAiSamples) elAiSamples.innerText = `${aiMem.sample_size || summary.total_signals || 0} Sampel Sinyal Dipelajari`;
+            if (elAiFavored) {
+                const favSetup = aiMem.dynamic_rules?.favored_setup || 'EMA 20 Pullback';
+                const favWeight = aiMem.weights?.ema20_pullback || 15;
+                elAiFavored.innerText = `${favSetup} (+${favWeight})`;
+            }
+            if (elAiNotes && aiMem.summary_notes) elAiNotes.innerText = aiMem.summary_notes;
+            if (elAiLastCalib && aiMem.last_calibrated) elAiLastCalib.innerText = aiMem.last_calibrated;
 
             // 2. PTS Tier Matrix
             const ptsContainer = document.getElementById('tracker-pts-matrix-container');

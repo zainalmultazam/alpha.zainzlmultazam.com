@@ -44,17 +44,8 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             (ema200 == 0 or price > ema200)
         )
 
-        # Multi-Timeframe Weekly Trend Confirmation
-        weekly_confirmed = bool(last.get("weekly_uptrend", True))
-
         # Deteksi Setup Khusus
         setups = []
-        confidence_score = 50
-
-        # Bonus Skor untuk Multi-Timeframe Alignment
-        if weekly_confirmed:
-            confidence_score += 15
-
         rvol = float(last["rvol"]) if pd.notnull(last["rvol"]) else 1.0
         vcp_ratio = float(last["vcp_ratio"]) if pd.notnull(last["vcp_ratio"]) else 1.0
         high_52w = float(last["high_52w"]) if pd.notnull(last["high_52w"]) else price
@@ -66,32 +57,58 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         flow_score = flow_data["score"]
         cmf_val = flow_data["cmf_val"]
 
-        if big_money_status == "INFLOW":
-            confidence_score += 15
-
         # 1. VCP Breakout Setup
         if is_stage2 and vcp_ratio < 0.60 and rvol > 1.2:
             setups.append("VCP Breakout")
-            confidence_score += 20
 
         # 2. Pullback EMA 20/50 Retest Setup
         distance_to_ema20 = abs(price - ema20) / price
         if is_stage2 and distance_to_ema20 < 0.025 and price >= float(last["Open"]):
             setups.append("EMA 20 Pullback")
-            confidence_score += 15
 
         # 3. Volume Surge / Smart Money Pocket Pivot
         if rvol >= 1.7 and price > float(prev["Close"]):
             setups.append("Volume Surge")
-            confidence_score += 15
 
         # 4. Stage 2 Strong Momentum / 52-Week High Breakout
         if is_stage2 and price >= 0.90 * high_52w:
             setups.append("Stage 2 Leader")
-            confidence_score += 10
+
+        # 1. Hitung Skor Teori Klasik (Buku Baku Minervini)
+        classic_score = 50
+        if weekly_confirmed:
+            classic_score += 15
+        if big_money_status == "INFLOW":
+            classic_score += 15
+        if "VCP Breakout" in setups:
+            classic_score += 20
+        if "EMA 20 Pullback" in setups:
+            classic_score += 15
+        if "Volume Surge" in setups:
+            classic_score += 15
+        if "Stage 2 Leader" in setups:
+            classic_score += 10
+
+        # 2. Hitung Skor AI Adaptive (Disesuaikan Data Empiris)
+        from app.engine.learner import get_active_learned_weights
+        ai_weights = get_active_learned_weights().get("weights", {})
+        
+        ai_score = ai_weights.get("base_score", 50)
+        if weekly_confirmed:
+            ai_score += ai_weights.get("weekly_trend", 15)
+        if big_money_status == "INFLOW":
+            ai_score += ai_weights.get("big_money_inflow", 15)
+        if "VCP Breakout" in setups:
+            ai_score += ai_weights.get("vcp_breakout", 20)
+        if "EMA 20 Pullback" in setups:
+            ai_score += ai_weights.get("ema20_pullback", 15)
+        if "Volume Surge" in setups:
+            ai_score += ai_weights.get("volume_surge", 15)
+        if "Stage 2 Leader" in setups:
+            ai_score += ai_weights.get("stage2_leader", 10)
 
         # Wajib memiliki minimal 1 setup teknikal terkonfirmasi dan Skor >= 80
-        if not setups or confidence_score < 80:
+        if not setups or max(classic_score, ai_score) < 80:
             return None
 
         primary_setup = setups[0]
@@ -114,7 +131,9 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "weekly_confirmed": weekly_confirmed,
             "primary_setup": primary_setup,
             "setups": setups,
-            "score": min(99, confidence_score),
+            "score": min(99, ai_score),
+            "ai_score": min(99, ai_score),
+            "classic_score": min(99, classic_score),
             "big_money_status": big_money_status,
             "flow_score": flow_score,
             "cmf_val": cmf_val,
