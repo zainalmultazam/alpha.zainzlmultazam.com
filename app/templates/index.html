@@ -3326,7 +3326,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             const p = lastLoadedChartData.trade_plan;
             const ticker = lastLoadedChartData.symbol || 'AUTO';
             switchView('calculator');
-            const inputSymbol = document.getElementById('calc-symbol');
+            const inputSymbol = document.getElementById('calc-ticker');
             const inputEntry = document.getElementById('calc-entry');
             const inputSl = document.getElementById('calc-sl');
             const inputTp = document.getElementById('calc-tp');
@@ -4538,7 +4538,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                                 <span class="font-sans font-semibold text-xs text-slate-700 dark:text-gray-300 block">Slot ${i + 1} Tersedia</span>
                                 <span class="text-[10px] text-slate-400 dark:text-gray-500 font-mono">Kapasitas Ideal ~25%</span>
                             </div>
-                            <button type="button" onclick="document.getElementById('calc-symbol')?.focus() || document.getElementById('calc-ticker')?.focus()" class="text-[10px] px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-sans font-semibold transition hover:bg-blue-100">
+                            <button type="button" onclick="document.getElementById('calc-ticker')?.focus()" class="text-[10px] px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 font-sans font-semibold transition hover:bg-blue-100">
                                 + Masukkan Saham
                             </button>
                         </div>
@@ -5000,7 +5000,11 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
         });
 
         function closeJournalModal() {
-            document.getElementById('journal-modal').classList.add('hidden');
+            const modal = document.getElementById('manual-journal-modal');
+            if (modal) {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            }
         }
 
         async function promptCloseTrade(tradeId, entryPrice) {
