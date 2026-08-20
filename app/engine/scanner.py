@@ -85,15 +85,16 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             setups.append("Volume Surge")
             confidence_score += 15
 
-        # 4. Stage 2 Strong Momentum
+        # 4. Stage 2 Strong Momentum / 52-Week High Breakout
         if is_stage2 and price >= 0.90 * high_52w:
             setups.append("Stage 2 Leader")
             confidence_score += 10
 
-        if not setups and not is_stage2:
+        # Wajib memiliki minimal 1 setup teknikal terkonfirmasi dan Skor >= 80
+        if not setups or confidence_score < 80:
             return None
 
-        primary_setup = setups[0] if setups else "Stage 2 Trend"
+        primary_setup = setups[0]
         trade_plan = generate_trade_plan(price, atr14, primary_setup)
         
         change_pct = round(((price - float(prev["Close"])) / float(prev["Close"])) * 100, 2) if float(prev["Close"]) > 0 else 0.0
