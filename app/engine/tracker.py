@@ -253,12 +253,12 @@ def get_tracker_dashboard_data() -> Dict[str, Any]:
     avg_max_dd = round(_calc_mean(dds), 1)
     avg_peak_day = round(_calc_mean(peak_days), 1) if peak_days else 1.0
     
-    # ── PTS Tier Analysis ────────────────────────────────────────────────────
+    # ── PTS Tier Analysis (Presisi Skala Skor >= 80) ──────────────────────────
     tiers = [
-        {"name": "PTS 90–100 (Ultra High)", "min_pts": 90.0, "max_pts": 100.0, "color": "emerald"},
-        {"name": "PTS 80–89 (Prime Breakout)", "min_pts": 80.0, "max_pts": 89.9, "color": "blue"},
-        {"name": "PTS 70–79 (Early Base)", "min_pts": 70.0, "max_pts": 79.9, "color": "amber"},
-        {"name": "PTS < 70 (Speculative)", "min_pts": 0.0, "max_pts": 69.9, "color": "slate"}
+        {"name": "PTS 95–100 (Ultra Elite)", "min_pts": 95.0, "max_pts": 100.0, "color": "emerald"},
+        {"name": "PTS 90–94 (High Momentum)", "min_pts": 90.0, "max_pts": 94.9, "color": "blue"},
+        {"name": "PTS 85–89 (Prime Breakout)", "min_pts": 85.0, "max_pts": 89.9, "color": "amber"},
+        {"name": "PTS 80–84 (Early Trigger)", "min_pts": 80.0, "max_pts": 84.9, "color": "slate"}
     ]
     
     pts_analysis = []
@@ -325,18 +325,18 @@ def get_tracker_dashboard_data() -> Dict[str, Any]:
     # ── AI Quantitative Pattern Insights ─────────────────────────────────────
     ai_insights = []
     
-    tier_80_89 = next((p for p in pts_analysis if "80–89" in p["tier_name"]), None)
-    tier_90_100 = next((p for p in pts_analysis if "90–100" in p["tier_name"]), None)
+    tier_85_89 = next((p for p in pts_analysis if "85–89" in p["tier_name"]), None)
+    tier_95_100 = next((p for p in pts_analysis if "95–100" in p["tier_name"]), None)
     
-    if tier_80_89 and tier_90_100 and tier_80_89["count"] > 0 and tier_90_100["count"] > 0:
-        if tier_80_89["avg_max_gain"] > tier_90_100["avg_max_gain"]:
-            diff = round(tier_80_89["avg_max_gain"] - tier_90_100["avg_max_gain"], 1)
+    if tier_85_89 and tier_95_100 and tier_85_89["count"] > 0 and tier_95_100["count"] > 0:
+        if tier_85_89["avg_max_gain"] > tier_95_100["avg_max_gain"]:
+            diff = round(tier_85_89["avg_max_gain"] - tier_95_100["avg_max_gain"], 1)
             ai_insights.append(
-                f"🎯 <b>PTS 80–89 Mengungguli PTS 90–100</b>: Saham di tier 80–89 rata-rata menghasilkan Max Gain <b>+{tier_80_89['avg_max_gain']}%</b> (lebih tinggi +{diff}% dibanding tier 90–100). Ini membuktikan bahwa saham yang baru breakout dari base segar memiliki ruang lari lebih leluasa dibanding saham yang sudah hyper-extended."
+                f"🎯 <b>PTS 85–89 Mengungguli PTS 95–100</b>: Saham di tier 85–89 rata-rata menghasilkan Max Gain <b>+{tier_85_89['avg_max_gain']}%</b> (lebih tinggi +{diff}% dibanding tier 95–100). Ini membuktikan bahwa saham yang baru breakout dari base segar memiliki ruang lari lebih leluasa dibanding saham yang sudah hyper-extended."
             )
-        elif tier_90_100["win_rate"] >= tier_80_89["win_rate"]:
+        elif tier_95_100["win_rate"] >= tier_85_89["win_rate"]:
             ai_insights.append(
-                f"🚀 <b>Momentum Ultra-High PTS 90–100 Paling Konsisten</b>: Memiliki Win Rate tertinggi sebesar <b>{tier_90_100['win_rate']}%</b> dengan rata-rata kenaikan puncak <b>+{tier_90_100['avg_max_gain']}%</b>."
+                f"🚀 <b>Momentum Ultra-Elite PTS 95–100 Paling Konsisten</b>: Memiliki Win Rate tertinggi sebesar <b>{tier_95_100['win_rate']}%</b> dengan rata-rata kenaikan puncak <b>+{tier_95_100['avg_max_gain']}%</b>."
             )
     else:
         ai_insights.append(
