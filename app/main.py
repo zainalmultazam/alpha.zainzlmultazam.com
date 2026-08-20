@@ -328,6 +328,18 @@ async def api_calibrate_tracker():
     data["ai_memory"] = calib
     return {"status": "success", "calibration": calib, "data": data}
 
+@app.get("/api/sectors")
+async def api_get_sectors():
+    from app.engine.sector import calculate_sector_rotation
+    data = calculate_sector_rotation()
+    return {"status": "success", "data": data}
+
+@app.get("/api/tracker/post-mortems")
+async def api_get_post_mortems():
+    from app.engine.post_mortem import get_all_post_mortems
+    data = get_all_post_mortems()
+    return {"status": "success", "data": data}
+
 @app.get("/api/performance")
 async def api_performance(capital: Optional[float] = None):
     base_cap = capital or settings.DEFAULT_CAPITAL or 50000000.0

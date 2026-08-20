@@ -957,6 +957,18 @@
                     <span class="text-slate-500 dark:text-gray-400 text-[11px]">Filter Universe: Kompas100 / LQ45 (Turnover MA20 ≥ Rp 1 Miliar)</span>
                 </div>
 
+                <!-- Sector Rotation Flow Bar -->
+                <div id="sector-rotation-bar" class="flex items-center gap-2 overflow-x-auto pb-1 text-xs font-mono">
+                    <span class="text-[11px] text-slate-400 dark:text-gray-500 font-sans uppercase font-bold tracking-wider shrink-0 flex items-center gap-1">
+                        <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-500"></i> Rotasi Sektor:
+                    </span>
+                    <div id="sector-inflow-pills" class="flex items-center gap-1.5 overflow-x-auto">
+                        <span class="px-2 py-0.5 rounded-lg bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 text-[10px] font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span> Memuat Sektor...
+                        </span>
+                    </div>
+                </div>
+
                 <!-- Category Filters & Scoring Engine Mode Toggle -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
                     <div class="flex items-center gap-2 overflow-x-auto" id="filter-tabs">
@@ -1203,6 +1215,10 @@
                             <button onclick="setTrackerFilter('HIT_TP')" id="tfilter-HIT_TP" class="tracker-filter-btn px-3 py-1 rounded-lg bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition">Hit TP</button>
                             <button onclick="setTrackerFilter('HIT_SL')" id="tfilter-HIT_SL" class="tracker-filter-btn px-3 py-1 rounded-lg bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition">Hit SL</button>
                             <button onclick="setTrackerFilter('STAGNANT')" id="tfilter-STAGNANT" class="tracker-filter-btn px-3 py-1 rounded-lg bg-slate-100 dark:bg-surface-800 hover:bg-slate-200 dark:hover:bg-surface-700 text-slate-600 dark:text-gray-400 transition">Stagnan</button>
+                            <button onclick="setTrackerFilter('POST_MORTEM')" id="tfilter-POST_MORTEM" class="tracker-filter-btn px-3 py-1 rounded-lg bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 dark:hover:bg-rose-900 transition flex items-center gap-1">
+                                <i data-lucide="microscope" class="w-3 h-3 text-rose-500"></i>
+                                <span>Otopsi Gagal</span>
+                            </button>
                         </div>
                     </div>
 
@@ -3282,6 +3298,10 @@
                             </span>
                             ${weeklyBadge}
                             ${bigMoneyBadge}
+                            ${item.is_sector_leader ? `<span class="px-2 py-0.5 rounded-md bg-cyan-50 text-cyan-700 dark:bg-cyan-950/80 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/80 font-semibold">🌊 ${item.sector}</span>` : `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]">${item.sector}</span>`}
+                            <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 font-semibold">
+                                ${item.volatility_badge || '⚖️ Balanced'}
+                            </span>
                             <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 dark:bg-surface-950 dark:text-gray-400 border border-slate-200 dark:border-white/[0.06]" title="Rata-rata turnover 20 hari">
                                 ${turnoverText}
                             </span>
@@ -5735,7 +5755,7 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
                 filtered = filtered.filter(s => s.status === 'ACTIVE');
             } else if (currentTrackerFilter === 'HIT_TP') {
                 filtered = filtered.filter(s => s.status === 'HIT_TP1' || s.status === 'HIT_TP2');
-            } else if (currentTrackerFilter === 'HIT_SL') {
+            } else if (currentTrackerFilter === 'HIT_SL' || currentTrackerFilter === 'POST_MORTEM') {
                 filtered = filtered.filter(s => s.status === 'HIT_SL');
             } else if (currentTrackerFilter === 'STAGNANT') {
                 filtered = filtered.filter(s => s.status === 'EXPIRED_STAGNANT');
@@ -5870,23 +5890,66 @@ Link Stockbit: https://stockbit.com/#/symbol/${ticker}`;
             }
         }
 
-        function openTradePlanForTicker(ticker, entry, sl, tp) {
-            const inputTicker = document.getElementById('calc-ticker');
-            const inputEntry = document.getElementById('calc-entry');
-            const inputSl = document.getElementById('calc-sl');
-            const inputTp = document.getElementById('calc-tp');
+        async function loadSectorRotation() {
+            const container = document.getElementById('sector-inflow-pills');
+            if (!container) return;
 
-            if (inputTicker) inputTicker.value = ticker;
-            if (inputEntry) inputEntry.value = Number(entry).toLocaleString('id-ID');
-            if (inputSl) inputSl.value = Number(sl).toLocaleString('id-ID');
-            if (inputTp) inputTp.value = Number(tp).toLocaleString('id-ID');
-
-            switchView('calculator');
-            calculateLotFromForm();
+            try {
+                const res = await fetch('/api/sectors');
+                const json = await res.json();
+                if (json.status === 'success' && json.data) {
+                    const sectors = json.data.sectors || [];
+                    if (sectors.length === 0) {
+                        container.innerHTML = '<span class="text-[10px] text-slate-400">Data sektor siap</span>';
+                        return;
+                    }
+                    container.innerHTML = sectors.slice(0, 5).map(s => {
+                        let badgeClass = "bg-slate-100 text-slate-600 dark:bg-surface-800 dark:text-gray-300 border-slate-200 dark:border-white/10";
+                        let dotClass = "bg-slate-400";
+                        if (s.flow_status === 'INFLOW') {
+                            badgeClass = "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80 font-bold";
+                            dotClass = "bg-emerald-500 animate-pulse";
+                        } else if (s.flow_status === 'OUTFLOW') {
+                            badgeClass = "bg-rose-50 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border-rose-200 dark:border-rose-800/80";
+                            dotClass = "bg-rose-500";
+                        }
+                        const chgSign = s.avg_chg_1d >= 0 ? '+' : '';
+                        return `
+                        <span class="px-2 py-0.5 rounded-lg border text-[10px] whitespace-nowrap flex items-center gap-1 transition cursor-pointer hover:opacity-80 ${badgeClass}" title="Turnover: Rp ${s.total_turnover_bio}B · 5D: ${s.avg_chg_5d}%">
+                            <span class="w-1.5 h-1.5 rounded-full ${dotClass}"></span>
+                            <span>${s.sector} (${chgSign}${s.avg_chg_1d}%)</span>
+                        </span>`;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Error loading sector rotation:', err);
+            }
         }
 
-        // Jalankan pengecekan PIN saat aplikasi dibuka
+        async function showPostMortemModal(ticker) {
+            try {
+                const res = await fetch('/api/tracker/post-mortems');
+                const json = await res.json();
+                const postMortems = json.data || [];
+                const matched = postMortems.find(p => p.ticker === ticker) || postMortems[0];
+                
+                if (matched) {
+                    alert(`🔍 HASIL OTOPSI TEKNIKAL AI (${matched.ticker}):\n\n` +
+                          `📌 Diagnosa: ${matched.cause_title}\n` +
+                          `📝 Detail: ${matched.diagnosis}\n\n` +
+                          `💡 Pelajaran AI: ${matched.lesson}\n` +
+                          `🛡️ Aturan Penalti: ${matched.penalty_rule?.rule_type || 'Negative Constraint'}`);
+                } else {
+                    alert(`Belum ada catatan otopsi untuk sinyal ${ticker}.`);
+                }
+            } catch (e) {
+                alert(`Gagal mengambil data otopsi: ${e.message}`);
+            }
+        }
+
+        // Jalankan sinkronisasi awal saat aplikasi dibuka
         checkPinAuth();
+        loadSectorRotation();
 
         // Register PWA Service Worker with auto-update
         if ('serviceWorker' in navigator) {

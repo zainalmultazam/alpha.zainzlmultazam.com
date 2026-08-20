@@ -92,15 +92,25 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         if "Stage 2 Leader" in setups:
             classic_score += 10
 
-        # 2. Hitung Skor AI Adaptive (Disesuaikan Data Empiris)
+        # 2. Hitung Skor AI Adaptive (Disesuaikan Rezim Pasar & Rotasi Sektor)
+        from app.services.market_data import get_market_climate
         from app.engine.learner import get_active_learned_weights
-        ai_weights = get_active_learned_weights().get("weights", {})
+        from app.engine.sector import get_top_inflow_sectors
+
+        climate_info = get_market_climate()
+        current_regime = climate_info.get("regime", "BULLISH")
+        ai_weights = get_active_learned_weights(current_regime).get("weights", {})
+        top_sectors = get_top_inflow_sectors()
         
+        is_sector_leader = ticker_info.get("sector") in top_sectors
+
         ai_score = ai_weights.get("base_score", 50)
         if weekly_confirmed:
             ai_score += ai_weights.get("weekly_trend", 15)
         if big_money_status == "INFLOW":
             ai_score += ai_weights.get("big_money_inflow", 15)
+        if is_sector_leader:
+            ai_score += ai_weights.get("sector_inflow_bonus", 5)
         if "VCP Breakout" in setups:
             ai_score += ai_weights.get("vcp_breakout", 20)
         if "EMA 20 Pullback" in setups:
@@ -108,14 +118,14 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         if "Volume Surge" in setups:
             ai_score += ai_weights.get("volume_surge", 15)
         if "Stage 2 Leader" in setups:
-            ai_score += ai_weights.get("stage2_leader", 10)
+            ai_score += ai_weights.get("stage2_leader", 15)
 
         # Wajib memiliki minimal 1 setup teknikal terkonfirmasi dan Skor >= 80
         if not setups or max(classic_score, ai_score) < 80:
             return None
 
         primary_setup = setups[0]
-        trade_plan = generate_trade_plan(price, atr14, primary_setup)
+        trade_plan = generate_trade_plan(price, atr14, primary_setup, sector=ticker_info.get("sector", ""))
         
         change_pct = round(((price - float(prev["Close"])) / float(prev["Close"])) * 100, 2) if float(prev["Close"]) > 0 else 0.0
 
@@ -138,6 +148,9 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "ai_score": min(99, ai_score),
             "classic_score": min(99, classic_score),
             "big_money_status": big_money_status,
+            "is_sector_leader": is_sector_leader,
+            "volatility_profile": trade_plan.get("volatility_profile", "BALANCED_GROWTH"),
+            "volatility_badge": trade_plan.get("volatility_badge", "⚖️ Balanced"),
             "flow_score": flow_score,
             "cmf_val": cmf_val,
             "plan": trade_plan

@@ -183,17 +183,28 @@ def update_tracked_signals() -> Dict[str, Any]:
                     status = "EXPIRED_STAGNANT"
                 else:
                     status = "ACTIVE"
+
+            # Otomatisasi AI Post-Mortem jika sinyal menyentuh Stop Loss (HIT_SL)
+            notes_payload = item.get("notes") or ""
+            if status == "HIT_SL" and (not notes_payload or "root_cause" not in notes_payload):
+                try:
+                    from app.engine.post_mortem import diagnose_failed_signal
+                    import json
+                    pm_diag = diagnose_failed_signal(dict(item, current_price=curr_price))
+                    notes_payload = json.dumps(pm_diag)
+                except Exception as ex:
+                    print(f"Error diagnosing {ticker}: {ex}")
                 
             cursor.execute("""
                 UPDATE signal_tracker 
                 SET current_price = ?, max_gain_pct = ?, max_drawdown_pct = ?, current_gain_pct = ?,
                     price_t1 = ?, price_t2 = ?, price_t3 = ?, price_t5 = ?, price_t10 = ?,
-                    status = ?, days_tracked = ?, peak_day = ?
+                    status = ?, days_tracked = ?, peak_day = ?, notes = ?
                 WHERE id = ?
             """, (
                 curr_price, max_gain, max_dd, curr_gain,
                 p_t1, p_t2, p_t3, p_t5, p_t10,
-                status, min(days_held, 10), peak_idx, sig_id
+                status, min(days_held, 10), peak_idx, notes_payload, sig_id
             ))
             updated_count += 1
         except Exception as e:

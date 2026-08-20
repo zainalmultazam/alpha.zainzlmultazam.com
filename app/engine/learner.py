@@ -6,19 +6,45 @@ from typing import Dict, Any, List, Optional
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../data/alpha.db"))
 
+DEFAULT_REGIME_WEIGHTS = {
+    "BULLISH": {
+        "weekly_trend": 15,
+        "big_money_inflow": 15,
+        "vcp_breakout": 22,
+        "ema20_pullback": 15,
+        "volume_surge": 18,
+        "stage2_leader": 15,
+        "sector_inflow_bonus": 5,
+        "base_score": 50
+    },
+    "NEUTRAL": {
+        "weekly_trend": 15,
+        "big_money_inflow": 15,
+        "vcp_breakout": 16,
+        "ema20_pullback": 20,
+        "volume_surge": 15,
+        "stage2_leader": 15,
+        "sector_inflow_bonus": 5,
+        "base_score": 50
+    },
+    "BEARISH": {
+        "weekly_trend": 15,
+        "big_money_inflow": 20,
+        "vcp_breakout": 15,
+        "ema20_pullback": 18,
+        "volume_surge": 15,
+        "stage2_leader": 20,
+        "sector_inflow_bonus": 5,
+        "base_score": 50
+    }
+}
+
 DEFAULT_LEARNED_WEIGHTS = {
     "version": 1,
     "last_calibrated": datetime.now().strftime("%Y-%m-%d %H:%M"),
     "sample_size": 0,
-    "weights": {
-        "weekly_trend": 15,
-        "big_money_inflow": 15,
-        "vcp_breakout": 20,
-        "ema20_pullback": 15,
-        "volume_surge": 15,
-        "stage2_leader": 10,
-        "base_score": 50
-    },
+    "weights": DEFAULT_REGIME_WEIGHTS["BULLISH"],
+    "regime_weights": DEFAULT_REGIME_WEIGHTS,
     "dynamic_rules": {
         "optimal_exit_day": 3,
         "favored_setup": "EMA 20 Pullback",
@@ -47,8 +73,8 @@ def init_learning_db():
     conn.commit()
     conn.close()
 
-def get_active_learned_weights() -> Dict[str, Any]:
-    """Mengambil bobot terkalibrasi paling mutakhir dari memori AI."""
+def get_active_learned_weights(regime: str = "BULLISH") -> Dict[str, Any]:
+    """Mengambil bobot terkalibrasi paling mutakhir dari memori AI sesuai Rezim Pasar IHSG."""
     init_learning_db()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -57,21 +83,38 @@ def get_active_learned_weights() -> Dict[str, Any]:
     row = cursor.fetchone()
     conn.close()
 
+    regime_key = str(regime or "BULLISH").upper()
+    if regime_key not in ["BULLISH", "NEUTRAL", "BEARISH"]:
+        regime_key = "BULLISH"
+
     if not row:
-        return DEFAULT_LEARNED_WEIGHTS
+        base = dict(DEFAULT_LEARNED_WEIGHTS)
+        base["weights"] = DEFAULT_REGIME_WEIGHTS.get(regime_key, DEFAULT_REGIME_WEIGHTS["BULLISH"])
+        base["active_regime"] = regime_key
+        return base
 
     try:
-        return {
+        data = {
             "version": row["version"],
             "last_calibrated": str(row["calibrated_at"]),
             "sample_size": row["sample_size"],
             "weights": json.loads(row["weights_json"]),
             "dynamic_rules": json.loads(row["dynamic_rules_json"]),
             "insights": json.loads(row["insights_json"]),
-            "summary_notes": row["notes"] or ""
+            "summary_notes": row["notes"] or "",
+            "active_regime": regime_key
         }
+        # Sesuaikan bobot dengan rezim pasar aktif
+        regime_override = DEFAULT_REGIME_WEIGHTS.get(regime_key, {})
+        for k, v in regime_override.items():
+            if k not in data["weights"] or data["weights"][k] < 10:
+                data["weights"][k] = v
+        return data
     except Exception:
-        return DEFAULT_LEARNED_WEIGHTS
+        base = dict(DEFAULT_LEARNED_WEIGHTS)
+        base["weights"] = DEFAULT_REGIME_WEIGHTS.get(regime_key, DEFAULT_REGIME_WEIGHTS["BULLISH"])
+        base["active_regime"] = regime_key
+        return base
 
 def calibrate_and_learn() -> Dict[str, Any]:
     """
@@ -87,12 +130,12 @@ def calibrate_and_learn() -> Dict[str, Any]:
 
     cursor.execute("SELECT * FROM signal_tracker ORDER BY id ASC")
     rows = cursor.fetchall()
-    conn.close()
 
     signals = [dict(r) for r in rows]
     sample_size = len(signals)
 
     if sample_size == 0:
+        conn.close()
         return get_active_learned_weights()
 
     # 1. Analisis Efektivitas Setup (Win Rate & Max Gain)
@@ -141,18 +184,37 @@ def calibrate_and_learn() -> Dict[str, Any]:
         "volatility_sl_multiplier": 1.0
     }
 
-    # 5. Narasi Pembelajaran AI
+    # 4.5. Analisis Riwayat Transaksi Nyata Pengguna (Journal Integration)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM trades WHERE status = 'CLOSED'")
+    journal_trades = [dict(r) for r in cursor.fetchall()]
+    journal_count = len(journal_trades)
+    
+    journal_insights = []
+    if journal_count >= 1:
+        j_wins = sum(1 for t in journal_trades if float(t.get("pnl_amount") or 0) > 0)
+        j_win_rate = round((j_wins / journal_count) * 100, 1)
+        j_gains = [float(t.get("pnl_pct") or 0) for t in journal_trades if float(t.get("pnl_amount") or 0) > 0]
+        j_losses = [float(t.get("pnl_pct") or 0) for t in journal_trades if float(t.get("pnl_amount") or 0) <= 0]
+        avg_j_gain = round(sum(j_gains) / len(j_gains), 1) if j_gains else 0.0
+        avg_j_loss = round(sum(j_losses) / len(j_losses), 1) if j_losses else 0.0
+        
+        journal_insights.append(
+            f"📓 <b>Integrasi Jurnal Trading ({journal_count} Transaksi Riil)</b>: Realized Win Rate kamu tercatat <b>{j_win_rate}%</b> (Rata-rata Cuan: <b>+{avg_j_gain}%</b>, Rata-rata Rugi: <b>{avg_j_loss}%</b>)."
+        )
+        if j_win_rate >= 65:
+            journal_insights.append("🏆 <b>Disiplin Eksekusi Sangat Baik</b>: Eksekusi riil kamu konsisten mengikuti batas risiko dan rencana trading.")
+
+    # 5. Narasi Pembelajaran AI Gabungan (Tracker + Journal)
     insights = [
-        f"🤖 <b>AI Memory Calibrated ({sample_size} Sinyal Dievaluasi)</b>: Sistem berhasil mempelajari pergerakan seluruh sinyal rekomendasi di database.",
+        f"🤖 <b>AI Memory Calibrated ({sample_size} Sinyal Tracker + {journal_count} Jurnal)</b>: Sistem berhasil mempelajari pergerakan seluruh sinyal rekomendasi dan riwayat eksekusi riil.",
         f"⭐ <b>Setup Prioritas Terpilih</b>: Pola <b>'{favored_setup}'</b> diidentifikasi sebagai setup paling konsisten menghasilkan gain positif.",
         f"⏱️ <b>Kalibrasi Siklus Keluar Optimal</b>: Saham rata-rata mencapai puncak gain pada <b>Hari ke-{optimal_day} Bursa (T+{optimal_day})</b>. Parameter ini otomatis disinkronkan ke radar kalkulator dan sentinel."
-    ]
+    ] + journal_insights
 
-    notes = f"AI Kalibrasi v{sample_size} dengan {sample_size} sampel empiris."
+    notes = f"AI Kalibrasi v{sample_size} dengan {sample_size} sampel empiris & {journal_count} transaksi jurnal."
 
     # Simpan ke Database
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
     cursor.execute("SELECT MAX(version) FROM ai_memory")
     max_v = cursor.fetchone()[0] or 0
     new_version = max_v + 1
@@ -162,7 +224,7 @@ def calibrate_and_learn() -> Dict[str, Any]:
             version, sample_size, weights_json, dynamic_rules_json, insights_json, notes
         ) VALUES (?, ?, ?, ?, ?, ?)
     """, (
-        new_version, sample_size,
+        new_version, sample_size + journal_count,
         json.dumps(weights),
         json.dumps(dynamic_rules),
         json.dumps(insights),
@@ -174,7 +236,7 @@ def calibrate_and_learn() -> Dict[str, Any]:
     return {
         "version": new_version,
         "last_calibrated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "sample_size": sample_size,
+        "sample_size": sample_size + journal_count,
         "weights": weights,
         "dynamic_rules": dynamic_rules,
         "insights": insights,
