@@ -822,18 +822,14 @@
                 
                 <!-- IHSG Macro Climate Banner Card -->
                 <div id="ihsg-climate-card" class="clean-card p-4 sm:p-5 border-l-4 border-l-emerald-500 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
-                    <div class="flex items-start gap-4">
-                        <div class="w-11 h-11 rounded-xl bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 transition-colors" id="climate-icon-box">
-                            <i data-lucide="trending-up" class="w-5.5 h-5.5" id="climate-icon"></i>
+                    <div class="space-y-1.5 min-w-0">
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">IHSG Macro Climate:</span>
+                            <span id="climate-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
+                                BULLISH · Risk-On
+                            </span>
+                            <span id="climate-price" class="text-xs font-mono text-slate-500 dark:text-gray-400">Index: 7,800 (+0.0%)</span>
                         </div>
-                        <div class="space-y-1.5 min-w-0">
-                            <div class="flex items-center gap-2.5 flex-wrap">
-                                <span class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight">IHSG Macro Climate:</span>
-                                <span id="climate-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700">
-                                    BULLISH · Risk-On
-                                </span>
-                                <span id="climate-price" class="text-xs font-mono text-slate-500 dark:text-gray-400">Index: 7,800 (+0.0%)</span>
-                            </div>
                             <!-- Separate Operational / Holiday Status Pill -->
                             <div id="climate-market-status" class="hidden flex items-center gap-2 text-xs flex-wrap"></div>
                             <p id="climate-advice" class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed">
@@ -3083,10 +3079,10 @@
             climateBadge.className = badgeCls;
             climateExposure.className = exposureCls;
             climateCard.className = `clean-card p-4 sm:p-5 border-l-4 ${cardBorder} flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all`;
-            climateIconBox.className = `w-11 h-11 rounded-xl ${iconBox} border flex items-center justify-center shrink-0 transition-colors`;
+            if (climateIconBox) climateIconBox.className = `w-11 h-11 rounded-xl ${iconBox} border flex items-center justify-center shrink-0 transition-colors`;
 
             const iconName = isBullish ? 'trending-up' : (isNeutral ? 'activity' : 'trending-down');
-            climateIcon.setAttribute('data-lucide', iconName);
+            if (climateIcon) climateIcon.setAttribute('data-lucide', iconName);
 
             climateBadge.innerText = `${climate.regime} · ${climate.title}`;
 
