@@ -18,6 +18,7 @@ from app.engine.scanner import scan_stock
 from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers, calculate_money_flow
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
 from app.engine.journal import log_trade, get_all_trades, get_open_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
+from app.engine.capital import log_capital_flow, get_capital_statement, delete_capital_entry, init_capital_db
 from app.engine.tracker import init_tracker_db, record_signal_snapshot, update_tracked_signals, get_tracker_dashboard_data
 from app.services.telegram import send_telegram_message, notify_super_digest, notify_morning_briefing, notify_evening_wrap
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
@@ -642,6 +643,33 @@ async def api_delete_trade(trade_id: Optional[int] = None, trade_id_form: Option
     if not tid:
         return {"status": "error", "message": "Missing trade_id"}
     ok = delete_trade(tid)
+    return {"status": "success" if ok else "error", "deleted": ok}
+
+@app.get("/api/capital/statement")
+async def api_get_capital_statement():
+    """Mengembalikan laporan neraca modal, HPP, kas RDN, dan riwayat mutasi."""
+    return get_capital_statement()
+
+@app.post("/api/capital/log")
+async def api_log_capital_flow(
+    type: str = Form("DEPOSIT"),
+    amount: float = Form(...),
+    entry_date: Optional[str] = Form(None),
+    notes: Optional[str] = Form("")
+):
+    """Mencatat setoran modal (Top Up) atau penarikan dana (Withdrawal)."""
+    res = log_capital_flow(type, amount, entry_date, notes or "")
+    return res
+
+@app.post("/api/capital/delete")
+@app.post("/api/capital/delete/{entry_id}")
+@app.delete("/api/capital/{entry_id}")
+async def api_delete_capital_entry(entry_id: Optional[int] = None, entry_id_form: Optional[int] = Form(None, alias="entry_id")):
+    """Menghapus riwayat mutasi modal jika ada kesalahan input."""
+    eid = entry_id or entry_id_form
+    if not eid:
+        return {"status": "error", "message": "Missing entry_id"}
+    ok = delete_capital_entry(eid)
     return {"status": "success" if ok else "error", "deleted": ok}
 
 @app.get("/api/telegram/status")
