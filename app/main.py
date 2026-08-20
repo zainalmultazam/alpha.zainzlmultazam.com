@@ -18,6 +18,7 @@ from app.engine.scanner import scan_stock
 from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers, calculate_money_flow
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
 from app.engine.journal import log_trade, get_all_trades, get_open_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
+from app.engine.tracker import init_tracker_db, record_signal_snapshot, update_tracked_signals, get_tracker_dashboard_data
 from app.services.telegram import send_telegram_message, notify_super_digest, notify_morning_briefing, notify_evening_wrap
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
 
@@ -194,16 +195,20 @@ async def run_scheduled_morning_briefing():
             cached_scan_results = await execute_market_scan()
         climate = get_market_climate()
         macro = get_global_macro_data()
+        regime = climate.get("regime", "BULLISH") if isinstance(climate, dict) else "BULLISH"
+        record_signal_snapshot(cached_scan_results[:10], climate=regime)
         await notify_morning_briefing(cached_scan_results[:3], climate=climate, macro=macro)
     except Exception as e:
         print(f"Error in morning briefing cron: {e}")
 
 async def run_scheduled_evening_wrap():
-    """Jadwal Otomatis 16:15 WIB: Kirim Rekap Penutupan Pasar & Status Portofolio."""
+    """Jadwal Otomatis 16:15 WIB: Kirim Rekap Penutupan Pasar & Status Portofolio + Update Signal Tracker."""
     try:
         climate = get_market_climate()
         open_trades = get_open_trades()
         stats = get_journal_stats()
+        # Update forward signal tracking prices
+        update_tracked_signals()
         await notify_evening_wrap(climate=climate, open_trades=open_trades, stats=stats)
     except Exception as e:
         print(f"Error in evening wrap cron: {e}")
@@ -211,6 +216,7 @@ async def run_scheduled_evening_wrap():
 @app.on_event("startup")
 async def startup_event():
     init_db()
+    init_tracker_db()
     # 1. Jadwalkan bot cron otomatis
     try:
         # Pukul 08:45 WIB: Morning Pre-Market Briefing (Senin-Jumat)
@@ -266,6 +272,7 @@ async def health_check():
 
 @app.get("/", response_class=HTMLResponse)
 @app.get("/screener", response_class=HTMLResponse)
+@app.get("/tracker", response_class=HTMLResponse)
 @app.get("/rules", response_class=HTMLResponse)
 @app.get("/journal", response_class=HTMLResponse)
 @app.get("/charts", response_class=HTMLResponse)
@@ -276,7 +283,7 @@ async def home(request: Request):
     climate = get_market_climate()
     # Detect initial view from path
     path = request.url.path.strip("/").lower()
-    initial_view = path if path in ["screener", "rules", "journal", "charts", "performance", "calculator", "alerts"] else "screener"
+    initial_view = path if path in ["screener", "tracker", "rules", "journal", "charts", "performance", "calculator", "alerts"] else "screener"
     if initial_view == "rules":
         initial_view = "playbook"
 
@@ -297,6 +304,17 @@ async def home(request: Request):
             "Expires": "0"
         }
     )
+
+@app.get("/api/tracker")
+async def api_get_tracker():
+    data = get_tracker_dashboard_data()
+    return {"status": "success", "data": data}
+
+@app.post("/api/tracker/sync")
+async def api_sync_tracker():
+    res = update_tracked_signals()
+    data = get_tracker_dashboard_data()
+    return {"status": "success", "sync_result": res, "data": data}
 
 @app.get("/api/performance")
 async def api_performance(capital: Optional[float] = None):
