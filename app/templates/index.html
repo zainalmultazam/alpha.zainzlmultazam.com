@@ -952,9 +952,9 @@
                 <div id="scan-speed-badge" class="hidden flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-surface-900/90 border border-slate-200 dark:border-white/10 text-xs font-mono">
                     <div class="flex items-center gap-2 text-slate-700 dark:text-gray-300">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="scan-duration-text" class="font-semibold">Dipindai dalam 1.2 detik · 104 saham</span>
+                        <span id="scan-duration-text" class="font-semibold">Terakhir dipindai · 58 saham pilihan</span>
                     </div>
-                    <span class="text-slate-500 dark:text-gray-400 text-[11px]">Filter Likuiditas: Turnover MA20 ≥ Rp 1 Miliar</span>
+                    <span class="text-slate-500 dark:text-gray-400 text-[11px]">Filter Universe: Kompas100 / LQ45 (Turnover MA20 ≥ Rp 1 Miliar)</span>
                 </div>
 
                 <!-- Category Filters -->
@@ -2891,7 +2891,9 @@
                 updateQuickTickersFromScan(allScanResults);
 
                 if (speedBadge && durationText && json.duration_sec) {
-                    durationText.innerText = `Dipindai dalam ${json.duration_sec} detik · ${json.total_universe || 104} saham`;
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                    durationText.innerHTML = `Terakhir dipindai pukul <b>${timeStr} WIB</b> · <b>${json.total_universe || 58} saham</b> (${json.duration_sec}s)`;
                     speedBadge.classList.remove('hidden');
                 }
 
@@ -2925,7 +2927,9 @@
                                 updateQuickTickersFromScan(allScanResults);
 
                                 if (speedBadge && durationText) {
-                                    durationText.innerText = `Dipindai dalam ${data.duration_sec} detik · ${data.total_universe || 104} saham`;
+                                    const now = new Date();
+                                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+                                    durationText.innerHTML = `Terakhir dipindai pukul <b>${timeStr} WIB</b> · <b>${data.total_universe || 58} saham</b> (${data.duration_sec}s)`;
                                     speedBadge.classList.remove('hidden');
                                 }
 
