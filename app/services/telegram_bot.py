@@ -514,9 +514,27 @@ async def run_safety_sentinel_check() -> Dict[str, Any]:
             await send_telegram_message(msg, reply_markup=reply_markup)
             alerts_sent += 1
 
-        # 3. ALERT EDUKASI TIME-STOP: Saham dipegang > 7 hari bursa dengan pergerakan stagnan
+        # 3. ALERT PROFIT ARMOR (BEP LOCK): Harga sudah naik >= +4.0% tapi belum kena TP1
+        elif pnl_pct >= 4.0 and current_price < tp and (trade_id, "BEP_ARMOR") not in _alerted_trades:
+            _alerted_trades.add((trade_id, "BEP_ARMOR"))
+            pnl_amt = (current_price - entry) * (lots * 100)
+            msg = f"🛡️ <b>PROFIT ARMOR BEP ALERT: {ticker}</b>\n"
+            msg += f"<i>Saham ini telah menguat <b>+{pnl_pct:.2f}%</b>! Lindungi modal Anda sekarang.</i>\n"
+            msg += "────────────\n"
+            msg += f"Saham             : <b>{ticker}</b> ({lots} Lot)\n"
+            msg += f"Harga Beli        : Rp {entry:,.0f}\n"
+            msg += f"Harga Live        : <b>Rp {current_price:,.0f} (+{pnl_pct:.2f}%)</b>\n"
+            msg += f"Floating Cuan     : <b>+Rp {pnl_amt:,.0f}</b>\n"
+            msg += "────────────\n"
+            msg += "<b>PANDUAN HEDGE FUND DISIPLIN:</b>\n"
+            msg += f"Segera geser Stop Loss di aplikasi sekuritas Anda dari Rp {sl:,.0f} ke <b>Rp {entry:,.0f} (Harga Modal / BEP)</b>.\n"
+            msg += "✨ Transaksi ini sekarang <b>100% Bebas Risiko (Risk-Free Trade)</b>!\n"
+            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+            await send_telegram_message(msg)
+            alerts_sent += 1
+
+        # 4. ALERT EDUKASI TIME-STOP: Saham dipegang > 7 hari bursa dengan pergerakan stagnan
         days = t.get("holding_days", 1)
-        pnl_pct = ((current_price - entry) / entry) * 100
         if days > 7 and (-2.0 <= pnl_pct <= 3.0) and (trade_id, "TIMESTOP") not in _alerted_trades:
             _alerted_trades.add((trade_id, "TIMESTOP"))
             pnl_sign = "+" if pnl_pct >= 0 else ""

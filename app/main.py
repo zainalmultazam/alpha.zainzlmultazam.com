@@ -19,6 +19,7 @@ from app.engine.technical import calculate_indicators, calculate_volume_profile,
 from app.engine.strategy import calculate_lot_size, generate_trade_plan
 from app.engine.journal import log_trade, get_all_trades, get_open_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
 from app.engine.capital import log_capital_flow, get_capital_statement, delete_capital_entry, init_capital_db
+from app.engine.relative_strength import calculate_rs_line_series, get_stock_rs_rating
 from app.engine.tracker import init_tracker_db, record_signal_snapshot, update_tracked_signals, get_tracker_dashboard_data
 from app.services.telegram import send_telegram_message, notify_super_digest, notify_morning_briefing, notify_evening_wrap
 from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
@@ -519,6 +520,11 @@ async def api_chart(ticker: str):
             ema200_series.append({"time": time_str, "value": round(float(row["EMA200"]), 2)})
         if pd.notnull(row.get("VolMA20")):
             vol_ma20_series.append({"time": time_str, "value": round(float(row["VolMA20"]), 2)})
+
+    # Hitung RS Line vs IHSG & RS Rating (Hedge Fund Metric)
+    df_ihsg = await loop.run_in_executor(None, fetch_stock_df, "^JKSE")
+    rs_line_series = calculate_rs_line_series(df_calc, df_ihsg)
+    rs_info = get_stock_rs_rating(full_ticker, df_stock=df_calc, df_ihsg=df_ihsg)
         
     return {
         "ticker": clean_ticker,
@@ -530,6 +536,8 @@ async def api_chart(ticker: str):
         "vol_ma20": vol_ma20_series[-180:],
         "avwap": avwap_series[-180:],
         "cmf": flow_data["cmf_series"][-180:],
+        "rs_line": rs_line_series[-180:],
+        "rs_rating": rs_info,
         "big_money": {
             "status": flow_data["status"],
             "score": flow_data["score"],

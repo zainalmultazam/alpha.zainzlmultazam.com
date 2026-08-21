@@ -92,10 +92,11 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         if "Stage 2 Leader" in setups:
             classic_score += 10
 
-        # 2. Hitung Skor AI Adaptive (Disesuaikan Rezim Pasar & Rotasi Sektor)
+        # 2. Hitung Skor AI Adaptive (Disesuaikan Rezim Pasar, Rotasi Sektor & Relative Strength)
         from app.services.market_data import get_market_climate
         from app.engine.learner import get_active_learned_weights
         from app.engine.sector import get_top_inflow_sectors
+        from app.engine.relative_strength import get_stock_rs_rating
 
         climate_info = get_market_climate()
         current_regime = climate_info.get("regime", "BULLISH")
@@ -103,6 +104,7 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
         top_sectors = get_top_inflow_sectors()
         
         is_sector_leader = ticker_info.get("sector") in top_sectors
+        rs_info = get_stock_rs_rating(ticker_info["ticker"], df_stock=df)
 
         ai_score = ai_weights.get("base_score", 50)
         if weekly_confirmed:
@@ -111,6 +113,15 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             ai_score += ai_weights.get("big_money_inflow", 15)
         if is_sector_leader:
             ai_score += ai_weights.get("sector_inflow_bonus", 5)
+        
+        # Relative Strength Bonus/Penalty (William O'Neil Institutional Standard)
+        if rs_info["rating"] >= 85:
+            ai_score += 8  # Elite Leader Bonus
+        elif rs_info["rating"] >= 80:
+            ai_score += 4  # Strong Outperformer Bonus
+        elif rs_info["rating"] < 50:
+            ai_score -= 8  # Laggard Penalty
+
         if "VCP Breakout" in setups:
             ai_score += ai_weights.get("vcp_breakout", 20)
         if "EMA 20 Pullback" in setups:
@@ -149,6 +160,10 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
             "classic_score": min(99, classic_score),
             "big_money_status": big_money_status,
             "is_sector_leader": is_sector_leader,
+            "rs_rating": rs_info["rating"],
+            "rs_tier": rs_info["tier"],
+            "rs_label": rs_info["label"],
+            "rs_color": rs_info["color"],
             "volatility_profile": trade_plan.get("volatility_profile", "BALANCED_GROWTH"),
             "volatility_badge": trade_plan.get("volatility_badge", "Balanced"),
             "flow_score": flow_score,
@@ -162,12 +177,21 @@ def scan_stock(ticker_info: Dict[str, str], df: pd.DataFrame) -> Optional[Dict[s
 def run_full_scan() -> list:
     """Melakukan scan cepat seluruh universe saham secara batch."""
     from app.engine.universe import get_universe
-    from app.services.market_data import batch_fetch_stock_dfs
+    from app.services.market_data import batch_fetch_stock_dfs, fetch_stock_df
+    from app.engine.relative_strength import compute_universe_rs_ratings
     
     universe = get_universe()
     tickers = [item["ticker"] for item in universe]
     dfs = batch_fetch_stock_dfs(tickers, batch_size=35)
     
+    # Hitung RS ranking batch vs IHSG
+    try:
+        df_ihsg = fetch_stock_df("^JKSE", period="1y")
+        if df_ihsg is not None and not df_ihsg.empty:
+            compute_universe_rs_ratings(dfs, df_ihsg)
+    except Exception as e:
+        print(f"Error computing universe RS ratings: {e}")
+
     results = []
     for item in universe:
         df = dfs.get(item["ticker"])
