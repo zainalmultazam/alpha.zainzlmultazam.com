@@ -526,6 +526,10 @@
         html:not(.dark) ::-webkit-scrollbar-track { background: #F1F5F9; }
         html:not(.dark) ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
         html:not(.dark) ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Hide scrollbars utility (clean, invisible scroll) */
+        .no-scrollbar::-webkit-scrollbar { display: none !important; width: 0 !important; height: 0 !important; }
+        .no-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
     </style>
 </head>
 <body class="min-h-screen w-full antialiased bg-slate-50 text-slate-800 dark:bg-oled dark:text-slate-200 selection:bg-blue-500/30 selection:text-blue-400">
@@ -2158,12 +2162,12 @@
                 </div>
 
                 <!-- Sector Rotation Flow Bar + Quick Allocation Pills -->
-                <div id="sector-rotation-bar" class="flex items-center justify-between gap-3 overflow-x-auto pb-1 text-xs font-mono">
-                    <div class="flex items-center gap-2 overflow-x-auto min-w-0">
+                <div id="sector-rotation-bar" class="flex items-center justify-between gap-3 overflow-x-auto no-scrollbar pb-1 text-xs font-mono">
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar min-w-0">
                         <span class="text-[11px] text-slate-400 dark:text-gray-500 font-sans uppercase font-bold tracking-wider shrink-0 flex items-center gap-1">
                             <i data-lucide="layers" class="w-3.5 h-3.5 text-cyan-500"></i> Rotasi Sektor:
                         </span>
-                        <div id="sector-inflow-pills" class="flex items-center gap-1.5 overflow-x-auto">
+                        <div id="sector-inflow-pills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                             <span class="px-2 py-0.5 rounded-lg bg-cyan-50 dark:bg-cyan-950/60 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800 text-[10px] font-semibold flex items-center gap-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span> Memuat Sektor...
                             </span>
@@ -2186,7 +2190,7 @@
 
                 <!-- Category Filters & Scoring Engine Mode Toggle -->
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-                    <div class="flex items-center gap-2 overflow-x-auto" id="filter-tabs">
+                    <div class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth" id="filter-tabs">
                         <button onclick="filterPicks('ALL')" class="filter-btn active text-xs font-medium px-3.5 py-1.5 rounded-xl bg-emerald-600 text-white transition shadow-sm whitespace-nowrap" data-filter="ALL">
                             Semua (<span id="count-all">0</span>)
                         </button>
