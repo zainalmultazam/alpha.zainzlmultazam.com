@@ -1,1 +1,1 @@
-# AlphaSwing IDX Package
+# Alpha Package

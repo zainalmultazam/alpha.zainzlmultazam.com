@@ -42,6 +42,19 @@ def calculate_indicators(df: pd.DataFrame) -> pd.DataFrame:
     range_20d = df["High"].rolling(20).max() - df["Low"].rolling(20).min()
     df["vcp_ratio"] = range_5d / range_20d.replace(0, np.nan)
 
+    # Volume Dry-Up (VDU: Volume terendah 5 hari sebelum breakout vs MA20)
+    min_vol_5d = df["Volume"].shift(1).rolling(5).min()
+    df["vdu_ratio"] = (min_vol_5d / df["vol_ma20"].replace(0, np.nan)).fillna(1.0)
+
+    # Up/Down Volume Ratio 20-Hari (CANSLIM Institutional Accumulation Indicator)
+    up_vol = df["Volume"].where(df["Close"] > df["Close"].shift(1), 0)
+    down_vol = df["Volume"].where(df["Close"] < df["Close"].shift(1), 0)
+    df["ud_ratio_20"] = (up_vol.rolling(20).sum() / down_vol.rolling(20).sum().replace(0, np.nan)).fillna(1.0)
+
+    # Close Location Value (CLV: -1.0 to +1.0 mengukur dominasi buyer saat penutupan)
+    hl_range = (df["High"] - df["Low"]).replace(0, np.nan)
+    df["clv"] = (((df["Close"] - df["Low"]) - (df["High"] - df["Close"])) / hl_range).fillna(0.0)
+
     # Multi-Timeframe: Weekly Trend Calculation (Resample to Weekly)
     try:
         weekly_close = df["Close"].resample("W-FRI").last().dropna()

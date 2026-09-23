@@ -32,12 +32,12 @@ IDX_STOCKS = [
     # Energi, Batu Bara, Migas & Renewable (15 Saham)
     {"ticker": "ADRO.JK", "name": "Adaro Energy Indonesia", "sector": "Energy"},
     {"ticker": "PTBA.JK", "name": "Bukit Asam", "sector": "Energy"},
-    {"ticker": "MEDC.JK", "name": "Medco Energi Internasional", "sector": "Energy"},
+    {"ticker": "MEDC.JK", "name": "Medco Energi Internasional", "sector": "Energy", "is_anti_crisis": True},
     {"ticker": "PGAS.JK", "name": "Perusahaan Gas Negara", "sector": "Energy"},
     {"ticker": "AKRA.JK", "name": "AKR Corporindo", "sector": "Energy"},
     {"ticker": "ENRG.JK", "name": "Energi Mega Persada", "sector": "Energy"},
     {"ticker": "BUMI.JK", "name": "Bumi Resources", "sector": "Energy"},
-    {"ticker": "ITMG.JK", "name": "Indo Tambangraya Megah", "sector": "Energy"},
+    {"ticker": "ITMG.JK", "name": "Indo Tambangraya Megah", "sector": "Energy", "is_anti_crisis": True},
     {"ticker": "INDY.JK", "name": "Indika Energy", "sector": "Energy"},
     {"ticker": "HRUM.JK", "name": "Harum Energy", "sector": "Energy"},
     {"ticker": "PGEO.JK", "name": "Pertamina Geothermal Energy", "sector": "Energy"},
@@ -47,9 +47,9 @@ IDX_STOCKS = [
     {"ticker": "ELSA.JK", "name": "Elnusa", "sector": "Energy"},
     
     # Mineral, Tambang, Logam & Bahan Baku (15 Saham)
-    {"ticker": "ANTM.JK", "name": "Aneka Tambang", "sector": "Basic Materials"},
+    {"ticker": "ANTM.JK", "name": "Aneka Tambang", "sector": "Basic Materials", "is_anti_crisis": True},
     {"ticker": "INCO.JK", "name": "Vale Indonesia", "sector": "Basic Materials"},
-    {"ticker": "MDKA.JK", "name": "Merdeka Copper Gold", "sector": "Basic Materials"},
+    {"ticker": "MDKA.JK", "name": "Merdeka Copper Gold", "sector": "Basic Materials", "is_anti_crisis": True},
     {"ticker": "MBMA.JK", "name": "Merdeka Battery Materials", "sector": "Basic Materials"},
     {"ticker": "AMMN.JK", "name": "Amman Mineral Internasional", "sector": "Basic Materials"},
     {"ticker": "NCKL.JK", "name": "Trimegah Bangun Persada", "sector": "Basic Materials"},
@@ -61,7 +61,8 @@ IDX_STOCKS = [
     {"ticker": "INTP.JK", "name": "Indocement Tunggal Prakarsa", "sector": "Basic Materials"},
     {"ticker": "ESSA.JK", "name": "Essa Industries Indonesia", "sector": "Basic Materials"},
     {"ticker": "AVIA.JK", "name": "Avia Avian", "sector": "Basic Materials"},
-    {"ticker": "PSAB.JK", "name": "J Resources Asia Pasifik", "sector": "Basic Materials"},
+    {"ticker": "PSAB.JK", "name": "J Resources Asia Pasifik", "sector": "Basic Materials", "is_anti_crisis": True},
+    {"ticker": "BRMS.JK", "name": "Bumi Resources Minerals", "sector": "Basic Materials", "is_anti_crisis": True},
     
     # Konsumsi, Makanan, Minuman & Farmasi / Kesehatan (18 Saham)
     {"ticker": "ICBP.JK", "name": "Indofood CBP Sukses Makmur", "sector": "Consumer Non-Cyclicals"},

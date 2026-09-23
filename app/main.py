@@ -1,30 +1,31 @@
-from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.middleware.cors import CORSMiddleware
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import os
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import asyncio
-import time
-import json
-import pandas as pd
-from datetime import datetime
-from typing import Optional
 
 from app.config import settings
-from app.engine.universe import get_universe
-from app.services.market_data import fetch_stock_df, batch_fetch_stock_dfs, clear_cache, get_market_climate, get_idx_market_status, get_global_macro_data
-from app.engine.scanner import scan_stock
-from app.engine.technical import calculate_indicators, calculate_volume_profile, calculate_anchored_vwap, calculate_pocket_pivots_and_markers, calculate_money_flow
-from app.engine.strategy import calculate_lot_size, generate_trade_plan
-from app.engine.journal import log_trade, get_all_trades, get_open_trades, close_trade, delete_trade, get_journal_stats, get_performance_metrics, init_db
-from app.engine.capital import log_capital_flow, get_capital_statement, delete_capital_entry, init_capital_db
-from app.engine.relative_strength import calculate_rs_line_series, get_stock_rs_rating
-from app.engine.tracker import init_tracker_db, record_signal_snapshot, update_tracked_signals, get_tracker_dashboard_data
-from app.services.telegram import send_telegram_message, notify_super_digest, notify_morning_briefing, notify_evening_wrap
-from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker, run_safety_sentinel_check
+from app.engine.journal import init_db, get_open_trades, get_journal_stats
+from app.engine.capital import init_capital_db
+from app.engine.tracker import init_tracker_db, record_signal_snapshot, update_tracked_signals
+from app.services.market_data import get_market_climate, get_global_macro_data
+from app.services.telegram import notify_super_digest, notify_morning_briefing, notify_evening_wrap
+from app.services.telegram_bot import telegram_polling_worker, sentinel_scheduler_worker
+
+# Import Routers
+from app.routers import pages, market, screener, tracker, journal, capital, auth, telegram, forecaster, ai
+from app.routers.screener import execute_market_scan, cached_scan_results
 
 app = FastAPI(title=settings.APP_NAME)
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "app": settings.APP_NAME}
+
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(static_dir):
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,199 +35,95 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
-
-FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs>
-    <linearGradient id="zapGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#60A5FA"/>
-      <stop offset="50%" stop-color="#3B82F6"/>
-      <stop offset="100%" stop-color="#1D4ED8"/>
-    </linearGradient>
-    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3B82F6" stop-opacity="0.8"/>
-      <stop offset="100%" stop-color="#06B6D4" stop-opacity="0.35"/>
-    </linearGradient>
-    <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="2.5" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-  </defs>
-  <rect width="64" height="64" rx="16" fill="#070913"/>
-  <rect x="1.5" y="1.5" width="61" height="61" rx="14.5" fill="none" stroke="url(#borderGrad)" stroke-width="1.5"/>
-  <path d="M35 8 L15 36 L30 36 L25 56 L49 26 L34 26 Z" fill="url(#zapGrad)" filter="url(#neonGlow)"/>
-</svg>"""
-
-@app.get("/favicon.svg")
-@app.get("/favicon.ico")
-@app.get("/apple-touch-icon.png")
-@app.get("/apple-touch-icon-precomposed.png")
-@app.get("/icon-192.svg")
-@app.get("/icon-512.svg")
-@app.get("/icon-192.png")
-@app.get("/icon-512.png")
-async def get_favicon():
-    return Response(content=FAVICON_SVG, media_type="image/svg+xml", headers={"Cache-Control": "no-cache, must-revalidate"})
-
-PWA_MANIFEST = {
-    "name": "Alpha - IDX Trading Terminal",
-    "short_name": "Alpha IDX",
-    "description": "High-Performance Swing Trading Screener & Journal for Indonesia Stock Exchange",
-    "start_url": "/",
-    "id": "/",
-    "scope": "/",
-    "display": "standalone",
-    "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-    "orientation": "portrait-primary",
-    "background_color": "#06080F",
-    "theme_color": "#06080F",
-    "categories": ["finance", "productivity", "utilities"],
-    "icons": [
-        {
-            "src": "/favicon.svg?v=3",
-            "sizes": "48x48 72x72 96x96 128x128 256x256",
-            "type": "image/svg+xml",
-            "purpose": "any"
-        },
-        {
-            "src": "/icon-192.svg?v=3",
-            "sizes": "192x192",
-            "type": "image/svg+xml",
-            "purpose": "any"
-        },
-        {
-            "src": "/icon-512.svg?v=3",
-            "sizes": "512x512",
-            "type": "image/svg+xml",
-            "purpose": "any maskable"
-        }
-    ]
-}
-
-@app.get("/manifest.json")
-@app.get("/manifest.webmanifest")
-async def get_manifest():
-    return JSONResponse(content=PWA_MANIFEST, media_type="application/manifest+json", headers={"Cache-Control": "no-cache"})
-
-SW_JS = """const CACHE_NAME = 'alpha-pwa-v5';
-const PRECACHE_URLS = [
-  '/',
-  '/manifest.json',
-  '/favicon.svg?v=3'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).catch(() => {})
-  );
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
-    })
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
-
-  // Network-First for API requests (real-time data)
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Navigation requests: Network-First with Cache Fallback
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('/')))
-    );
-    return;
-  }
-
-  // Stale-While-Revalidate for other static assets
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        }
-        return networkResponse;
-      }).catch(() => cachedResponse);
-
-      return cachedResponse || fetchPromise;
-    })
-  );
-});
-"""
-
-@app.get("/sw.js")
-@app.get("/service-worker.js")
-async def get_service_worker():
-    return Response(content=SW_JS, media_type="application/javascript", headers={"Cache-Control": "no-cache", "Service-Worker-Allowed": "/"})
-
-
-# Scheduler untuk automasi pasar (Morning Briefing, Evening Wrap, EOD Scan)
+# ── Scheduler untuk automasi pasar (Morning Briefing, Evening Wrap, EOD Scan) ──
 scheduler = AsyncIOScheduler()
 
 async def run_scheduled_morning_briefing():
-    """Jadwal Otomatis 08:45 WIB: Kirim Morning Pre-Market Briefing & Top 3 Picks."""
+    """Jadwal Otomatis 08:45 WIB: Kirim Morning Pre-Market Briefing & Top 3 Picks (IDX)."""
     global cached_scan_results
     try:
-        if not cached_scan_results:
-            cached_scan_results = await execute_market_scan()
-        climate = get_market_climate()
+        if not cached_scan_results.get("IDX"):
+            cached_scan_results["IDX"] = await execute_market_scan(market="IDX")
+        climate = get_market_climate(market="IDX")
         macro = get_global_macro_data()
         regime = climate.get("regime", "BULLISH") if isinstance(climate, dict) else "BULLISH"
-        record_signal_snapshot(cached_scan_results[:10], climate=regime)
-        await notify_morning_briefing(cached_scan_results[:3], climate=climate, macro=macro)
+        record_signal_snapshot(cached_scan_results["IDX"][:10], climate=regime, market="IDX")
+        await notify_morning_briefing(cached_scan_results["IDX"][:3], climate=climate, macro=macro, market="IDX")
     except Exception as e:
         print(f"Error in morning briefing cron: {e}")
 
 async def run_scheduled_evening_wrap():
-    """Jadwal Otomatis 16:15 WIB: Kirim Rekap Penutupan Pasar & Status Portofolio + Update Signal Tracker."""
+    """Jadwal Otomatis 16:15 WIB: Kirim Evening Market & Portfolio Wrap (IDX)."""
     try:
-        climate = get_market_climate()
-        open_trades = get_open_trades()
-        stats = get_journal_stats()
-        # Update forward signal tracking prices
-        update_tracked_signals()
-        await notify_evening_wrap(climate=climate, open_trades=open_trades, stats=stats)
+        climate = get_market_climate(market="IDX")
+        macro = get_global_macro_data()
+        open_trades = get_open_trades(market="IDX")
+        stats = get_journal_stats(market="IDX")
+        update_tracked_signals(market="IDX")
+        await notify_evening_wrap(climate=climate, macro=macro, open_trades=open_trades, stats=stats, market="IDX")
     except Exception as e:
         print(f"Error in evening wrap cron: {e}")
+
+async def run_daily_scheduled_scan():
+    """Jadwal Otomatis 17:00 WIB: Scan EOD Kompas100, update sinyal, & sinkronisasi tracker."""
+    global cached_scan_results
+    try:
+        print("[CRON] Running daily EOD market scan...")
+        cached_scan_results["IDX"] = await execute_market_scan(market="IDX", force=True)
+        update_tracked_signals(market="IDX")
+        print("[CRON] Daily EOD scan & signal tracking completed.")
+    except Exception as e:
+        print(f"Error in daily scheduled scan: {e}")
+
+async def run_scheduled_premarket_us():
+    """Jadwal Otomatis 20:00 WIB: Kirim Wall Street Pre-Market Briefing & Top 3 Picks."""
+    global cached_scan_results
+    try:
+        if not cached_scan_results.get("US"):
+            cached_scan_results["US"] = await execute_market_scan(market="US")
+        climate = get_market_climate(market="US")
+        regime = climate.get("regime", "BULLISH") if isinstance(climate, dict) else "BULLISH"
+        record_signal_snapshot(cached_scan_results["US"][:10], climate=regime, market="US")
+        await notify_morning_briefing(cached_scan_results["US"][:3], climate=climate, macro={}, market="US")
+    except Exception as e:
+        print(f"Error in US premarket briefing cron: {e}")
+
+async def run_scheduled_postmarket_us():
+    """Jadwal Otomatis 06:00 WIB: Kirim Wall Street Post-Market Wrap & Status Portofolio US."""
+    try:
+        climate = get_market_climate(market="US")
+        open_trades = get_open_trades(market="US")
+        stats = get_journal_stats(market="US")
+        update_tracked_signals(market="US")
+        await notify_evening_wrap(climate=climate, open_trades=open_trades, stats=stats, market="US")
+    except Exception as e:
+        print(f"Error in US postmarket wrap cron: {e}")
 
 @app.on_event("startup")
 async def startup_event():
     init_db()
     init_tracker_db()
+    init_capital_db()
+    
     # 1. Jadwalkan bot cron otomatis
     try:
-        # Pukul 08:45 WIB: Morning Pre-Market Briefing (Senin-Jumat)
+        # [IDX] Pukul 08:45 WIB: Morning Pre-Market Briefing (Senin-Jumat)
         scheduler.add_job(run_scheduled_morning_briefing, "cron", day_of_week="mon-fri", hour=8, minute=45, timezone="Asia/Jakarta")
-        # Pukul 16:15 WIB: Evening Market & Portfolio Wrap (Senin-Jumat)
+        # [IDX] Pukul 16:15 WIB: Evening Market & Portfolio Wrap (Senin-Jumat)
         scheduler.add_job(run_scheduled_evening_wrap, "cron", day_of_week="mon-fri", hour=16, minute=15, timezone="Asia/Jakarta")
-        # Pukul 17:00 WIB: EOD Full Database Refresh Scan (Senin-Jumat)
+        # [IDX] Pukul 17:00 WIB: EOD Full Database Refresh Scan (Senin-Jumat)
         scheduler.add_job(run_daily_scheduled_scan, "cron", day_of_week="mon-fri", hour=17, minute=0, timezone="Asia/Jakarta")
+        # [IDX AI Learner] Pukul 17:15 WIB: Autonomous External Learning & Calibration (Senin-Jumat)
+        from app.engine.external_learner import run_nightly_external_learning_idx, run_nightly_external_learning_us
+        scheduler.add_job(run_nightly_external_learning_idx, "cron", day_of_week="mon-fri", hour=17, minute=15, timezone="Asia/Jakarta")
+        
+        # [US Wall Street] Pukul 20:00 WIB: Wall Street Pre-Market Briefing & Top 3 Picks (Senin-Jumat)
+        scheduler.add_job(run_scheduled_premarket_us, "cron", day_of_week="mon-fri", hour=20, minute=0, timezone="Asia/Jakarta")
+        # [US Wall Street] Pukul 06:00 WIB: Wall Street Post-Market Wrap (Selasa-Sabtu)
+        scheduler.add_job(run_scheduled_postmarket_us, "cron", day_of_week="tue-sat", hour=6, minute=0, timezone="Asia/Jakarta")
+        # [US AI Learner] Pukul 06:15 WIB: Autonomous External Learning & Calibration (Selasa-Sabtu)
+        scheduler.add_job(run_nightly_external_learning_us, "cron", day_of_week="tue-sat", hour=6, minute=15, timezone="Asia/Jakarta")
+        
         scheduler.start()
     except Exception as e:
         print(f"Scheduler start warning: {e}")
@@ -235,507 +132,14 @@ async def startup_event():
     asyncio.create_task(telegram_polling_worker())
     asyncio.create_task(sentinel_scheduler_worker())
 
-cached_scan_results = []
-last_scan_duration = 0.0
-
-async def execute_market_scan() -> list:
-    """Melakukan scan seluruh universe saham secara asinkron dengan batch downloader."""
-    global last_scan_duration
-    t0 = time.time()
-    universe = get_universe()
-    tickers = [item["ticker"] for item in universe]
-    loop = asyncio.get_event_loop()
-    
-    # Ambil seluruh data saham secara batch multi-threaded
-    dfs = await loop.run_in_executor(None, batch_fetch_stock_dfs, tickers, 35)
-    
-    results = []
-    for item in universe:
-        df = dfs.get(item["ticker"])
-        res = scan_stock(item, df)
-        if res is not None:
-            results.append(res)
-            
-    results.sort(key=lambda x: x["score"], reverse=True)
-    last_scan_duration = round(time.time() - t0, 2)
-    return results
-
-async def run_daily_scheduled_scan():
-    global cached_scan_results
-    results = await execute_market_scan()
-    cached_scan_results = results
-    if settings.ENABLE_TELEGRAM_ALERTS:
-        climate = get_market_climate()
-        await notify_super_digest(results[:3], climate)
-
-@app.get("/health")
-async def health_check():
-    return {"status": "ok", "app": settings.APP_NAME, "domain": settings.APP_DOMAIN}
-
-@app.get("/", response_class=HTMLResponse)
-@app.get("/screener", response_class=HTMLResponse)
-@app.get("/tracker", response_class=HTMLResponse)
-@app.get("/rules", response_class=HTMLResponse)
-@app.get("/journal", response_class=HTMLResponse)
-@app.get("/charts", response_class=HTMLResponse)
-@app.get("/performance", response_class=HTMLResponse)
-@app.get("/calculator", response_class=HTMLResponse)
-@app.get("/alerts", response_class=HTMLResponse)
-async def home(request: Request):
-    climate = get_market_climate()
-    # Detect initial view from path
-    path = request.url.path.strip("/").lower()
-    initial_view = path if path in ["screener", "tracker", "rules", "journal", "charts", "performance", "calculator", "alerts"] else "screener"
-    if initial_view == "rules":
-        initial_view = "playbook"
-
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-        context={
-            "domain": settings.APP_DOMAIN,
-            "default_capital": settings.DEFAULT_CAPITAL,
-            "default_risk_pct": settings.DEFAULT_MAX_RISK_PCT,
-            "app_name": settings.APP_NAME,
-            "climate": climate,
-            "initial_view": initial_view
-        },
-        headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0"
-        }
-    )
-
-@app.get("/api/tracker")
-async def api_get_tracker():
-    data = get_tracker_dashboard_data()
-    from app.engine.learner import get_active_learned_weights
-    data["ai_memory"] = get_active_learned_weights()
-    return {"status": "success", "data": data}
-
-@app.post("/api/tracker/sync")
-async def api_sync_tracker():
-    res = update_tracked_signals()
-    data = get_tracker_dashboard_data()
-    from app.engine.learner import get_active_learned_weights
-    data["ai_memory"] = get_active_learned_weights()
-    return {"status": "success", "sync_result": res, "data": data}
-
-@app.post("/api/tracker/calibrate")
-async def api_calibrate_tracker():
-    from app.engine.learner import calibrate_and_learn
-    calib = calibrate_and_learn()
-    data = get_tracker_dashboard_data()
-    data["ai_memory"] = calib
-    return {"status": "success", "calibration": calib, "data": data}
-
-@app.get("/api/sectors")
-async def api_get_sectors():
-    from app.engine.sector import calculate_sector_rotation
-    data = calculate_sector_rotation()
-    return {"status": "success", "data": data}
-
-@app.get("/api/tracker/post-mortems")
-async def api_get_post_mortems():
-    from app.engine.post_mortem import get_all_post_mortems
-    data = get_all_post_mortems()
-    return {"status": "success", "data": data}
-
-@app.get("/api/performance")
-async def api_performance(capital: Optional[float] = None):
-    base_cap = capital or settings.DEFAULT_CAPITAL or 50000000.0
-    metrics = get_performance_metrics(base_cap)
-    return {"status": "success", "data": metrics}
-
-@app.post("/api/auth/verify-pin")
-async def api_verify_pin(pin: str = Form(...)):
-    if str(pin).strip() == str(settings.ACCESS_PIN).strip():
-        response = JSONResponse(content={"status": "success", "authenticated": True, "token": "pin_ok"})
-        response.set_cookie(key="alpha_pin_auth", value="authenticated", max_age=2592000, httponly=False, samesite="lax")
-        return response
-    return JSONResponse(status_code=401, content={"status": "error", "message": "PIN Salah. Silakan coba lagi."})
-
-@app.get("/api/auth/status")
-async def api_auth_status(request: Request):
-    auth_cookie = request.cookies.get("alpha_pin_auth")
-    return {"status": "success", "authenticated": auth_cookie == "authenticated"}
-
-@app.post("/api/auth/logout")
-async def api_auth_logout():
-    response = JSONResponse(content={"status": "success", "authenticated": False})
-    response.delete_cookie("alpha_pin_auth")
-    return response
-
-@app.get("/api/market-climate")
-async def api_market_climate(force: bool = False):
-    return {"status": "success", "data": get_market_climate(force=force)}
-
-@app.get("/api/market-status")
-async def api_market_status():
-    return {"status": "success", "data": get_idx_market_status()}
-
-@app.get("/api/scan")
-async def api_scan(force: bool = False):
-    global cached_scan_results, last_scan_duration
-    if not cached_scan_results or force:
-        if force:
-            clear_cache()
-        cached_scan_results = await execute_market_scan()
-    climate = get_market_climate()
-    universe = get_universe()
-    return {
-        "status": "success", 
-        "total": len(cached_scan_results),
-        "total_universe": len(universe),
-        "duration_sec": last_scan_duration,
-        "climate": climate,
-        "data": cached_scan_results
-    }
-
-@app.get("/api/scan-stream")
-async def api_scan_stream(force: bool = False):
-    """Server-Sent Events endpoint untuk streaming persentase scan langsung ke frontend."""
-    async def event_generator():
-        global cached_scan_results, last_scan_duration
-        t0 = time.time()
-        if force:
-            clear_cache()
-        
-        universe = get_universe()
-        total_universe = len(universe)
-        
-        # Step 1: Inisialisasi
-        yield f"data: {json.dumps({'progress': 10, 'stage': 'Menyiapkan 104 watchlist universe IDX...', 'total': total_universe})}\n\n"
-        await asyncio.sleep(0.05)
-        
-        # Step 2: Batch Download Data Bursa
-        yield f"data: {json.dumps({'progress': 30, 'stage': 'Mengunduh data candle & volume bursa paralel...', 'total': total_universe})}\n\n"
-        loop = asyncio.get_event_loop()
-        tickers = [item["ticker"] for item in universe]
-        dfs = await loop.run_in_executor(None, batch_fetch_stock_dfs, tickers, 35)
-        
-        # Step 3: Analisis Pola Breakout Raider & Validasi Likuiditas MA20
-        yield f"data: {json.dumps({'progress': 70, 'stage': 'Menganalisis Stage 2, VCP, EMA Pullback & Likuiditas MA20...', 'total': total_universe})}\n\n"
-        results = []
-        for idx, item in enumerate(universe):
-            df = dfs.get(item["ticker"])
-            res = scan_stock(item, df)
-            if res is not None:
-                results.append(res)
-                
-        results.sort(key=lambda x: x["score"], reverse=True)
-        cached_scan_results = results
-        last_scan_duration = round(time.time() - t0, 2)
-        climate = get_market_climate()
-        
-        # Step 4: Selesai
-        yield f"data: {json.dumps({'progress': 100, 'stage': 'Pemindaian selesai!', 'total': len(results), 'total_universe': total_universe, 'duration_sec': last_scan_duration, 'climate': climate, 'data': results})}\n\n"
-
-    return StreamingResponse(event_generator(), media_type="text/event-stream")
-
-@app.post("/api/calculate-size")
-async def api_calculate_size(
-    capital: float = Form(...),
-    risk_pct: float = Form(1.0),
-    entry_price: float = Form(...),
-    stop_loss: float = Form(...),
-    target_price: Optional[float] = Form(None)
-):
-    try:
-        result = calculate_lot_size(capital, risk_pct, entry_price, stop_loss, target_price)
-        return {"status": "success", "data": result}
-    except ValueError as e:
-        return JSONResponse(status_code=400, content={"status": "error", "message": str(e)})
-
-@app.get("/api/macro")
-async def api_macro(force: bool = False):
-    """Mengembalikan data harga komoditas global, kurs USD/IDR, dan yield US 10Y dengan korelasi emiten BEI."""
-    loop = asyncio.get_event_loop()
-    data = await loop.run_in_executor(None, get_global_macro_data, force)
-    return JSONResponse(content=data)
-
-@app.get("/api/chart/{ticker}")
-async def api_chart(ticker: str):
-    clean_ticker = ticker.upper().replace(".JK", "").strip()
-    full_ticker = f"{clean_ticker}.JK"
-    loop = asyncio.get_event_loop()
-    df = await loop.run_in_executor(None, fetch_stock_df, full_ticker)
-    
-    if df is None or df.empty:
-        return JSONResponse(status_code=404, content={"error": "Data not found"})
-    
-    # Hitung Indikator Teknikal: EMA 20, EMA 50, EMA 200 & Volume MA 20
-    df_calc = calculate_indicators(df)
-    df_calc["EMA20"] = df_calc["Close"].ewm(span=20, adjust=False).mean()
-    df_calc["EMA50"] = df_calc["Close"].ewm(span=50, adjust=False).mean()
-    df_calc["EMA200"] = df_calc["Close"].ewm(span=200, adjust=False).mean()
-    df_calc["VolMA20"] = df_calc["Volume"].rolling(window=20).mean()
-
-    last_row = df_calc.iloc[-1]
-    curr_price = float(last_row["Close"])
-    curr_atr = float(last_row.get("ATR", curr_price * 0.04))
-    trade_plan = generate_trade_plan(curr_price, curr_atr, "Trade Plan")
-
-    # Hitung Volume Profile, Anchored VWAP, Pocket Pivot Markers, & Money Flow (CMF/OBV)
-    vol_profile = calculate_volume_profile(df_calc, lookback=120)
-    avwap_series = calculate_anchored_vwap(df_calc, lookback=120)
-    markers = calculate_pocket_pivots_and_markers(df_calc, lookback=180)
-    flow_data = calculate_money_flow(df_calc)
-
-    # Format untuk TradingView Lightweight Charts
-    candles = []
-    volumes = []
-    ema20_series = []
-    ema50_series = []
-    ema200_series = []
-    vol_ma20_series = []
-
-    for idx, row in df_calc.iterrows():
-        time_str = idx.strftime("%Y-%m-%d")
-        open_val = round(float(row["Open"]), 2)
-        close_val = round(float(row["Close"]), 2)
-        high_val = round(float(row["High"]), 2)
-        low_val = round(float(row["Low"]), 2)
-        vol_val = int(row["Volume"]) if pd.notnull(row["Volume"]) else 0
-        
-        candles.append({
-            "time": time_str,
-            "open": open_val,
-            "high": high_val,
-            "low": low_val,
-            "close": close_val,
-        })
-        volumes.append({
-            "time": time_str,
-            "value": vol_val,
-            "color": "rgba(16, 185, 129, 0.4)" if close_val >= open_val else "rgba(239, 68, 68, 0.4)"
-        })
-
-        if pd.notnull(row.get("EMA20")):
-            ema20_series.append({"time": time_str, "value": round(float(row["EMA20"]), 2)})
-        if pd.notnull(row.get("EMA50")):
-            ema50_series.append({"time": time_str, "value": round(float(row["EMA50"]), 2)})
-        if pd.notnull(row.get("EMA200")):
-            ema200_series.append({"time": time_str, "value": round(float(row["EMA200"]), 2)})
-        if pd.notnull(row.get("VolMA20")):
-            vol_ma20_series.append({"time": time_str, "value": round(float(row["VolMA20"]), 2)})
-
-    # Hitung RS Line vs IHSG & RS Rating (Hedge Fund Metric)
-    df_ihsg = await loop.run_in_executor(None, fetch_stock_df, "^JKSE")
-    rs_line_series = calculate_rs_line_series(df_calc, df_ihsg)
-    rs_info = get_stock_rs_rating(full_ticker, df_stock=df_calc, df_ihsg=df_ihsg)
-        
-    return {
-        "ticker": clean_ticker,
-        "candles": candles[-180:],
-        "volumes": volumes[-180:],
-        "ema20": ema20_series[-180:],
-        "ema50": ema50_series[-180:],
-        "ema200": ema200_series[-180:],
-        "vol_ma20": vol_ma20_series[-180:],
-        "avwap": avwap_series[-180:],
-        "cmf": flow_data["cmf_series"][-180:],
-        "rs_line": rs_line_series[-180:],
-        "rs_rating": rs_info,
-        "big_money": {
-            "status": flow_data["status"],
-            "score": flow_data["score"],
-            "cmf_val": flow_data["cmf_val"],
-            "obv_trend": flow_data["obv_trend"]
-        },
-        "markers": markers,
-        "volume_profile": vol_profile,
-        "trade_plan": trade_plan
-    }
-
-_FLOW_RADAR_CACHE = {}
-_FLOW_RADAR_TIME = None
-_FLOW_RADAR_EXPIRY = 600  # 10 menit
-
-@app.get("/api/flow-radar")
-async def api_flow_radar():
-    """Mengembalikan radar Top Big Money Inflow & Outflow saham likuid BEI."""
-    global _FLOW_RADAR_CACHE, _FLOW_RADAR_TIME
-    now = datetime.now()
-    if _FLOW_RADAR_TIME and (now - _FLOW_RADAR_TIME).total_seconds() < _FLOW_RADAR_EXPIRY and _FLOW_RADAR_CACHE:
-        return JSONResponse(content=_FLOW_RADAR_CACHE)
-
-    loop = asyncio.get_event_loop()
-    def compute_radar():
-        global _FLOW_RADAR_CACHE, _FLOW_RADAR_TIME
-        universe = get_universe()
-        tickers = [item["ticker"] for item in universe]
-        dfs = batch_fetch_stock_dfs(tickers, batch_size=35)
-        
-        flow_list = []
-        for item in universe:
-            df = dfs.get(item["ticker"])
-            if df is not None and len(df) >= 30:
-                try:
-                    flow = calculate_money_flow(df)
-                    price = float(df["Close"].iloc[-1])
-                    prev_price = float(df["Close"].iloc[-2]) if len(df) > 1 else price
-                    chg = round(((price - prev_price) / prev_price) * 100, 2) if prev_price > 0 else 0.0
-                    turnover = price * float(df["Volume"].iloc[-1])
-                    if turnover >= 500_000_000:
-                        flow_list.append({
-                            "symbol": item["ticker"].replace(".JK", ""),
-                            "name": item["name"],
-                            "sector": item["sector"],
-                            "price": int(price),
-                            "change_pct": chg,
-                            "status": flow["status"],
-                            "score": flow["score"],
-                            "cmf": flow["cmf_val"],
-                            "turnover_bio": round(turnover / 1_000_000_000, 2)
-                        })
-                except Exception:
-                    continue
-        
-        inflows = sorted([x for x in flow_list if x["status"] == "INFLOW"], key=lambda x: x["score"], reverse=True)[:5]
-        outflows = sorted([x for x in flow_list if x["status"] == "OUTFLOW"], key=lambda x: x["score"])[:5]
-        
-        if not inflows:
-            inflows = sorted(flow_list, key=lambda x: x["score"], reverse=True)[:5]
-        if not outflows:
-            outflows = sorted(flow_list, key=lambda x: x["score"])[:5]
-
-        res = {
-            "top_inflow": inflows,
-            "top_outflow": outflows,
-            "timestamp": datetime.now().strftime("%H:%M:%S WIB")
-        }
-        _FLOW_RADAR_CACHE = res
-        _FLOW_RADAR_TIME = datetime.now()
-        return res
-
-    radar_data = await loop.run_in_executor(None, compute_radar)
-    return JSONResponse(content=radar_data)
-
-@app.get("/api/journal")
-async def api_get_journal():
-    return {"status": "success", "trades": get_all_trades(), "stats": get_journal_stats()}
-
-@app.get("/api/journal/stats")
-async def api_journal_stats():
-    return {"status": "success", "data": get_journal_stats()}
-
-@app.post("/api/journal/log")
-async def api_log_trade(
-    ticker: str = Form(...),
-    entry_price: float = Form(...),
-    stop_loss: float = Form(...),
-    target_price: float = Form(...),
-    lots: int = Form(...),
-    setup_name: str = Form("Alpha Setup")
-):
-    trade_id = log_trade(ticker, entry_price, stop_loss, target_price, lots, setup_name)
-    return {"status": "success", "trade_id": trade_id}
-
-@app.post("/api/journal/close")
-async def api_close_trade(
-    trade_id: int = Form(...),
-    exit_price: float = Form(...),
-    notes: Optional[str] = Form(""),
-    exit_reason: Optional[str] = Form("MANUAL")
-):
-    ok = close_trade(trade_id, exit_price, notes or "", exit_reason or "MANUAL")
-    return {"status": "success" if ok else "error"}
-
-@app.post("/api/journal/delete")
-@app.post("/api/journal/delete/{trade_id}")
-@app.delete("/api/journal/{trade_id}")
-async def api_delete_trade(trade_id: Optional[int] = None, trade_id_form: Optional[int] = Form(None, alias="trade_id")):
-    tid = trade_id or trade_id_form
-    if not tid:
-        return {"status": "error", "message": "Missing trade_id"}
-    ok = delete_trade(tid)
-    return {"status": "success" if ok else "error", "deleted": ok}
-
-@app.get("/api/capital/statement")
-async def api_get_capital_statement():
-    """Mengembalikan laporan neraca modal, HPP, kas RDN, dan riwayat mutasi."""
-    return get_capital_statement()
-
-@app.post("/api/capital/log")
-async def api_log_capital_flow(
-    type: str = Form("DEPOSIT"),
-    amount: float = Form(...),
-    entry_date: Optional[str] = Form(None),
-    notes: Optional[str] = Form("")
-):
-    """Mencatat setoran modal (Top Up) atau penarikan dana (Withdrawal)."""
-    res = log_capital_flow(type, amount, entry_date, notes or "")
-    return res
-
-@app.post("/api/capital/delete")
-@app.post("/api/capital/delete/{entry_id}")
-@app.delete("/api/capital/{entry_id}")
-async def api_delete_capital_entry(entry_id: Optional[int] = None, entry_id_form: Optional[int] = Form(None, alias="entry_id")):
-    """Menghapus riwayat mutasi modal jika ada kesalahan input."""
-    eid = entry_id or entry_id_form
-    if not eid:
-        return {"status": "error", "message": "Missing entry_id"}
-    ok = delete_capital_entry(eid)
-    return {"status": "success" if ok else "error", "deleted": ok}
-
-@app.get("/api/telegram/status")
-async def api_telegram_status():
-    open_trades = get_open_trades()
-    return {
-        "status": "success",
-        "bot_configured": bool(settings.TELEGRAM_BOT_TOKEN and settings.TELEGRAM_CHAT_ID),
-        "chat_id": str(settings.TELEGRAM_CHAT_ID)[:4] + "****" if settings.TELEGRAM_CHAT_ID else None,
-        "schedules": [
-            {"time": "08:45 WIB", "title": "Morning Pre-Market Briefing & Top 3 Picks", "active": True},
-            {"time": "Jam Bursa (3 Menit)", "title": "Safety Sentinel Live SL / TP Alerts", "active": True},
-            {"time": "16:15 WIB", "title": "Evening Market & Portfolio Wrap", "active": True},
-            {"time": "17:00 WIB", "title": "EOD Full Database Scan Refresh", "active": True}
-        ],
-        "open_trades_monitored": len(open_trades)
-    }
-
-@app.post("/api/telegram/test")
-async def api_telegram_test():
-    test_msg = f"🔔 <b>ALPHA IDX TELEGRAM BOT AKTIF</b>\n"
-    test_msg += f"━━━━━━━━━━━━━━━━━━\n"
-    test_msg += f"• Domain  : <code>{settings.APP_DOMAIN}</code>\n"
-    test_msg += f"• Status  : 🟢 <b>Terkoneksi Sempurna</b>\n"
-    test_msg += f"• Jadwal  : 🌅 08:45 Morning • 🛡️ Live 3m Sentinel • 🌆 16:15 Wrap\n"
-    test_msg += f"━━━━━━━━━━━━━━━━━━\n"
-    test_msg += f"<i>Robot siap mengirimkan sinyal & mengawal Stop Loss portofolio Anda!</i>"
-    
-    reply_markup = {
-        "inline_keyboard": [
-            [
-                {"text": "🌐 Buka Alpha Terminal", "url": f"https://{settings.APP_DOMAIN}"}
-            ]
-        ]
-    }
-    ok = await send_telegram_message(test_msg, reply_markup=reply_markup)
-    return {"status": "success" if ok else "failed", "connected": ok}
-
-@app.post("/api/telegram/send-digest")
-async def api_telegram_send_digest():
-    global cached_scan_results
-    if not cached_scan_results:
-        cached_scan_results = await execute_market_scan()
-    climate = get_market_climate()
-    macro = get_global_macro_data()
-    ok = await notify_morning_briefing(cached_scan_results[:3], climate=climate, macro=macro)
-    return {"status": "success" if ok else "failed", "sent": ok, "top_count": min(3, len(cached_scan_results))}
-
-@app.post("/api/telegram/send-evening-wrap")
-async def api_telegram_send_evening_wrap():
-    climate = get_market_climate()
-    open_trades = get_open_trades()
-    stats = get_journal_stats()
-    ok = await notify_evening_wrap(climate=climate, open_trades=open_trades, stats=stats)
-    return {"status": "success" if ok else "failed", "sent": ok, "open_trades_count": len(open_trades)}
-
-@app.post("/api/telegram/check-sentinel")
-@app.get("/api/journal/check-safety")
-async def api_check_safety():
-    res = await run_safety_sentinel_check()
-    return {"status": "success", "data": res, "message": "Safety Sentinel check executed"}
+# ── Mount All Routers ────────────────────────────────────────────────────────
+app.include_router(auth.router)
+app.include_router(market.router)
+app.include_router(screener.router)
+app.include_router(tracker.router)
+app.include_router(forecaster.router)
+app.include_router(journal.router)
+app.include_router(capital.router)
+app.include_router(telegram.router)
+app.include_router(ai.router)
+app.include_router(pages.router)  # Pages router mounted last to allow specific API paths first

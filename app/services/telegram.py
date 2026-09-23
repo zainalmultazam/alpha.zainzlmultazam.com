@@ -71,15 +71,18 @@ def format_id_date(dt: Optional[datetime] = None, include_time: bool = True, inc
     time_suffix = f", {dt.strftime('%H:%M')} WIB" if include_time else ""
     return f"{day_prefix}{dt.day} {month_name} {dt.year}{time_suffix}"
 
-async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None, macro: Optional[Dict[str, Any]] = None) -> bool:
-    """Mengirimkan Morning Pre-Market Briefing (08:45 WIB) dengan Iklim IHSG, Radar Makro, dan Top 3 Picks."""
+async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None, macro: Optional[Dict[str, Any]] = None, market: str = "IDX") -> bool:
+    """Mengirimkan Morning Pre-Market Briefing (08:45 WIB untuk IDX / 20:00 WIB untuk Wall Street) dengan Iklim Pasar, Radar Makro, dan Top 3 Picks."""
     now_str = format_id_date(datetime.now())
+    clean_m = (market or "IDX").upper().strip()
+    is_us = (clean_m == "US")
     
     # 1. Header & Market Climate Banner
     regime_status = climate.get("regime", "BULLISH") if climate else "BULLISH"
-    ihsg_price = climate.get("price", 0) if climate else 0
-    ihsg_change = climate.get("change_pct", 0) if climate else 0
-    sign = "+" if ihsg_change >= 0 else ""
+    index_name = "S&P 500" if is_us else "IHSG"
+    idx_price = climate.get("price", 0) if climate else 0
+    idx_change = climate.get("change_pct", 0) if climate else 0
+    sign = "+" if idx_change >= 0 else ""
     exposure = climate.get("exposure_pct", 50) if climate else 50
     
     if regime_status == "BULLISH":
@@ -89,18 +92,21 @@ async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional
     else:
         climate_badge = f"🔴 <b>DEFENSIVE ({exposure}% Modal Aktif)</b>"
 
-    msg = f"🌅 <b>MORNING PRE-MARKET BRIEFING</b>\n"
+    header_title = "🇺🇸 🌆 <b>WALL STREET PRE-MARKET BRIEFING</b>" if is_us else "🇮🇩 🌅 <b>MORNING PRE-MARKET BRIEFING</b>"
+    price_str = f"${idx_price:,.2f}" if is_us else f"{idx_price:,.2f}"
+
+    msg = f"{header_title}\n"
     msg += f"<i>{now_str}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━\n"
     
-    msg += f"📊 <b>IHSG:</b> <code>{ihsg_price:,.2f}</code> ({sign}{ihsg_change}%)\n"
+    msg += f"📊 <b>{index_name}:</b> <code>{price_str}</code> ({sign}{idx_change}%)\n"
     msg += f"🧭 <b>Rezim:</b> {climate_badge}\n"
     if climate and climate.get("advice"):
         msg += f"💡 <i>{climate['advice']}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━\n"
 
-    # 2. Global Macro Radar Highlights
-    if macro and macro.get("items"):
+    # 2. Global Macro Radar Highlights (hanya untuk briefing pagi IDX)
+    if not is_us and macro and macro.get("items"):
         msg += "🌐 <b>RADAR MAKRO GLOBAL:</b>\n"
         for item in macro["items"][:4]:
             m_sign = "+" if item.get("is_positive") else ""
@@ -114,7 +120,7 @@ async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional
     # Check for stagnant trades in Journal (Time-Stop Evaluation)
     try:
         from app.engine.journal import get_open_trades
-        open_trades = get_open_trades()
+        open_trades = get_open_trades(market=clean_m)
         stagnant_trades = [t for t in open_trades if t.get("is_stagnant")]
         if stagnant_trades:
             msg += "⏱️ <b>EVALUASI TIME-STOP (SAHAM STAGNAN):</b>\n"
@@ -130,75 +136,108 @@ async def notify_morning_briefing(picks: List[Dict[str, Any]], climate: Optional
 
     # 3. Top 3 Picks Details
     if picks:
-        msg += "🎯 <b>TOP 3 REKOMENDASI HARI INI:</b>\n\n"
-        top_3 = picks[:3]
+        picks_title = "🎯 <b>TOP 3 US MOMENTUM PICKS (PLUANG):</b>\n\n" if is_us else "🎯 <b>TOP 3 REKOMENDASI HARI INI:</b>\n\n"
+        msg += picks_title
+        
+        # Filter blackout stocks for US market so user is protected from gap-down risk
+        if is_us:
+            safe_picks = [p for p in picks if not p.get("is_earnings_blackout")]
+            top_3 = safe_picks[:3] if safe_picks else picks[:3]
+        else:
+            top_3 = picks[:3]
+
         inline_keyboard = []
+        base_capital = 5000.0 if is_us else settings.DEFAULT_CAPITAL
 
         for i, p in enumerate(top_3, 1):
             plan = p.get("plan", {})
-            entry = int(plan.get("entry_price", p.get("close", 0)))
-            sl = int(plan.get("stop_loss", entry * 0.96))
-            tp1 = int(plan.get("tp1", entry * 1.08))
-            tp2 = int(plan.get("tp2", entry * 1.15))
+            entry = float(plan.get("entry_price", p.get("close", 0)))
+            sl = float(plan.get("stop_loss", entry * 0.96))
+            tp1 = float(plan.get("tp1", entry * 1.08))
+            tp2 = float(plan.get("tp2", entry * 1.15))
 
-            # Hitung alokasi lot otomatis berbasis 1% risk dari default capital
-            sizing = calculate_lot_size(settings.DEFAULT_CAPITAL, settings.DEFAULT_MAX_RISK_PCT, entry, sl)
+            # Hitung alokasi lot/shares otomatis berbasis 1% risk dari default capital
+            sizing = calculate_lot_size(base_capital, settings.DEFAULT_MAX_RISK_PCT, entry, sl, market=clean_m)
             lots = sizing["lots"]
-            half_lots = max(1, lots // 2)
-            cost_str = format_rupiah_short(sizing["total_cost"])
-            risk_str = format_rupiah_short(sizing["max_risk_idr"])
+            shares = sizing.get("shares", lots)
+            unit_name = "Shares" if is_us else "Lot"
+            qty_val = shares if is_us else lots
+            half_qty = max(1, qty_val // 2) if not is_us else round(qty_val / 2, 2)
+            
+            cost_str = f"${sizing['total_cost']:,.2f}" if is_us else format_rupiah_short(sizing["total_cost"])
+            risk_str = f"${sizing['max_risk_amount']:,.2f}" if is_us else format_rupiah_short(sizing["max_risk_idr"])
+
+            entry_str = f"${entry:,.2f}" if is_us else f"{int(entry):,}"
+            sl_str = f"${sl:,.2f}" if is_us else f"{int(sl):,}"
+            tp1_str = f"${tp1:,.2f}" if is_us else f"{int(tp1):,}"
+            tp2_str = f"${tp2:,.2f}" if is_us else f"{int(tp2):,}"
 
             weekly_tag = "Weekly Confirmed" if p.get("weekly_confirmed") else "Daily Setup"
             safe_name = html.escape(str(p.get("name", p.get("symbol", ""))))
             safe_setup = html.escape(str(p.get("primary_setup", "Breakout")))
+            earnings_tag = f" | {p.get('earnings_badge')}" if p.get("earnings_badge") else ""
+
+            turnover_unit = f"${p.get('turnover_bio', 0)}M" if is_us else f"Rp {p.get('turnover_bio', 0)}B"
 
             msg += f"<b>#{i} {p['symbol']} - {safe_name}</b>\n"
-            msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p.get('score', 90)} PTS</b>)\n"
-            msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: Rp {p.get('turnover_bio', 0)}B\n\n"
+            msg += f"• Setup: <code>{safe_setup}</code> (Skor: <b>{p.get('score', 90)} PTS</b>{earnings_tag})\n"
+            msg += f"• Validasi: <i>{weekly_tag}</i> | Turnover: {turnover_unit}\n\n"
             
             # Angka kunci format code agar tap-to-copy
-            msg += f"🟢 <b>BUY (GTC) :</b> <code>{entry}</code> → <b>{lots} Lot</b> ({cost_str})\n"
-            msg += f"🔴 <b>STOP LOSS :</b> <code>{sl}</code> (-{plan.get('risk_pct', 4.0)}% | Risk {risk_str})\n"
-            msg += f"🎯 <b>TARGET TP1:</b> <code>{tp1}</code> (+{plan.get('tp1_gain_pct', 8.0)}% | Jual {half_lots} Lot)\n"
-            msg += f"🚀 <b>TARGET TP2:</b> <code>{tp2}</code> (+{plan.get('tp2_gain_pct', 15.0)}%)\n\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
+            msg += f"🟢 <b>BUY (GTC) :</b> <code>{entry_str}</code> → <b>{qty_val} {unit_name}</b> ({cost_str})\n"
+            msg += f"🔴 <b>STOP LOSS :</b> <code>{sl_str}</code> (-{plan.get('risk_pct', 4.0)}% | Risk {risk_str})\n"
+            msg += f"🎯 <b>TARGET TP1:</b> <code>{tp1_str}</code> (+{plan.get('tp1_gain_pct', 8.0)}% | Jual {half_qty} {unit_name})\n"
+            msg += f"🚀 <b>TARGET TP2:</b> <code>{tp2_str}</code> (+{plan.get('tp2_gain_pct', 15.0)}%)\n\n"
+            
+            if is_us:
+                msg += f"• <a href=\"https://app.pluang.com\">Buka {p['symbol']} di Pluang</a>\n"
+            else:
+                msg += f"• <a href=\"https://stockbit.com/#/symbol/{p['symbol']}\">Buka {p['symbol']} di Stockbit</a>\n"
+            
             if i < len(top_3):
                 msg += "──────────────────\n\n"
 
             inline_keyboard.append([
                 {
-                    "text": f"🛒 Catat Beli {p['symbol']} ({lots} Lot)",
-                    "callback_data": f"picklot:{p['symbol']}:{lots}:{entry}:{sl}:{tp1}"
+                    "text": f"🛒 Catat Beli {p['symbol']} ({qty_val} {unit_name})",
+                    "callback_data": f"picklot:{p['symbol']}:{qty_val}:{entry}:{sl}:{tp1}"
                 }
             ])
 
         reply_markup = {"inline_keyboard": inline_keyboard} if inline_keyboard else None
     else:
-        msg += "<i>Belum ada setup dengan skor tinggi yang lolos filter likuiditas pagi ini. Disiplin tunggu konfirmasi pasar!</i>\n"
+        msg += "<i>Belum ada setup dengan skor tinggi yang lolos filter likuiditas. Disiplin tunggu konfirmasi pasar!</i>\n"
         reply_markup = None
 
     return await send_telegram_message(msg.strip(), reply_markup=reply_markup)
 
-async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None) -> bool:
+async def notify_super_digest(picks: List[Dict[str, Any]], climate: Optional[Dict[str, Any]] = None, market: str = "IDX") -> bool:
     """Mengirimkan Super-Bot Digest (HANYA TOP 3 TERBAIK) dengan tombol interaktif 1-Click Buy."""
-    return await notify_morning_briefing(picks, climate=climate)
+    return await notify_morning_briefing(picks, climate=climate, market=market)
 
-async def notify_evening_wrap(climate: Optional[Dict[str, Any]] = None, open_trades: Optional[List[Dict[str, Any]]] = None, stats: Optional[Dict[str, Any]] = None) -> bool:
-    """Mengirimkan Evening Market & Portfolio Wrap (16:15 WIB)."""
+async def notify_evening_wrap(climate: Optional[Dict[str, Any]] = None, open_trades: Optional[List[Dict[str, Any]]] = None, stats: Optional[Dict[str, Any]] = None, market: str = "IDX") -> bool:
+    """Mengirimkan Evening Market & Portfolio Wrap (16:15 WIB untuk IDX / 06:00 WIB untuk Wall Street)."""
     now_str = format_id_date(datetime.now())
+    clean_m = (market or "IDX").upper().strip()
+    is_us = (clean_m == "US")
     
-    ihsg_price = climate.get("price", 0) if climate else 0
-    ihsg_change = climate.get("change_pct", 0) if climate else 0
-    sign = "+" if ihsg_change >= 0 else ""
+    index_name = "S&P 500" if is_us else "IHSG"
+    idx_price = climate.get("price", 0) if climate else 0
+    idx_change = climate.get("change_pct", 0) if climate else 0
+    sign = "+" if idx_change >= 0 else ""
     regime = climate.get("regime", "BULLISH") if climate else "BULLISH"
 
-    msg = f"🌆 <b>MARKET CLOSE & PORTFOLIO WRAP</b>\n"
+    header_title = "🇺🇸 🌅 <b>WALL STREET POST-MARKET WRAP</b>" if is_us else "🇮🇩 🌆 <b>MARKET CLOSE & PORTFOLIO WRAP</b>"
+    price_str = f"${idx_price:,.2f}" if is_us else f"{idx_price:,.2f}"
+
+    msg = f"{header_title}\n"
     msg += f"<i>{now_str}</i>\n"
     msg += "━━━━━━━━━━━━━━━━━━\n"
-    msg += f"📊 <b>IHSG Tutup:</b> <code>{ihsg_price:,.2f}</code> ({sign}{ihsg_change}%) • <b>{regime}</b>\n"
+    msg += f"📊 <b>{index_name} Tutup:</b> <code>{price_str}</code> ({sign}{idx_change}%) • <b>{regime}</b>\n"
     msg += "━━━━━━━━━━━━━━━━━━\n\n"
 
     # Status Open Trades
+    unit_name = "Shares" if is_us else "Lot"
     if open_trades and len(open_trades) > 0:
         msg += f"💼 <b>POSISI TERBUKA AKTIF ({len(open_trades)} Saham):</b>\n"
         for t in open_trades:
@@ -206,24 +245,29 @@ async def notify_evening_wrap(climate: Optional[Dict[str, Any]] = None, open_tra
             entry = float(t.get("entry_price", 0))
             sl = float(t.get("stop_loss", 0))
             lots = int(t.get("lots", 0))
-            msg += f"• <b>{ticker}</b> ({lots} Lot) — Entry: Rp {entry:,.0f} | SL: Rp {sl:,.0f}\n"
+            entry_fmt = f"${entry:,.2f}" if is_us else f"Rp {entry:,.0f}"
+            sl_fmt = f"${sl:,.2f}" if is_us else f"Rp {sl:,.0f}"
+            msg += f"• <b>{ticker}</b> ({lots} {unit_name}) — Entry: {entry_fmt} | SL: {sl_fmt}\n"
         msg += "\n"
     else:
-        msg += "💼 <b>Posisi Terbuka:</b> 0 Saham (100% Cash RDN Aman)\n\n"
+        cash_type = "USD" if is_us else "RDN"
+        msg += f"💼 <b>Posisi Terbuka:</b> 0 Saham (100% Cash {cash_type} Aman)\n\n"
 
     # Performance Stats
     if stats:
         win_rate = stats.get("win_rate", 0.0)
         pnl = stats.get("total_realized_pnl", 0.0)
         pnl_sign = "+" if pnl >= 0 else ""
+        pnl_fmt = f"{pnl_sign}${pnl:,.2f}" if is_us else f"{pnl_sign}Rp {pnl:,.0f}"
         closed_count = stats.get("closed_trades_count", 0)
         msg += "📈 <b>RINGKASAN KINERJA JURNAL:</b>\n"
         msg += f"• Win Rate        : <b>{win_rate:.1f}%</b>\n"
-        msg += f"• Total Realized  : <b>{pnl_sign}Rp {pnl:,.0f}</b>\n"
+        msg += f"• Total Realized  : <b>{pnl_fmt}</b>\n"
         msg += f"• Transaksi Selesai: <b>{closed_count} Trade</b>\n"
     
+    app_url = f"https://{settings.APP_DOMAIN}/{clean_m.lower()}/screener"
     msg += "\n────────────\n"
-    msg += f"🌐 <a href=\"https://{settings.APP_DOMAIN}\">Buka Alpha Terminal</a>"
+    msg += f"🌐 <a href=\"{app_url}\">Buka Alpha ({clean_m})</a>"
 
     return await send_telegram_message(msg.strip())
 

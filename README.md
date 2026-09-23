@@ -1,4 +1,4 @@
-# ⚡ AlphaSwing IDX - Personal Swing Trading Platform
+# Alpha - Personal Swing Trading Platform
 
 Platform Quant & Swing Trading Otomatis untuk Saham Likuid Bursa Efek Indonesia (IDX).  
 Domain: **[alpha.zainalmultazam.com](https://alpha.zainalmultazam.com)**

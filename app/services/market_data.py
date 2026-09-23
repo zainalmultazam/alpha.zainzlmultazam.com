@@ -138,13 +138,25 @@ def get_idx_market_status() -> Dict[str, Any]:
 def get_dynamic_cache_ttl_seconds() -> int:
     """
     Menentukan durasi TTL cache secara cerdas:
-    - Jam bursa aktif (09:00 - 16:15 WIB Senin-Jumat): 15 menit (900 detik).
+    - Jam bursa aktif (09:00 - 16:15 WIB Senin-Jumat): 60 detik (1 menit real-time update).
     - Di luar jam bursa / setelah closing (16:30 - 08:45 WIB & Weekend/Libur): 12 jam (43200 detik).
     """
     status = get_idx_market_status()
     if status.get("is_open"):
-        return 15 * 60  # 15 menit saat bursa aktif
+        return 60  # 60 detik (1 menit) saat bursa aktif untuk akurasi harga live
     return 12 * 3600  # 12 jam (EOD persistent) saat bursa tutup
+
+def is_cache_valid(cached_entry: Dict[str, Any], ttl: int) -> bool:
+    """Memeriksa validitas cache dan menginvalidasi cache pre-market saat bursa sudah buka."""
+    now = datetime.now()
+    if (now - cached_entry["timestamp"]).total_seconds() >= ttl:
+        return False
+    status = get_idx_market_status()
+    if status.get("is_open"):
+        today_9am = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        if cached_entry["timestamp"] < today_9am:
+            return False
+    return True
 
 def fetch_stock_df(ticker: str) -> Optional[pd.DataFrame]:
     """Mengambil data historis saham IDX dari Yahoo Finance dengan sistem smart cache cerdas."""
@@ -152,7 +164,7 @@ def fetch_stock_df(ticker: str) -> Optional[pd.DataFrame]:
     ttl = get_dynamic_cache_ttl_seconds()
     if ticker in _CACHE:
         cached = _CACHE[ticker]
-        if (now - cached["timestamp"]).total_seconds() < ttl:
+        if is_cache_valid(cached, ttl):
             return cached["data"]
 
     try:
@@ -179,7 +191,7 @@ def batch_fetch_stock_dfs(tickers: list, batch_size: int = 30) -> Dict[str, pd.D
     for t in tickers:
         if t in _CACHE:
             cached = _CACHE[t]
-            if (now - cached["timestamp"]).total_seconds() < ttl:
+            if is_cache_valid(cached, ttl):
                 results[t] = cached["data"]
                 continue
         uncached.append(t)
@@ -220,12 +232,168 @@ def batch_fetch_stock_dfs(tickers: list, batch_size: int = 30) -> Dict[str, pd.D
 
     return results
 
+def get_us_market_status() -> Dict[str, Any]:
+    """Mendeteksi apakah bursa Wall Street (NYSE/NASDAQ) sedang Buka, Pre-Market, After-Hours, Tutup, atau Akhir Pekan."""
+    try:
+        tz_ny = ZoneInfo("America/New_York")
+        now_ny = datetime.now(tz_ny)
+        tz_jkt = ZoneInfo("Asia/Jakarta")
+        now_jkt = datetime.now(tz_jkt)
+    except Exception:
+        now_ny = datetime.utcnow() - timedelta(hours=4)
+        now_jkt = datetime.utcnow() + timedelta(hours=7)
+
+    weekday = now_ny.weekday() # 0 = Senin, 4 = Jumat, 5 = Sabtu, 6 = Minggu
+    ny_time = now_ny.time()
+
+    if weekday in [5, 6]:
+        return {
+            "is_open": False,
+            "is_holiday": True,
+            "status": "WEEKEND",
+            "badge_color": "rose",
+            "title": "Weekend (Wall Street Tutup)",
+            "message": "Bursa saham AS tutup pada akhir pekan. Buka kembali Senin 20:30 WIB.",
+            "next_open": "Senin 20:30 WIB",
+            "current_wib": now_jkt.strftime("%H:%M WIB")
+        }
+
+    open_time = time(9, 30)
+    close_time = time(16, 0)
+    pre_time = time(4, 0)
+    post_time = time(20, 0)
+
+    if open_time <= ny_time <= close_time:
+        return {
+            "is_open": True,
+            "is_holiday": False,
+            "status": "OPEN_REGULAR",
+            "badge_color": "emerald",
+            "title": "Bursa Wall Street Buka",
+            "message": "Sesi perdagangan reguler NYSE & NASDAQ sedang berlangsung s.d 03:00 WIB.",
+            "next_open": "Sedang Berlangsung",
+            "current_wib": now_jkt.strftime("%H:%M WIB")
+        }
+    elif pre_time <= ny_time < open_time:
+        return {
+            "is_open": False,
+            "is_holiday": False,
+            "status": "PRE_MARKET",
+            "badge_color": "amber",
+            "title": "Sesi Pre-Market AS",
+            "message": "Sesi Pre-Market Wall Street aktif. Pasar reguler buka pukul 20:30 WIB.",
+            "next_open": "20:30 WIB",
+            "current_wib": now_jkt.strftime("%H:%M WIB")
+        }
+    elif close_time < ny_time <= post_time:
+        return {
+            "is_open": False,
+            "is_holiday": False,
+            "status": "AFTER_HOURS",
+            "badge_color": "amber",
+            "title": "Sesi After-Hours AS",
+            "message": "Sesi reguler telah ditutup. Transaksi After-Hours aktif.",
+            "next_open": "Besok 20:30 WIB",
+            "current_wib": now_jkt.strftime("%H:%M WIB")
+        }
+    else:
+        return {
+            "is_open": False,
+            "is_holiday": False,
+            "status": "CLOSED",
+            "badge_color": "slate",
+            "title": "Bursa Wall Street Tutup",
+            "message": "Pasar AS sedang tutup. Buka kembali pukul 20:30 WIB.",
+            "next_open": "20:30 WIB",
+            "current_wib": now_jkt.strftime("%H:%M WIB")
+        }
+
 _IHSG_CLIMATE_CACHE: Dict[str, Any] = {}
 _IHSG_CLIMATE_CACHE_TIME: Optional[datetime] = None
+_US_CLIMATE_CACHE: Dict[str, Any] = {}
+_US_CLIMATE_CACHE_TIME: Optional[datetime] = None
 
-def get_market_climate(force: bool = False) -> Dict[str, Any]:
-    """Menganalisis rezim pasar IHSG (^JKSE) secara real-time untuk menentukan iklim risiko pasar (Risk-On / Caution / Risk-Off) serta status operasional bursa."""
-    global _IHSG_CLIMATE_CACHE, _IHSG_CLIMATE_CACHE_TIME
+def get_market_climate(force: bool = False, market: str = "IDX") -> Dict[str, Any]:
+    """Menganalisis rezim pasar (IHSG ^JKSE untuk IDX atau S&P 500 ^GSPC untuk US) secara real-time."""
+    global _IHSG_CLIMATE_CACHE, _IHSG_CLIMATE_CACHE_TIME, _US_CLIMATE_CACHE, _US_CLIMATE_CACHE_TIME
+    clean_m = (market or "IDX").upper().strip()
+    
+    if clean_m == "US":
+        market_status = get_us_market_status()
+        now = datetime.now()
+        cache_ttl = 120 if market_status.get("is_open") else 900
+        if not force and _US_CLIMATE_CACHE_TIME and (now - _US_CLIMATE_CACHE_TIME).total_seconds() < cache_ttl and _US_CLIMATE_CACHE:
+            _US_CLIMATE_CACHE["market_status"] = market_status
+            return _US_CLIMATE_CACHE
+
+        df_us = fetch_stock_df("^GSPC")
+        if df_us is None or len(df_us) < 50:
+            return {
+                "market": "US",
+                "index_symbol": "^GSPC",
+                "index_name": "S&P 500",
+                "regime": "BULLISH",
+                "title": "Risk-On (Wall Street Bull Market)",
+                "color": "emerald",
+                "price": 5800.0,
+                "change_pct": 0.0,
+                "exposure_pct": 100,
+                "advice": "Kondisi pasar Wall Street kondusif untuk momentum swing trading.",
+                "market_status": market_status
+            }
+
+        df = df_us.copy()
+        df["ema50"] = df["Close"].ewm(span=50, adjust=False).mean()
+        df["ema200"] = df["Close"].ewm(span=200, adjust=False).mean()
+        last = df.iloc[-1]
+        prev = df.iloc[-2]
+
+        price = round(float(last["Close"]), 2)
+        prev_close = float(prev["Close"])
+        change_pct = round(((price - prev_close) / prev_close) * 100, 2) if prev_close > 0 else 0.0
+        ema50 = float(last["ema50"])
+        ema200 = float(last["ema200"])
+
+        if price >= ema50 and price >= ema200:
+            regime = "BULLISH"
+            title = "Risk-On (S&P 500 Stage 2 Uptrend)"
+            color = "emerald"
+            exposure_pct = 100
+            advice = "S&P 500 di atas EMA 50 & 200. Kondisi optimal untuk full-size momentum swing trading."
+        elif price >= ema50 or price >= ema200:
+            regime = "NEUTRAL"
+            title = "Caution (S&P 500 Rebound / Consolidation)"
+            color = "amber"
+            exposure_pct = 50
+            advice = "S&P 500 dalam fase konsolidasi. Alokasikan 50% modal aktif pada saham Mega-Cap & AI Leader."
+        else:
+            regime = "BEARISH"
+            title = "Risk-Off (Wall Street Correction)"
+            color = "rose"
+            exposure_pct = 0
+            advice = "S&P 500 di bawah EMA 50 & 200. Tekanan jual tinggi, utamakan memegang Cash USD."
+
+        result = {
+            "market": "US",
+            "index_symbol": "^GSPC",
+            "index_name": "S&P 500",
+            "regime": regime,
+            "title": title,
+            "color": color,
+            "price": price,
+            "change_pct": change_pct,
+            "ema50": round(ema50, 2),
+            "ema200": round(ema200, 2),
+            "exposure_pct": exposure_pct,
+            "advice": advice,
+            "market_status": market_status,
+            "last_updated": datetime.now().strftime("%H:%M:%S")
+        }
+        _US_CLIMATE_CACHE = result
+        _US_CLIMATE_CACHE_TIME = now
+        return result
+
+    # ── IDX Market Climate (Default) ──────────────────────────────────────
     market_status = get_idx_market_status()
     now = datetime.now()
 
@@ -247,6 +415,9 @@ def get_market_climate(force: bool = False) -> Dict[str, Any]:
     
     if df_ihsg is None or len(df_ihsg) < 50:
         return {
+            "market": "IDX",
+            "index_symbol": "^JKSE",
+            "index_name": "IHSG",
             "regime": "BULLISH",
             "title": "Risk-On",
             "color": "emerald",
@@ -294,6 +465,9 @@ def get_market_climate(force: bool = False) -> Dict[str, Any]:
         advice = "IHSG jebol di bawah EMA 50 & EMA 200. Tekanan jual tinggi, utamakan memegang Cash dan hindari beli agresif."
 
     result = {
+        "market": "IDX",
+        "index_symbol": "^JKSE",
+        "index_name": "IHSG",
         "regime": regime,
         "title": title,
         "color": color,
@@ -320,8 +494,8 @@ def clear_cache():
     _IHSG_CLIMATE_CACHE = {}
     _IHSG_CLIMATE_CACHE_TIME = None
 
-_MACRO_CACHE: Dict[str, Any] = {}
-_MACRO_CACHE_TIME: Optional[datetime] = None
+_MACRO_CACHE = {}
+_MACRO_CACHE_TIME = None
 _MACRO_CACHE_EXPIRY_SECONDS = 900  # Cache 15 menit
 
 def get_global_macro_data(force: bool = False) -> Dict[str, Any]:

@@ -17,6 +17,13 @@ _last_update_id = 0
 _alerted_trades = set()  # prevent spamming same alert repeatedly
 _waiting_custom_lot: Dict[str, Dict[str, Any]] = {}
 
+def get_stock_direct_link(ticker: str) -> str:
+    clean = ticker.replace(".JK", "").strip()
+    idx_top = {"BBCA", "BBRI", "BMRI", "BBNI", "ASII", "TLKM", "ADRO", "ICBP", "INDF", "UNVR", "ANTM", "GOTO", "KLBF", "AMRT", "PGAS", "PTBA", "MDKA", "INCO", "BRIS", "BREN", "AMMN", "AUTO", "ACES", "MAPI", "CTRA", "BSDE", "PWON", "JSMR", "SMGR", "INTP", "MEDC", "AKRA", "TPIA", "BRPT", "INKP", "TKIM", "CPIN", "JPFA", "MYOR", "CMRY", "HEAL", "SILO", "MIKA", "SIDO", "ISAT", "EXCL", "TOWR", "TBIG", "MTEL", "BUKA", "EMTK", "SCMA", "SSIA", "KIJA", "SMDR", "TMAS", "HAIS", "IPCC", "ARTO", "BDMN", "BNGA", "BFIN", "BJBR", "BJTM", "PNBN", "BBHI", "BTPS", "HEXA", "GJTL", "SMSM", "ASSA", "MARK", "ENRG", "BUMI", "ITMG", "INDY", "HRUM", "PGEO", "DOID", "TOBA", "ELSA", "MBMA", "NCKL", "ESSA", "AVIA", "PSAB", "MIDI", "ULTJ", "CLEO", "ROTI", "TAPG", "MAPA", "ERAA", "RALS", "LPPF", "PTPP", "ADHI", "WIKA"}
+    if clean.upper() not in idx_top and not ticker.endswith(".JK"):
+        return f'• <a href="https://app.pluang.com">Buka {clean} di Pluang</a>'
+    return f'• <a href="https://stockbit.com/#/symbol/{clean}">Buka {clean} di Stockbit</a>'
+
 async def process_telegram_command(text: str, chat_id: str) -> None:
     """Memproses command teks atau angka lot yang dikirimkan user di grup/chat Telegram."""
     raw_text = text.strip()
@@ -55,7 +62,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
                 msg += f"Stop Loss  : Rp {sl:,.0f} (-{((entry - sl)/entry)*100:.1f}%)\n"
                 msg += f"Target TP1 : Rp {tp1:,.0f} (+{((tp1 - entry)/entry)*100:.1f}%)\n"
                 msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
-                msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
+                msg += f"{get_stock_direct_link(ticker)}\n"
                 msg += "────────────\n"
                 msg += "🛡️ <i>Robot Sentinel aktif memantau posisi ini. Peringatan darurat akan otomatis dikirim jika harga mendekati Stop Loss!</i>"
 
@@ -77,20 +84,31 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
 
     # 1. Command /beli atau /buy
     if cmd in ["/beli", "/buy"]:
-        # Format: /beli AUTO 35 [optional_entry] [optional_sl]
+        # Format: /beli AUTO 35 atau /beli NVDA 10
         if len(parts) < 3:
-            msg = "<b>PANDUAN /beli:</b>\n"
-            msg += "Format: <code>/beli [TICKER] [JUMLAH_LOT]</code>\n"
-            msg += "Contoh: <code>/beli AUTO 35</code>"
+            msg = "<b>PANDUAN /beli (IDX & US):</b>\n"
+            msg += "Format: <code>/beli [TICKER] [JUMLAH]</code>\n"
+            msg += "Contoh IDX: <code>/beli AUTO 35</code> (35 Lot)\n"
+            msg += "Contoh US : <code>/beli NVDA 10</code> (10 Lembar)"
             await send_telegram_message(msg)
             return
 
+        is_us = False
+        if parts[1].upper() in ["US", "USA"]:
+            is_us = True
+            parts.pop(1)
+
         ticker = parts[1].upper().replace(".JK", "").strip()
         try:
-            lots = int(parts[2].replace("lot", "").replace("LOT", "").strip())
+            lots = float(parts[2].replace("lot", "").replace("LOT", "").replace("shares", "").replace("SHARES", "").strip())
         except ValueError:
-            await send_telegram_message("❌ Jumlah lot harus berupa angka bulat. Contoh: <code>/beli AUTO 35</code>")
+            await send_telegram_message("❌ Jumlah lot/lembar harus berupa angka. Contoh: <code>/beli AUTO 35</code> atau <code>/beli NVDA 10</code>")
             return
+
+        # Auto-detect market from universe
+        from app.services.market_data import US_SYMBOLS
+        if not is_us and ticker in US_SYMBOLS:
+            is_us = True
 
         df = fetch_stock_df(ticker)
         if df is None or df.empty:
@@ -114,6 +132,10 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         sl_price = float(parts[4]) if len(parts) >= 5 else float(plan["stop_loss"])
         tp1_price = float(plan["tp1"])
 
+        market_tag = "US" if is_us else "IDX"
+        multiplier = 1 if is_us else 100
+        unit_name = "Lembar" if is_us else "Lot"
+
         # Catat ke Database Terpusat (alpha.db)
         trade_id = log_trade(
             ticker=ticker,
@@ -121,23 +143,28 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             stop_loss=sl_price,
             target_price=tp1_price,
             lots=lots,
-            setup_name="Telegram Entry"
+            setup_name="Telegram Entry",
+            market=market_tag
         )
 
-        total_cost = lots * 100 * entry_price
-        max_risk = lots * 100 * (entry_price - sl_price)
-        cost_str = format_rupiah_short(total_cost)
-        risk_str = format_rupiah_short(max_risk)
+        total_cost = lots * multiplier * entry_price
+        max_risk = lots * multiplier * (entry_price - sl_price)
+        cost_str = f"${total_cost:,.2f}" if is_us else format_rupiah_short(total_cost)
+        risk_str = f"${max_risk:,.2f}" if is_us else format_rupiah_short(max_risk)
+        entry_fmt = f"${entry_price:,.2f}" if is_us else f"Rp {entry_price:,.0f}"
+        sl_fmt = f"${sl_price:,.2f}" if is_us else f"Rp {sl_price:,.0f}"
+        tp_fmt = f"${tp1_price:,.2f}" if is_us else f"Rp {tp1_price:,.0f}"
+        flag = "🇺🇸" if is_us else "🇮🇩"
 
-        msg = f"<b>POSISI TERCATAT & DALAM PENGAWASAN</b>\n"
-        msg += f"<i>ID Trade: #{trade_id} • {format_id_date(datetime.now(), include_day=False)}</i>\n"
+        msg = f"<b>{flag} POSISI TERCATAT & DALAM PENGAWASAN</b>\n"
+        msg += f"<i>ID Trade: #{trade_id} ({market_tag}) • {format_id_date(datetime.now(), include_day=False)}</i>\n"
         msg += "────────────\n"
-        msg += f"Saham      : <b>{ticker}</b> ({lots} Lot)\n"
-        msg += f"Harga Beli : Rp {entry_price:,.0f}\n"
-        msg += f"Stop Loss  : Rp {sl_price:,.0f} (-{((entry_price - sl_price)/entry_price)*100:.1f}%)\n"
-        msg += f"Target TP1 : Rp {tp1_price:,.0f} (+{((tp1_price - entry_price)/entry_price)*100:.1f}%)\n"
+        msg += f"Saham      : <b>{ticker}</b> ({lots:g} {unit_name})\n"
+        msg += f"Harga Beli : {entry_fmt}\n"
+        msg += f"Stop Loss  : {sl_fmt} (-{((entry_price - sl_price)/entry_price)*100:.1f}%)\n"
+        msg += f"Target TP1 : {tp_fmt} (+{((tp1_price - entry_price)/entry_price)*100:.1f}%)\n"
         msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
-        msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
+        msg += f"{get_stock_direct_link(ticker)}\n"
         msg += "────────────\n"
         msg += "🛡️ <i>Robot Sentinel aktif memantau posisi ini. Peringatan darurat akan otomatis dikirim jika harga mendekati Stop Loss!</i>"
 
@@ -155,7 +182,7 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
         if len(parts) < 2:
             msg = "<b>PANDUAN /jual:</b>\n"
             msg += "Format: <code>/jual [TICKER] [HARGA_JUAL]</code>\n"
-            msg += "Contoh: <code>/jual AUTO 3100</code>"
+            msg += "Contoh: <code>/jual AUTO 3100</code> atau <code>/jual NVDA 125</code>"
             await send_telegram_message(msg)
             return
 
@@ -187,22 +214,27 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
 
         pnl_amt = closed_trade["pnl_amount"]
         pnl_pct = closed_trade["pnl_pct"]
+        is_us = (closed_trade.get("market") == "US")
         sign = "+" if pnl_amt >= 0 else ""
         badge = "PROFIT" if pnl_amt >= 0 else "CUT LOSS"
+        unit_name = "Lembar" if is_us else "Lot"
+        pnl_str = f"${abs(pnl_amt):,.2f}" if is_us else f"Rp {abs(pnl_amt):,.0f}"
+        entry_fmt = f"${closed_trade['entry_price']:,.2f}" if is_us else f"Rp {closed_trade['entry_price']:,.0f}"
+        exit_fmt = f"${exit_price:,.2f}" if is_us else f"Rp {exit_price:,.0f}"
 
         msg = f"<b>TRADE CLOSED: [{badge}]</b>\n"
-        msg += f"<i>{ticker} • {format_id_date(datetime.now(), include_day=False)}</i>\n"
+        msg += f"<i>{ticker} ({'US' if is_us else 'IDX'}) • {format_id_date(datetime.now(), include_day=False)}</i>\n"
         msg += "────────────\n"
-        msg += f"Beli @ Rp {closed_trade['entry_price']:,.0f} ({closed_trade['lots']} Lot)\n"
-        msg += f"Jual @ Rp {exit_price:,.0f}\n"
-        msg += f"Hasil PnL  : <b>{sign}{pnl_pct:.2f}% ({sign}Rp {abs(pnl_amt):,.0f})</b>\n"
+        msg += f"Beli @ {entry_fmt} ({closed_trade['lots']} {unit_name})\n"
+        msg += f"Jual @ {exit_fmt}\n"
+        msg += f"Hasil PnL  : <b>{sign}{pnl_pct:.2f}% ({sign}{pnl_str})</b>\n"
         msg += "────────────\n"
         msg += "✅ <i>Data tersimpan ke Jurnal Riwayat Performance Portofolio.</i>"
         await send_telegram_message(msg)
 
     # 3. Command /posisi atau /portfolio atau /status
     elif cmd in ["/posisi", "/portfolio", "/status"]:
-        open_trades = get_open_trades()
+        open_trades = get_open_trades(market="IDX") + get_open_trades(market="US")
         if not open_trades:
             msg = "<b>STATUS PORTOFOLIO AKTIF:</b>\n"
             msg += "────────────\n"
@@ -221,7 +253,10 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
             entry = float(t["entry_price"])
             sl = float(t["stop_loss"])
             tp = float(t["target_price"])
-            lots = int(t["lots"])
+            lots = float(t["lots"])
+            is_us = (t.get("market") == "US")
+            unit_name = "Lembar" if is_us else "Lot"
+            flag = "🇺🇸" if is_us else "🇮🇩"
 
             df = fetch_stock_df(ticker)
             current_price = float(df.iloc[-1]["close"]) if df is not None and not df.empty else entry
@@ -230,10 +265,14 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
 
             dist_to_sl = ((current_price - sl) / current_price) * 100
             status_text = "🟢 AMAN" if current_price > entry else ("🟡 WASPADA" if dist_to_sl > 1.5 else "🔴 BAHAYA DEKAT SL")
+            entry_fmt = f"${entry:,.2f}" if is_us else f"Rp {entry:,.0f}"
+            curr_fmt = f"${current_price:,.2f}" if is_us else f"Rp {current_price:,.0f}"
+            sl_fmt = f"${sl:,.2f}" if is_us else f"Rp {sl:,.0f}"
+            tp_fmt = f"${tp:,.2f}" if is_us else f"Rp {tp:,.0f}"
 
-            msg += f"<b>#{i} {ticker}</b> ({lots} Lot)\n"
-            msg += f"• Beli @ Rp {entry:,.0f} | Live: <b>Rp {current_price:,.0f} ({sign}{pnl_pct:.1f}%)</b>\n"
-            msg += f"• Stop Loss: Rp {sl:,.0f} | Target: Rp {tp:,.0f}\n"
+            msg += f"<b>#{i} {flag} {ticker}</b> ({lots:g} {unit_name})\n"
+            msg += f"• Beli @ {entry_fmt} | Live: <b>{curr_fmt} ({sign}{pnl_pct:.1f}%)</b>\n"
+            msg += f"• Stop Loss: {sl_fmt} | Target: {tp_fmt}\n"
             msg += f"• Status: <i>{status_text}</i> (Jarak ke SL: {dist_to_sl:.1f}%)\n"
             if i < len(open_trades):
                 msg += "────────────\n\n"
@@ -247,22 +286,29 @@ async def process_telegram_command(text: str, chat_id: str) -> None:
 
     # 4. Command /scan atau /top3
     elif cmd in ["/scan", "/top3"]:
-        await send_telegram_message("🔍 <i>Sedang menjalankan scan bursa real-time... Mohon tunggu sebentar.</i>")
-        picks = run_full_scan()
-        climate = get_market_climate()
-        await notify_super_digest(picks[:3], climate)
+        market_arg = "IDX"
+        if len(parts) > 1 and parts[1].upper() in ["US", "USA", "WALLSTREET", "GLOBAL"]:
+            market_arg = "US"
+        m_label = "🇺🇸 Wall Street" if market_arg == "US" else "🇮🇩 IDX Indonesia"
+        await send_telegram_message(f"🔍 <i>Sedang menjalankan scan bursa real-time ({m_label})... Mohon tunggu sebentar.</i>")
+        picks = run_full_scan(market=market_arg)
+        climate = get_market_climate(market=market_arg)
+        macro = get_global_macro_data() if market_arg == "IDX" else None
+        await notify_morning_briefing(picks[:3], climate=climate, macro=macro, market=market_arg)
 
     # 5. Command /help atau /start atau /menu
     elif cmd in ["/help", "/start", "/menu"]:
-        msg = "<b>PANDUAN PERINTAH BOT TELEGRAM:</b>\n"
+        msg = "<b>PANDUAN PERINTAH BOT TELEGRAM (IDX & US):</b>\n"
         msg += "────────────\n"
-        msg += "• <code>/beli AUTO 35</code> : Catat beli saham & aktifkan pengawas bahaya\n"
+        msg += "• <code>/scan</code> atau <code>/top3</code> : Scan & kirim 3 rekomendasi IDX\n"
+        msg += "• <code>/scan us</code> atau <code>/top3 us</code> : Scan 3 rekomendasi US Wall Street\n"
+        msg += "• <code>/beli AUTO 35</code> : Catat beli saham IDX (Lot)\n"
+        msg += "• <code>/beli NVDA 10</code> : Catat beli saham US (Shares / USD)\n"
         msg += "• <code>/jual AUTO 3100</code> : Catat jual saham & hitung profit/loss\n"
-        msg += "• <code>/posisi</code> : Cek status semua saham yang sedang dipegang\n"
-        msg += "• <code>/top3</code> : Jalankan scanner & kirim 3 rekomendasi terbaik\n"
+        msg += "• <code>/posisi</code> : Cek status semua saham aktif (IDX & US)\n"
         msg += "• <code>/help</code> : Menampilkan menu panduan ini\n"
         msg += "────────────\n"
-        msg += "<i>Anda juga bisa langsung menekan tombol interaktif di bawah setiap rekomendasi!</i>"
+        msg += "🛡️ <i>Robot Safety Sentinel otomatis memantau Stop Loss & Take Profit saham IDX & US Stock setiap 3 menit!</i>"
         await send_telegram_message(msg)
 
 async def process_telegram_callback(callback: Dict[str, Any]) -> None:
@@ -354,13 +400,18 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
         parts = data.split(":")
         if len(parts) >= 6:
             ticker = parts[1]
-            lots = int(parts[2])
+            lots = float(parts[2])
             entry = float(parts[3])
             sl = float(parts[4])
             tp1 = float(parts[5])
 
+            is_us = not ticker.endswith(".JK") and len(ticker) <= 5 and ticker.isalpha() and ticker not in ["BBCA", "BBRI", "BMRI", "BBNI", "ASII", "TLKM", "ADRO", "ICBP", "INDF", "UNVR", "ANTM", "GOTO"]
+            unit_name = "Shares" if is_us else "Lot"
+            multiplier = 1 if is_us else 100
+            clean_m = "US" if is_us else "IDX"
+
             # Jawab callback pop-up
-            await answer_callback_query(callback_id, text=f"✅ {ticker} ({lots} Lot) berhasil dicatat & dipantau!", show_alert=False)
+            await answer_callback_query(callback_id, text=f"✅ {ticker} ({lots} {unit_name}) berhasil dicatat & dipantau!", show_alert=False)
 
             # Catat ke Database
             trade_id = log_trade(
@@ -369,23 +420,27 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
                 stop_loss=sl,
                 target_price=tp1,
                 lots=lots,
-                setup_name="1-Click Button"
+                setup_name="1-Click Button",
+                market=clean_m
             )
 
-            total_cost = lots * 100 * entry
-            max_risk = lots * 100 * (entry - sl)
-            cost_str = format_rupiah_short(total_cost)
-            risk_str = format_rupiah_short(max_risk)
+            total_cost = lots * multiplier * entry
+            max_risk = lots * multiplier * (entry - sl)
+            cost_str = f"${total_cost:,.2f}" if is_us else format_rupiah_short(total_cost)
+            risk_str = f"${max_risk:,.2f}" if is_us else format_rupiah_short(max_risk)
+            entry_fmt = f"${entry:,.2f}" if is_us else f"Rp {entry:,.0f}"
+            sl_fmt = f"${sl:,.2f}" if is_us else f"Rp {sl:,.0f}"
+            tp1_fmt = f"${tp1:,.2f}" if is_us else f"Rp {tp1:,.0f}"
 
             msg = f"<b>1-CLICK BUY TERCATAT & DIAWASI</b>\n"
             msg += f"<i>Eksekusi oleh: {from_user} • ID: #{trade_id}</i>\n"
             msg += "────────────\n"
-            msg += f"Saham      : <b>{ticker}</b> ({lots} Lot)\n"
-            msg += f"Harga Beli : Rp {entry:,.0f}\n"
-            msg += f"Stop Loss  : Rp {sl:,.0f} (-{((entry - sl)/entry)*100:.1f}%)\n"
-            msg += f"Target TP1 : Rp {tp1:,.0f} (+{((tp1 - entry)/entry)*100:.1f}%)\n"
+            msg += f"Saham      : <b>{ticker}</b> ({lots} {unit_name})\n"
+            msg += f"Harga Beli : {entry_fmt}\n"
+            msg += f"Stop Loss  : {sl_fmt} (-{((entry - sl)/entry)*100:.1f}%)\n"
+            msg += f"Target TP1 : {tp1_fmt} (+{((tp1 - entry)/entry)*100:.1f}%)\n"
             msg += f"Total Beli : <b>{cost_str}</b> (Max Risiko: {risk_str})\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>\n"
+            msg += f"{get_stock_direct_link(ticker)}\n"
             msg += "────────────\n"
             msg += "🛡️ <i>Radar Safety Sentinel aktif memantau saham ini dari risiko!</i>"
 
@@ -420,7 +475,6 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
                 msg += f"Beli @ Rp {closed_trade['entry_price']:,.0f} ({closed_trade['lots']} Lot)\n"
                 msg += f"Jual @ Rp {exit_price:,.0f}\n"
                 msg += f"Hasil PnL : <b>{sign}{pnl_pct:.2f}% ({sign}Rp {abs(pnl_amt):,.0f})</b>\n"
-                msg += "────────────\n"
                 msg += "✅ <i>Riwayat jurnal dan win rate portofolio berhasil diperbarui.</i>"
                 await send_telegram_message(msg)
             else:
@@ -437,8 +491,8 @@ async def process_telegram_callback(callback: Dict[str, Any]) -> None:
         await send_telegram_message(msg)
 
 async def run_safety_sentinel_check() -> Dict[str, Any]:
-    """Memeriksa seluruh posisi OPEN untuk mengirimkan alert bahaya jika menembus SL atau alert TP1."""
-    open_trades = get_open_trades()
+    """Memeriksa seluruh posisi OPEN (IDX & US) untuk mengirimkan alert bahaya jika menembus SL atau alert TP1."""
+    open_trades = get_open_trades(market="IDX") + get_open_trades(market="US")
     if not open_trades:
         return {"checked_count": 0, "alerts_sent": 0, "status": "no_open_trades"}
 
@@ -450,31 +504,41 @@ async def run_safety_sentinel_check() -> Dict[str, Any]:
         sl = float(t["stop_loss"])
         tp = float(t["target_price"])
         lots = int(t["lots"])
+        market = (t.get("market") or "IDX").upper().strip()
+        is_us = (market == "US")
 
         df = fetch_stock_df(ticker)
         if df is None or df.empty:
             continue
 
         current_price = float(df.iloc[-1]["close"])
+        unit_name = "Shares" if is_us else "Lot"
+        multiplier = 1 if is_us else 100
+        pnl_amt = (current_price - entry) * (lots * multiplier)
+        pnl_pct = ((current_price - entry) / entry) * 100
+
+        entry_fmt = f"${entry:,.2f}" if is_us else f"Rp {entry:,.0f}"
+        curr_fmt = f"${current_price:,.2f}" if is_us else f"Rp {current_price:,.0f}"
+        sl_fmt = f"${sl:,.2f}" if is_us else f"Rp {sl:,.0f}"
+        loss_amt_fmt = f"${abs(pnl_amt):,.2f}" if is_us else f"Rp {abs(pnl_amt):,.0f}"
+        gain_amt_fmt = f"${abs(pnl_amt):,.2f}" if is_us else f"Rp {abs(pnl_amt):,.0f}"
 
         # 1. ALERT DARURAT: Harga menyentuh atau menembus Stop Loss
         if current_price <= sl and (trade_id, "SL") not in _alerted_trades:
             _alerted_trades.add((trade_id, "SL"))
-            pnl_amt = (current_price - entry) * (lots * 100)
-            pnl_pct = ((current_price - entry) / entry) * 100
 
             msg = f"🚨 <b>PERINGATAN DARURAT: {ticker}</b>\n"
             msg += f"<i>Harga saat ini menembus batas Stop Loss!</i>\n"
             msg += "────────────\n"
-            msg += f"Saham             : <b>{ticker}</b> ({lots} Lot)\n"
-            msg += f"Harga Beli        : Rp {entry:,.0f}\n"
-            msg += f"Harga Live        : <b>Rp {current_price:,.0f}</b>\n"
-            msg += f"Batas Stop Loss   : Rp {sl:,.0f}\n"
-            msg += f"Floating Loss     : <b>{pnl_pct:.2f}% (-Rp {abs(pnl_amt):,.0f})</b>\n"
+            msg += f"Saham             : <b>{ticker}</b> ({lots} {unit_name})\n"
+            msg += f"Harga Beli        : {entry_fmt}\n"
+            msg += f"Harga Live        : <b>{curr_fmt}</b>\n"
+            msg += f"Batas Stop Loss   : {sl_fmt}\n"
+            msg += f"Floating Loss     : <b>{pnl_pct:.2f}% (-{loss_amt_fmt})</b>\n"
             msg += "────────────\n"
             msg += "<b>TINDAKAN SEGERA:</b>\n"
             msg += "Buka aplikasi sekuritas Anda dan lakukan Cut Loss manual untuk melindungi sisa modal!\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+            msg += f"{get_stock_direct_link(ticker)}"
 
             reply_markup = {
                 "inline_keyboard": [
@@ -489,20 +553,19 @@ async def run_safety_sentinel_check() -> Dict[str, Any]:
         # 2. ALERT PROFIT: Harga menyentuh Target TP1
         elif current_price >= tp and (trade_id, "TP") not in _alerted_trades:
             _alerted_trades.add((trade_id, "TP"))
-            half_lots = max(1, lots // 2)
-            pnl_pct = ((current_price - entry) / entry) * 100
+            half_lots = max(1, lots // 2) if not is_us else round(lots / 2, 2)
 
             msg = f"🎯 <b>TARGET TP1 TERCAPAI: {ticker}</b>\n"
             msg += f"<i>Harga saat ini telah mencapai target Take Profit 1!</i>\n"
             msg += "────────────\n"
-            msg += f"Saham        : <b>{ticker}</b> ({lots} Lot)\n"
-            msg += f"Harga Beli   : Rp {entry:,.0f}\n"
-            msg += f"Harga Live   : <b>Rp {current_price:,.0f} (+{pnl_pct:.2f}%)</b>\n"
+            msg += f"Saham        : <b>{ticker}</b> ({lots} {unit_name})\n"
+            msg += f"Harga Beli   : {entry_fmt}\n"
+            msg += f"Harga Live   : <b>{curr_fmt} (+{pnl_pct:.2f}%)</b>\n"
             msg += "────────────\n"
             msg += "<b>PANDUAN EKSEKUSI:</b>\n"
-            msg += f"1. Jual 50% posisi ({half_lots} Lot) untuk amankan profit.\n"
-            msg += f"2. Geser Stop Loss sisa lot ke Rp {entry:,.0f} (Breakeven/Modal) agar bebas risiko!\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+            msg += f"1. Jual 50% posisi ({half_lots} {unit_name}) untuk amankan profit.\n"
+            msg += f"2. Geser Stop Loss sisa ke {entry_fmt} (Breakeven/Modal) agar bebas risiko!\n"
+            msg += f"{get_stock_direct_link(ticker)}"
 
             reply_markup = {
                 "inline_keyboard": [
@@ -517,19 +580,18 @@ async def run_safety_sentinel_check() -> Dict[str, Any]:
         # 3. ALERT PROFIT ARMOR (BEP LOCK): Harga sudah naik >= +4.0% tapi belum kena TP1
         elif pnl_pct >= 4.0 and current_price < tp and (trade_id, "BEP_ARMOR") not in _alerted_trades:
             _alerted_trades.add((trade_id, "BEP_ARMOR"))
-            pnl_amt = (current_price - entry) * (lots * 100)
             msg = f"🛡️ <b>PROFIT ARMOR BEP ALERT: {ticker}</b>\n"
             msg += f"<i>Saham ini telah menguat <b>+{pnl_pct:.2f}%</b>! Lindungi modal Anda sekarang.</i>\n"
             msg += "────────────\n"
-            msg += f"Saham             : <b>{ticker}</b> ({lots} Lot)\n"
-            msg += f"Harga Beli        : Rp {entry:,.0f}\n"
-            msg += f"Harga Live        : <b>Rp {current_price:,.0f} (+{pnl_pct:.2f}%)</b>\n"
-            msg += f"Floating Cuan     : <b>+Rp {pnl_amt:,.0f}</b>\n"
+            msg += f"Saham             : <b>{ticker}</b> ({lots} {unit_name})\n"
+            msg += f"Harga Beli        : {entry_fmt}\n"
+            msg += f"Harga Live        : <b>{curr_fmt} (+{pnl_pct:.2f}%)</b>\n"
+            msg += f"Floating Cuan     : <b>+{gain_amt_fmt}</b>\n"
             msg += "────────────\n"
             msg += "<b>PANDUAN HEDGE FUND DISIPLIN:</b>\n"
-            msg += f"Segera geser Stop Loss di aplikasi sekuritas Anda dari Rp {sl:,.0f} ke <b>Rp {entry:,.0f} (Harga Modal / BEP)</b>.\n"
+            msg += f"Segera geser Stop Loss di aplikasi sekuritas Anda dari {sl_fmt} ke <b>{entry_fmt} (Harga Modal / BEP)</b>.\n"
             msg += "✨ Transaksi ini sekarang <b>100% Bebas Risiko (Risk-Free Trade)</b>!\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+            msg += f"{get_stock_direct_link(ticker)}"
             await send_telegram_message(msg)
             alerts_sent += 1
 
@@ -541,15 +603,15 @@ async def run_safety_sentinel_check() -> Dict[str, Any]:
             msg = f"⏱️ <b>EVALUASI TIME-STOP: {ticker}</b>\n"
             msg += f"<i>Posisi sudah dipegang selama {days} hari bursa tanpa momentum yang kuat.</i>\n"
             msg += "────────────\n"
-            msg += f"Saham        : <b>{ticker}</b> ({lots} Lot)\n"
-            msg += f"Harga Beli   : Rp {entry:,.0f}\n"
-            msg += f"Harga Live   : <b>Rp {current_price:,.0f} ({pnl_sign}{pnl_pct:.2f}%)</b>\n"
+            msg += f"Saham        : <b>{ticker}</b> ({lots} {unit_name})\n"
+            msg += f"Harga Beli   : {entry_fmt}\n"
+            msg += f"Harga Live   : <b>{curr_fmt} ({pnl_sign}{pnl_pct:.2f}%)</b>\n"
             msg += f"Durasi Hold  : <b>{days} Hari Bursa</b>\n"
             msg += "────────────\n"
             msg += "<b>SARAN TINDAKAN SWING:</b>\n"
             msg += "• Geser Stop Loss ke harga modal (BEP) agar bebas risiko rugi, ATAU\n"
             msg += "• Evaluasi tutup posisi di harga impas untuk membebaskan kas slot modal ke saham Screener yang baru breakout!\n"
-            msg += f"• <a href=\"https://stockbit.com/#/symbol/{ticker}\">Buka {ticker} di Stockbit</a>"
+            msg += f"{get_stock_direct_link(ticker)}"
             
             await send_telegram_message(msg)
             alerts_sent += 1
