@@ -4790,102 +4790,105 @@
         </div>
 
         <!-- AI Deep Audit & Anti-Trap Predictive Intelligence Modal -->
-        <div id="modal-ai-deep-audit" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-            <div class="bg-white dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-5 my-8 animate-in fade-in zoom-in duration-200">
+        <div id="modal-ai-deep-audit" class="fixed inset-0 z-[100000] bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 transition-all duration-300">
+            <div class="bg-white dark:bg-surface-950 border border-slate-200 dark:border-white/10 rounded-2xl max-w-xl w-full max-h-[88vh] flex flex-col shadow-2xl my-auto animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
                 
-                <!-- Header -->
-                <div class="flex items-start justify-between pb-3.5 border-b border-slate-200/80 dark:border-white/[0.06]">
+                <!-- Fixed Header (Sticky) -->
+                <div class="p-4 sm:p-5 flex items-start justify-between border-b border-slate-200/80 dark:border-white/[0.06] bg-white/95 dark:bg-surface-950/95 backdrop-blur-sm shrink-0 z-10">
                     <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
-                            <i data-lucide="brain" class="w-6 h-6 animate-pulse"></i>
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                            <i data-lucide="brain" class="w-5 h-5 animate-pulse"></i>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h3 class="text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight" id="ai-modal-ticker">NVDA</h3>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-base sm:text-lg font-black text-slate-900 dark:text-white font-mono tracking-tight" id="ai-modal-ticker">NVDA</h3>
                                 <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-surface-800 text-slate-700 dark:text-gray-300" id="ai-modal-market">🇺🇸 US</span>
                                 <span class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full" id="ai-modal-conviction-badge">🔥 High Conviction</span>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-gray-400 font-sans" id="ai-modal-name-sector">NVIDIA Corporation · Semiconductors</p>
+                            <p class="text-xs text-slate-500 dark:text-gray-400 font-sans truncate max-w-[280px] sm:max-w-none" id="ai-modal-name-sector">NVIDIA Corporation · Semiconductors</p>
                         </div>
                     </div>
-                    <button onclick="closeAiDeepAudit()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-800 transition" title="Tutup Modal">
+                    <button onclick="closeAiDeepAudit()" class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-surface-800 transition shrink-0" title="Tutup Modal">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
 
-                <!-- Probability & Trap Risk Gauge Cards -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <!-- Probability Card -->
-                    <div class="p-4 rounded-xl bg-gradient-to-br from-emerald-500/[0.06] to-cyan-500/[0.04] border border-emerald-500/20 space-y-2">
+                <!-- Scrollable Body Content (Internal Scroll, No Clipping) -->
+                <div class="p-4 sm:p-6 overflow-y-auto no-scrollbar space-y-4 flex-1">
+                    <!-- Probability & Trap Risk Gauge Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <!-- Probability Card -->
+                        <div class="p-3.5 rounded-xl bg-gradient-to-br from-emerald-500/[0.06] to-cyan-500/[0.04] border border-emerald-500/20 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                                    <i data-lucide="target" class="w-3.5 h-3.5"></i> Estimasi Probabilitas Cuan
+                                </span>
+                                <span class="font-mono font-black text-base text-emerald-600 dark:text-emerald-400" id="ai-modal-prob-val">88%</span>
+                            </div>
+                            <div class="w-full bg-slate-200 dark:bg-surface-800 h-2 rounded-full overflow-hidden">
+                                <div id="ai-modal-prob-bar" class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full rounded-full transition-all duration-500" style="width: 88%;"></div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 dark:text-gray-400 font-sans leading-tight">Probabilitas statistik setup ini mencapai Target TP1 (+2R) sebelum menyentuh Stop Loss.</p>
+                        </div>
+
+                        <!-- Trap Risk Card -->
+                        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-oled border border-slate-200/80 dark:border-white/[0.06] space-y-1.5" id="ai-modal-trap-card">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                                    <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500"></i> Uji Jebakan (Bull-Trap)
+                                </span>
+                                <span class="font-mono font-bold text-[10px] px-2 py-0.5 rounded-md" id="ai-modal-trap-badge">🛡️ Trap-Free</span>
+                            </div>
+                            <div class="space-y-1 text-[11px] font-mono text-slate-600 dark:text-gray-300" id="ai-modal-micro-stats">
+                                <div class="flex justify-between"><span>Upper Shadow (Ekor Atas):</span> <b id="ai-modal-wick-val">12% (Aman)</b></div>
+                                <div class="flex justify-between"><span>Jarak ke EMA 20:</span> <b id="ai-modal-ext-val">+4.2%</b></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Minervini SEPA & CANSLIM Checklist Box -->
+                    <div class="space-y-2" id="ai-modal-sepa-box">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
-                                <i data-lucide="target" class="w-3.5 h-3.5"></i> Estimasi Probabilitas Cuan
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 font-mono flex items-center gap-1.5">
+                                <i data-lucide="award" class="w-3.5 h-3.5 text-blue-500"></i> Standar Minervini SEPA &amp; CANSLIM
+                            </h4>
+                            <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300" id="ai-modal-sepa-score">6/6 Lolos</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="ai-modal-sepa-container">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Historical Pattern Match Box (10 Years Multi-Bagger) -->
+                    <div class="p-3.5 rounded-xl bg-purple-500/[0.05] border border-purple-500/20 space-y-1.5" id="ai-modal-hist-box">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
+                                <i data-lucide="history" class="w-3.5 h-3.5"></i> Kemiripan Pola Historis 10 Tahun
                             </span>
-                            <span class="font-mono font-black text-lg text-emerald-600 dark:text-emerald-400" id="ai-modal-prob-val">88%</span>
+                            <span class="text-xs font-mono font-bold text-purple-600 dark:text-purple-400" id="ai-modal-hist-sim">88% Match</span>
                         </div>
-                        <div class="w-full bg-slate-200 dark:bg-surface-800 h-2 rounded-full overflow-hidden">
-                            <div id="ai-modal-prob-bar" class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full rounded-full transition-all duration-500" style="width: 88%;"></div>
-                        </div>
-                        <p class="text-[10px] text-slate-500 dark:text-gray-400 font-sans leading-tight">Probabilitas statistik setup ini mencapai Target TP1 (+2R) sebelum menyentuh Stop Loss.</p>
+                        <p class="text-xs text-slate-700 dark:text-gray-300 leading-relaxed font-sans" id="ai-modal-hist-desc">
+                            Karakteristik kompresi dan lonjakan volume saham ini memiliki kemiripan tinggi dengan fase awal reli <b>NVDA (Okt 2023)</b> yang menghasilkan kenaikan <b>+185%</b>.
+                        </p>
                     </div>
 
-                    <!-- Trap Risk Card -->
-                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-oled border border-slate-200/80 dark:border-white/[0.06] space-y-2" id="ai-modal-trap-card">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-semibold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
-                                <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-500"></i> Uji Jebakan (Bull-Trap)
-                            </span>
-                            <span class="font-mono font-bold text-xs px-2 py-0.5 rounded-md" id="ai-modal-trap-badge">🛡️ Trap-Free</span>
-                        </div>
-                        <div class="space-y-1 text-[11px] font-mono text-slate-600 dark:text-gray-300" id="ai-modal-micro-stats">
-                            <div class="flex justify-between"><span>Upper Shadow (Ekor Atas):</span> <b id="ai-modal-wick-val">12% (Aman)</b></div>
-                            <div class="flex justify-between"><span>Jarak ke EMA 20:</span> <b id="ai-modal-ext-val">+4.2%</b></div>
+                    <!-- AI Deep Narrative Insights -->
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-gray-500 font-mono">Diagnosa Kualitatif AI</h4>
+                        <div class="space-y-2" id="ai-modal-insights-container">
+                            <!-- Injected by JS -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Minervini SEPA & CANSLIM Checklist Box -->
-                <div class="space-y-2" id="ai-modal-sepa-box">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-gray-400 font-mono flex items-center gap-1.5">
-                            <i data-lucide="award" class="w-3.5 h-3.5 text-blue-500"></i> Standar Minervini SEPA &amp; CANSLIM
-                        </h4>
-                        <span class="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300" id="ai-modal-sepa-score">6/6 Lolos</span>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs" id="ai-modal-sepa-container">
-                        <!-- Injected by JS -->
-                    </div>
-                </div>
-
-                <!-- Historical Pattern Match Box (10 Years Multi-Bagger) -->
-                <div class="p-3.5 rounded-xl bg-purple-500/[0.05] border border-purple-500/20 space-y-1.5" id="ai-modal-hist-box">
-                    <div class="flex items-center justify-between text-xs">
-                        <span class="font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">
-                            <i data-lucide="history" class="w-3.5 h-3.5"></i> Kemiripan Pola Historis 10 Tahun
-                        </span>
-                        <span class="text-xs font-mono font-bold text-purple-600 dark:text-purple-400" id="ai-modal-hist-sim">88% Match</span>
-                    </div>
-                    <p class="text-xs text-slate-700 dark:text-gray-300 leading-relaxed font-sans" id="ai-modal-hist-desc">
-                        Karakteristik kompresi dan lonjakan volume saham ini memiliki kemiripan tinggi dengan fase awal reli <b>NVDA (Okt 2023)</b> yang menghasilkan kenaikan <b>+185%</b>.
-                    </p>
-                </div>
-
-                <!-- AI Deep Narrative Insights -->
-                <div class="space-y-2">
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-gray-500 font-mono">Diagnosa Kualitatif AI</h4>
-                    <div class="space-y-2" id="ai-modal-insights-container">
-                        <!-- Injected by JS -->
-                    </div>
-                </div>
-
-                <!-- Modal Action Buttons -->
-                <div class="pt-3 border-t border-slate-200/80 dark:border-white/[0.06] flex items-center justify-end gap-2 text-xs">
-                    <button type="button" onclick="closeAiDeepAudit()" class="px-3.5 py-2 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-surface-800 transition font-medium">Tutup</button>
-                    <button type="button" id="ai-modal-btn-calc" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-600/20">
+                <!-- Fixed Footer (Sticky Action Buttons) -->
+                <div class="p-4 sm:p-5 border-t border-slate-200/80 dark:border-white/[0.06] bg-slate-50/90 dark:bg-surface-900/90 backdrop-blur-sm flex items-center justify-end gap-2 text-xs shrink-0 z-10">
+                    <button type="button" onclick="closeAiDeepAudit()" class="px-3.5 py-2 rounded-xl text-slate-600 dark:text-gray-400 hover:bg-slate-200/80 dark:hover:bg-surface-800 transition font-medium">Tutup</button>
+                    <button type="button" id="ai-modal-btn-calc" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-blue-600/20 active:scale-95">
                         <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
                         <span>Hitung Sizing</span>
                     </button>
-                    <button type="button" id="ai-modal-btn-chart" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-purple-600/20">
+                    <button type="button" id="ai-modal-btn-chart" class="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold transition flex items-center gap-1.5 shadow-md shadow-purple-600/20 active:scale-95">
                         <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
                         <span>Buka Chart</span>
                     </button>
